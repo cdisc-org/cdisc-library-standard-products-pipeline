@@ -1,0 +1,4 @@
+{
+    "value": "<p><ac:structured-macro ac:name=\"sharext_spec-scraper\" ac:schema-version=\"1\" ac:macro-id=\"10f77de1-8b2e-4974-8377-04d773942a3d\"><ac:parameter ac:name=\"for\">Library</ac:parameter><ac:parameter ac:name=\"page\"><ac:link><ri:page ri:space-key=\"{}\" ri:content-title=\"{}\" /></ac:link></ac:parameter><ac:parameter ac:name=\"out\">CSV</ac:parameter></ac:structured-macro></p>",
+    "representation": "storage"
+}

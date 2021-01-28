@@ -1,20 +1,70 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# CDISC Standards Pipeline
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+Pipeline for generating CDISC library json from the wiki for the following product types:
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+* SDTM
+* SDTMIG
+* SEND
+* ADAM
+* ADAMIG
+* CDASH
+* CDASHIG
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+#### Requirements
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+##### Creating a virtual enviornment
+
+1. Install python 3.7
+2. Install virtualenv
+   `pip install virtualenv`
+3. Create a virtual env
+   `python3 -m venv <desired_virtual_env_path>`
+4. Activate virtual env
+   `<path_to_virtual_env>\Scripts\activate`
+5. Install requirements from `requirements.txt`
+   `pip install -r requirements.txt`
+
+#### Running the pipeline
+
+##### Setup
+
+The pipeline requires the location of the expected wiki content be defined in 1 of 2 ways. 
+
+1. Through a config file mapping expected metadata tables to a wiki document id:
+    ```
+    {
+        "summary": "11111111",
+        "classMetadata": "11111111",
+        "domainsMetadata": "11111111"
+        "datasetMetadata": "11111111",
+        "datastructures": "11111111",
+        "variableSets": "11111111",
+        "variables": "11111111",
+        "scenarioMetadata": "11111111"
+    }
+   ```
+   Note: Some product types only require certain keys to appear in the config. For example SDTM based products only have classes, datasets, and variables so only those values would need to appear in the config when generating the json for that product type. Additionally, the variables specifier is optional. If a variables document is not specified in the config, the pipeline will automatically run the specgrabber for that product.
+2. Environment variables defined for each expected metadata table with the value being the associated document id. The environment variable names should match those shown in the config above.
+
+##### Command
+
+###### Arguments
+
+* -c, --config: Specify path to config file
+* -u, --username: Confluence username (Can also be stored in the environment variable CONFLUENCE_USERNAME)
+* -p, --password: Confluence password (Can also be stored in the environment variable CONFLUENCE_PASSWORD)
+* -a, --api_key: CDISC library api key (Can also be stored in the environment variable LIBRARY_API_KEY)
+* -r, --report_file: File to log report output. Defaults to report.txt
+* -l, --log_level: Log level for all reporting. Options: info, debug, error. Defaults to info
+* -i, --ignore_errors: Boolean flag for determining whether or not spec grabber/wiki document errors should stop pipeline execution. These errors will be reported either way.
+
+Once the config or environment variables are set up, the pipeline can be run using the following command:
+
+`python .\parse_document.py -u '<confluence_username>' -p '<confluence_password>' -a '<api_key>' -l '<log_level>' -i`
+
+
+##### Tests
+
+Tests can be run by running the following command from the root directory of this repository:
+
+`pytest`
