@@ -90,3 +90,16 @@ def test_get_all_prior_versions(mock_wiki_client, mock_library_client, mock_summ
     prior_versions = sdtm._get_all_prior_versions()
     for version in prior_versions:
         assert version["href"].startswith(f"/mdr/{product_type}")
+
+@pytest.mark.parametrize("described_value_domain, expected_output", [
+    ("(NULLFLAVOR)",  "ISO 21090 NullFlavor enumeration"),
+    (("NULLFLAVOR"), "ISO 21090 NullFlavor enumeration")
+])
+def test_get_described_value_domain(mock_wiki_client, mock_library_client, mock_summary, mock_products_payload, 
+                        described_value_domain, expected_output):
+    config = Config({})
+    version = "5-0"
+    sdtm = SDTM(mock_wiki_client, mock_library_client,mock_summary,"sdtm",version, config)
+    is_described_value_domain = sdtm._isdescribedvaluedomain(described_value_domain)
+    assert is_described_value_domain == True
+    assert expected_output == sdtm._get_described_value_domain(described_value_domain)

@@ -201,7 +201,8 @@ class BaseProduct:
     
     def _get_described_value_domain(self, codelist: str) -> str:
         described_value_domain_mapping = {
-            "nullflavor": "ISO 21090 NullFlavor enumeration",
+            "(nullflavor)": "ISO 21090 NullFlavor enumeration",
+            "nullflavor": "ISO 21090 NullFlavor enumeration"
         }
         return described_value_domain_mapping.get(codelist.lower(), codelist)
     
@@ -232,10 +233,10 @@ class BaseProduct:
         }
 
     def _iscodelist(self, codelist: str) -> bool:
-        return codelist.startswith("(")
+        return codelist.startswith("(") and "nullflavor" not in codelist.lower()
 
     def _isdescribedvaluedomain(self, described_value_domain: str) -> bool:
-        return described_value_domain.lower() in ["iso 8601", "nullflavor", "meddra", "number-number"]
+        return described_value_domain.lower() in ["iso 8601", "(nullflavor)", "nullflavor", "meddra", "number-number"]
 
     @staticmethod
     def _cleanup_json(json_data: dict, unwanted_keys: [str]):
