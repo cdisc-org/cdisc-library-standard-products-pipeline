@@ -90,7 +90,7 @@ class BaseProduct:
     def write_document(self, document: dict, output_file: str = None):
         if not output_file:
             output_file = self.summary["name"].replace(" ", "") + ".json"
-        with codecs.open(output_file, 'w', encoding='utf-8') as f:
+        with codecs.open(output_file, 'w', encoding='ascii') as f:
             json.dump(document, f, indent=4, ensure_ascii=False)
     
     def _get_variable_prior_version(self, root_link: str) -> dict:

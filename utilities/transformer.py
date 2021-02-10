@@ -41,10 +41,22 @@ class Transformer:
 
     def cleanup_html_encoding(self, string: str) -> str:
         html_entity_regex = "&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});"
+        utf_to_ascii_mapping = {
+            "\u2013": "-",
+            "\u2018": "'",
+            "\u2019": "'",
+            "\u201d": '"',
+            "\u2011": "-",
+            "\u2012": "-",
+            "\u2014": "-",
+            "\u2026": "...",
+            "\u00a0": " "
+        }
         html_entities = re.findall(html_entity_regex, string)
         text = string
         for entity in html_entities:
-            replacement = html.entities.html5.get(f"{entity};")
+            utf_string = html.entities.html5.get(f"{entity};")
+            replacement = utf_to_ascii_mapping.get(utf_string, utf_string)
             if replacement:
                 text = self.replace_str(text, f"&{entity};", replacement)
             else:
