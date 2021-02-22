@@ -54,7 +54,7 @@ stages:
       displayName: 'Build extensions'
 
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.6'
+      displayName: 'Use Python 3.7'
       inputs:
         versionSpec: 3.7 # Functions V2 supports Python 3.6 as of today
 
@@ -65,8 +65,8 @@ stages:
     
     - bash: |
         python -m venv worker_venv
-        cp -r ./.python_packages/lib/site-packages/* worker_env/lib/python3.7/site-packages/
         source worker_venv/bin/activate
+        pip install -r requirements.txt
         python -m pytest
       displayName: 'Run unit tests'
 
