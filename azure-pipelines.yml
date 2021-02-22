@@ -64,11 +64,6 @@ stages:
         pip install -r requirements.txt
       workingDirectory: $(workingDirectory)
       displayName: 'Install application dependencies'
-    
-    - bash: |
-        source worker_venv/bin/activate
-        python -m pytest
-      displayName: 'Run unit tests'
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'
