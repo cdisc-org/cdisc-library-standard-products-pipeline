@@ -19,6 +19,9 @@ class SDTM(BaseProduct):
         }
 
     def generate_document(self) -> dict:
+        """
+        Generate standard product json document
+        """
         sdtm_document = deepcopy(self.summary)
         classes, datasets, variables = self.get_metadata()
         sdtm_document["classes"] = classes
@@ -27,6 +30,16 @@ class SDTM(BaseProduct):
         return sdtm_document
 
     def get_metadata(self, parent: str = None) -> ([dict], [dict], [dict]):
+        """
+        Gets the classes, datasets, and variables for an sdtm based product.
+        Applies appropriate links between variables -> class, variables -> dataset, dataset -> class and class->class
+
+        Arguments:
+        parent - link to a parent model where this products classes can be found.
+
+        Returns:
+        arrays of classes, datasets and variables
+        """
         self.codelist_mapping = self._get_codelist_mapping()
         if parent:
             classes = self.get_classes_from_parent(parent)
@@ -55,6 +68,11 @@ class SDTM(BaseProduct):
         return classes, datasets, variables
 
     def validate_document(self, document: dict):
+        """
+        Validates generated json document
+        Arguments:
+        document - Json document.
+        """
         logger.info("Begin validating")
         for c in document["classes"]:
             self._validate_links(c)
@@ -63,6 +81,13 @@ class SDTM(BaseProduct):
         logger.info("Finished validating")
     
     def get_classes(self) -> [dict]:
+        """
+        Load classes from wiki
+
+        Returns:
+
+        Array of classes
+        """
         document_id = self.config.get(constants.CLASSES)
         classes = []
         classes_data = self.wiki_client.get_wiki_table(document_id, constants.CLASSES)
@@ -76,6 +101,17 @@ class SDTM(BaseProduct):
         return classes
     
     def get_classes_from_parent(self, parent_link: str) -> [dict]:
+        """
+        Load classes from parent model.
+
+        Arguments:
+
+        parent_link: href link to parent model
+
+        Returns:
+
+        Array of classes
+        """
         data = self.library_client.get_api_json(parent_link)
         classes = data.get("classes")
         new_classes = []
@@ -90,6 +126,13 @@ class SDTM(BaseProduct):
         
 
     def get_datasets(self) -> [dict]:
+        """
+        Load datasets from wiki
+
+        Returns:
+
+        Array of datasets
+        """
         document_id = self.config.get(constants.DATASETS)
         datasets = []
         datasets_data = self.wiki_client.get_wiki_table(document_id, constants.DATASETS)
@@ -103,6 +146,12 @@ class SDTM(BaseProduct):
         return datasets
     
     def get_variables(self) -> [dict]:
+        """
+        Load variables from wiki
+
+        Returns:
+        Array of variables
+        """
         try:
             document_id = self.config.get(constants.VARIABLES)
         except KeyError:
@@ -119,6 +168,17 @@ class SDTM(BaseProduct):
         return variables
 
     def _build_variable(self, variable_data: dict) -> dict:
+        """
+        Format variable data from wiki into variable object for the json document
+
+        Arguments:
+
+        variable_data: spec grabber data for a single variable represented as a dictionary
+
+        Returns:
+
+        An SDTM variable
+        """
         variable = {
             "name": variable_data.get("Variable Name", ""),
             "name_no_prefix": variable_data.get("Variable Name (no prefix)"),
@@ -130,7 +190,7 @@ class SDTM(BaseProduct):
             "core": variable_data.get("Core"),
             "dataset": self.dataset_name_mappings.get(variable_data.get("Dataset Name", ""), variable_data.get("Dataset Name", "")),
             "class": self.class_name_mappings.get(variable_data["Observation Class"], variable_data["Observation Class"]),
-            "codelist": variable_data.get("Controlled Terms, Codelist, or Format")
+            "codelist": variable_data.get("Controlled Terms, Codelist, or Format", "")
         }
 
         if not self.is_ig:
@@ -138,7 +198,19 @@ class SDTM(BaseProduct):
         variable["_links"] = self.__build_variable_links(variable)
         return variable
     
-    def _build_object(self, record: dict, expected_fields: [str], category: str) -> [dict]:
+    def _build_object(self, record: dict, expected_fields: [str], category: str) -> dict:
+        """
+        Build either a class or dataset given a wiki confiforms table record.
+
+        Arguments:
+
+        record: Dictionary of metadata sourced from confiforms table in the wiki
+        expected_fields: Fields we expect to store in the resulting json
+        category: Either classes or datasets, determines which object to build
+
+        Returns:
+        A class or dataset
+        """
         data = {}
         key_type_conversions = {
             "ordinal": str
@@ -273,6 +345,14 @@ class SDTM(BaseProduct):
         return False
 
     def _build_model_variable_link(self, variable: dict, classes: [dict]):
+        """
+        Generates the link to a model variable in the case that the sdtm based product is an ig.
+
+        Arguments:
+
+        variable: variable json
+        classes: all classes for the current product
+        """
         model_variable_key = "modelClassVariable" if self._class_variable(variable, classes) else "modelDatasetVariable"
         model_variable_type = "classes" if model_variable_key == "modelClassVariable" else "datasets"
         model_variable_parent = variable.get('class') if model_variable_key == "modelClassVariable" else variable.get("dataset")
@@ -292,6 +372,9 @@ class SDTM(BaseProduct):
                 pass
     
     def _cleanup_document(self, document: dict) -> dict:
+        """
+        Remove unnecessary keys from a json document
+        """
         logger.info("Cleaning generated document")
         for c in document.get("classes", []):
             self._cleanup_json(c, ["hasParentClass", "id"])

@@ -40,6 +40,8 @@ class Transformer:
         return new_string
 
     def cleanup_html_encoding(self, string: str) -> str:
+        if string == None:
+            return None
         html_entity_regex = "&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});"
         utf_to_ascii_mapping = {
             "\u2013": "-",
@@ -52,6 +54,9 @@ class Transformer:
             "\u2026": "...",
             "\u00a0": " "
         }
+        for key in utf_to_ascii_mapping:
+            if key in string:
+                string = string.replace(key, utf_to_ascii_mapping.get(key))
         html_entities = re.findall(html_entity_regex, string)
         text = string
         for entity in html_entities:

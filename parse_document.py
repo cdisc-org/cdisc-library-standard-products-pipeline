@@ -58,7 +58,10 @@ if __name__ == "__main__":
         config = Config({})
     
     config.add(constants.IGNORE_ERRORS, args.ignore_errors)
-    factory = ProductFactory(username, password, api_key, args)
+    arguments = {
+        'spec_grabber_doc': args.spec_grabber_doc
+    }
+    factory = ProductFactory(username, password, api_key, **arguments)
     product = factory.build_product(config)
     product_document = product.generate_document()
     product.validate_document(product_document)

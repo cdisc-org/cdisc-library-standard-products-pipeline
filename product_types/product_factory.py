@@ -14,8 +14,8 @@ from product_types.data_analysis.adamig import ADAMIG
 from product_types.data_analysis.adam import ADAM
 
 class ProductFactory:
-    def __init__(self, username, password, api_key, args):
-        self.wiki_client = WikiClient(username, password, args.spec_grabber_doc)
+    def __init__(self, username, password, api_key, **args):
+        self.wiki_client = WikiClient(username, password, args.pop('spec_grabber_doc',''))
         self.api_key = api_key
         self.foundational_models = ["sdtm", "cdash", "adam"]
         self.trasformer = Transformer()
@@ -44,7 +44,7 @@ class ProductFactory:
         type_label = "Implementation Guide" if product_type not in self.foundational_models else "Foundational Model"
         prior_version_href = ""
         self_href = ""
-        if ("adam" in product_type):
+        if (product_type.startswith("adam")):
             self_href = f"/mdr/adam/{product_type}-{version}"
             if summary.get("priorVersion"):
                 prior_version = self.trasformer.replace_str(str(summary['priorVersion']),'.', '-')
@@ -85,5 +85,5 @@ class ProductFactory:
             return CDASHIG(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, config)
         elif product_type == "adam":
             return ADAM(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, config)
-        elif product_type in ["adamig"]:
+        elif product_type.startswith("adam"):
             return ADAMIG(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, config)

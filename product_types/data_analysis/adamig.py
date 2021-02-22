@@ -11,6 +11,9 @@ class ADAMIG(ADAM):
         self.codelist_types = ["adamct", "sdtmct"]
         self.product_type = product_type
         self.version_prefix = product_type + "-"
+        self.core_map = {
+            "adam-adnca": ["NCA Core", "BDS Core", "Core"]
+        }
     
     def generate_document(self) -> dict:
         if self.has_parent_model:
@@ -48,11 +51,11 @@ class ADAMIG(ADAM):
         data = self.wiki_client.get_wiki_table(document_id, constants.DATASTRUCTURES)
         for record in data["list"]["entry"]:
             generated_data = {
-                "class": record["fields"].get("className"),
-                "description": record["fields"].get("description"),
-                "name": record["fields"].get("name"),
-                "label": record["fields"].get("label"),
-                "ordinal": record["fields"].get("ordinal")
+                "class": self.transformer.cleanup_html_encoding(record["fields"].get("className")),
+                "description": self.transformer.cleanup_html_encoding(record["fields"].get("description")),
+                "name": self.transformer.cleanup_html_encoding(record["fields"].get("name")),
+                "label": self.transformer.cleanup_html_encoding(record["fields"].get("label")),
+                "ordinal": str(record["fields"].get("ordinal"))
             }
             generated_data["_links"] = self._build_object_links(generated_data, "datastructures")
             datastructures.append(generated_data)
@@ -68,7 +71,7 @@ class ADAMIG(ADAM):
             generated_data = {}
             for key in record["fields"]:
                 if key in expected_keys:
-                    generated_data[key] = record["fields"][key]
+                    generated_data[key] = self.transformer.cleanup_html_encoding(str(record["fields"][key]))
             generated_data["_links"] = self._build_object_links(generated_data, "varsets")
             varsets.append(generated_data)
         logger.info("Finished loading Variable sets")
@@ -103,16 +106,20 @@ class ADAMIG(ADAM):
 
     def _build_variable(self, variable_data: dict) -> dict:
         variable = {
-            "name": variable_data.get("Variable Name"),
-            "label": variable_data.get("Variable Label"),
+            "name": self.transformer.cleanup_html_encoding(variable_data.get("Variable Name")),
+            "label": self.transformer.cleanup_html_encoding(variable_data.get("Variable Label")),
             "description": self.transformer.cleanup_html_encoding(variable_data.get("CDISC Notes")),
-            "core": variable_data.get("Core"),
-            "simpleDatatype": variable_data.get("Type"),
-            "ordinal": 1,
-            "datastructure": variable_data.get("Dataset Name", variable_data.get("Class")).strip(),
-            "codelist": variable_data.get("Codelist/Controlled Terms"),
-            "varset": variable_data.get("Variable Grouping", "").strip()
+            "simpleDatatype": self.transformer.cleanup_html_encoding(variable_data.get("Type")),
+            "ordinal": self.transformer.cleanup_html_encoding(variable_data.get("Seq. for Order")),
+            "datastructure": self.transformer.cleanup_html_encoding(variable_data.get("Dataset Name", variable_data.get("Class")).strip()),
+            "codelist": self.transformer.cleanup_html_encoding(variable_data.get("Codelist/Controlled Terms", variable_data.get("Codelist", ""))),
+            "controlledTerms": self.transformer.cleanup_html_encoding(variable_data.get("Controlled Terms", "")),
+            "varset": self.transformer.cleanup_html_encoding(variable_data.get("Variable Grouping", "").strip())
         }
+
+        variable["core"] = self._get_variable_core(variable, variable_data)
+        if self.product_type != "adamig" and not variable.get("datastructure"):
+            variable["datastructure"] = self.product_type.split("-")[-1].upper()
         variable["_links"] = self.__build_variable_links(variable)
         return variable
 
@@ -130,9 +137,11 @@ class ADAMIG(ADAM):
         prior_version = self._get_prior_version(self_link)
         if prior_version:
             links["priorVersion"] = prior_version
-        codelist = variable.get("codelist", "")
+        codelist = variable.get("codelist", variable.get("controlledTerms", ""))
         if self._iscodelist(codelist):
-            links["codelist"] = self._get_codelist_links(codelist)
+            codelist_links = self._get_codelist_links(codelist)
+            if codelist_links:
+                links["codelist"] = codelist_links[0]
         elif self._isdescribedvaluedomain(codelist):
             variable["describedValueDomain"] = self._get_described_value_domain(codelist)
         elif codelist:
@@ -179,10 +188,17 @@ class ADAMIG(ADAM):
             datastructure["analysisVariableSets"] = datastructure.get("analysisVariableSets", []) + [varset]
     
     def _cleanup_document(self, document: dict) -> dict:
-        for datastructure in document.get("datastructures", []):
+        for datastructure in document.get("dataStructures", []):
             self._cleanup_json(datastructure, ["id"])
             for varset in datastructure.get("analysisVariableSets", []):
                 self._cleanup_json(varset, ["parentDatastructure"])
                 for variable in varset.get("analysisVariables", []):
-                    self._cleanup_json(variable, ["datastructure", "codelist", "varset"])
+                    self._cleanup_json(variable, ["datastructure", "codelist", "varset", "controlledTerms"])
         return document
+
+    def _get_variable_core(self, variable, variable_data):
+        core_hierarchy = self.core_map.get(self.product_type, ["Core"])
+        for core in core_hierarchy:
+            if variable_data.get(core):
+                return variable_data.get(core)
+        return None

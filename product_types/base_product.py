@@ -31,6 +31,7 @@ class BaseProduct:
             "Findings-General": "Findings",
             "Findings About-Findings": "Findings About"
         }
+        self.described_value_domains = {"iso 8601", "(nullflavor)", "nullflavor", "meddra", "number-number", "who drug"}
         logger.info(f"Loading product of type: {product_type}")
         
     def _get_version_prefix(self, version: str) -> str:
@@ -236,7 +237,7 @@ class BaseProduct:
         return codelist.startswith("(") and "nullflavor" not in codelist.lower()
 
     def _isdescribedvaluedomain(self, described_value_domain: str) -> bool:
-        return described_value_domain.lower() in ["iso 8601", "(nullflavor)", "nullflavor", "meddra", "number-number"]
+        return described_value_domain.lower() in self.described_value_domains
 
     @staticmethod
     def _cleanup_json(json_data: dict, unwanted_keys: [str]):
