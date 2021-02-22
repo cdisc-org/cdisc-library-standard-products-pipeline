@@ -68,7 +68,6 @@ stages:
     - bash: |
         source worker_venv/bin/activate
         python -m pytest
-      workingDirectory: $(workingDirectory)
       displayName: 'Run unit tests'
 
     - task: ArchiveFiles@2
