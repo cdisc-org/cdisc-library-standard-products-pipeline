@@ -65,7 +65,7 @@ stages:
       workingDirectory: $(workingDirectory)
       displayName: 'Install application dependencies'
     
-    - bash: /
+    - bash: |
         pytest
       workingDirectory: $(workingDirectory)
       displayName: 'Run unit tests'
@@ -83,7 +83,7 @@ stages:
       artifact: drop
 
 - stage: deploy_to_dev
-  displayName: 'DEV: Deploy Search Standard Products Generator'
+  displayName: 'DEV: Deploy Standard Products Generator'
   dependsOn: Build
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main')) # only deploy when pushing to main branch
 
