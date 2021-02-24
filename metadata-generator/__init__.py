@@ -9,8 +9,9 @@ from product_types.product_factory import ProductFactory
 from utilities.config import Config
 from utilities import logger
 import utilities.constants as constants
+from loaders.blob_loader import BlobLoader
 
-def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+def main(config: dict) -> str:
     # setup logging
     logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
     logger.setLevel(logging.INFO)
@@ -25,7 +26,6 @@ def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     azure_connection_string = os.environ.get(constants.AZURE_CONNECTION_STRING)
 
     # generate json
-    config = req.get_json()
     Config.validate_config_data(config)
     config = Config(config)
     config.add(constants.IGNORE_ERRORS, True) # Ignores spec grabber errors by default
@@ -33,4 +33,7 @@ def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     product = factory.build_product(config)
     product_document = product.generate_document()
     product.validate_document(product_document)
-    return func.HttpResponse(json.dumps(product_document))
+    loader = BlobLoader(azure_connection_string)
+    file_name = f"{product_document.get('name', 'untitled').lower().replace(' ', '-').replace('.', '-')}.json" 
+    loader.load(json.dumps(product_document), file_name, "generated-json", overwrite=True)
+    return file_name
