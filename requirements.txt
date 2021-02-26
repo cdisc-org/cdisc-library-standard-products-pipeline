@@ -8,4 +8,4 @@ azure-functions-durable
 azure-core==1.10.0
 aiohttp==3.6.2
 aiohttp-retry==1.0
-git+https://cdisc-org@dev.azure.com/cdisc-org/cdisc-library/_git/cdisc-library-content-loader
+azure-storage-blob==12.3.1

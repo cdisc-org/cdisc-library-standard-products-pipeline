@@ -3,13 +3,13 @@ import sys
 import logging
 import json
 import azure.functions as func
+from azure.storage.blob import BlobClient
 
 sys.path.append(os.path.abspath(""))
 from product_types.product_factory import ProductFactory
 from utilities.config import Config
 from utilities import logger
 import utilities.constants as constants
-from loaders.blob_loader import BlobLoader
 
 def main(config: dict) -> str:
     # setup logging
@@ -33,7 +33,7 @@ def main(config: dict) -> str:
     product = factory.build_product(config)
     product_document = product.generate_document()
     product.validate_document(product_document)
-    loader = BlobLoader(azure_connection_string)
     file_name = f"{product_document.get('name', 'untitled').lower().replace(' ', '-').replace('.', '-')}.json" 
-    loader.load(json.dumps(product_document), file_name, "generated-json", overwrite=True)
+    blob = BlobClient.from_connection_string(conn_str=azure_connection_string, container_name="generated-json", blob_name=file_name)
+    blob.upload_blob(json.dumps(product_document), overwrite=True)
     return file_name
