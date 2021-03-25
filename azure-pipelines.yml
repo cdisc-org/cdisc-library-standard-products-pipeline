@@ -8,10 +8,8 @@ trigger:
     include:
     - 'main' # Trigger on to main
 
-pr:
-  branches:
-    include:
-    - '*' # Trigger on all branches
+pr: 
+ - 'main'
 
 
 variables:

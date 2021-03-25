@@ -51,7 +51,7 @@ def mock_varset_data():
             "entry": [
                 {
                     "fields": {
-                        "name": "Varset 1",
+                        "name": "Varset1",
                         "label": "First Varset",
                         "ordinal": "1",
                         "description": "Varset description",
@@ -60,7 +60,7 @@ def mock_varset_data():
                 },
                 {
                     "fields": {
-                        "name": "Varset 2",
+                        "name": "Varset2",
                         "label": "Second Varset",
                         "ordinal": "2",
                         "description": "Varset description",
