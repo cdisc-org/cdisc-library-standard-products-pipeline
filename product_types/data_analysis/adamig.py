@@ -68,10 +68,15 @@ class ADAMIG(ADAM):
         expected_keys = set(["name", "label", "description", "ordinal", "parentDatastructure"])
         data = self.wiki_client.get_wiki_table(document_id, constants.VARSETS)
         for record in data["list"]["entry"]:
-            generated_data = {}
-            for key in record["fields"]:
-                if key in expected_keys:
-                    generated_data[key] = self.transformer.cleanup_html_encoding(str(record["fields"][key]))
+            generated_data = {
+                "parentDatastructure": self.transformer.cleanup_html_encoding(record["fields"].get("parentDatastructure", "")),
+                "name": self._get_varset_name(record["fields"].get("name")),
+                "description": self.transformer.cleanup_html_encoding(record["fields"].get("description")),
+                "label": self.transformer.cleanup_html_encoding(record["fields"].get("label")),
+                "ordinal": str(record["fields"].get("ordinal")),
+                "analysisVariables": []
+            }
+            generated_data["label"] = f"{generated_data['parentDatastructure']} {record['fields'].get('label')}"
             generated_data["_links"] = self._build_object_links(generated_data, "varsets")
             varsets.append(generated_data)
         logger.info("Finished loading Variable sets")
@@ -111,8 +116,8 @@ class ADAMIG(ADAM):
             "description": self.transformer.cleanup_html_encoding(variable_data.get("CDISC Notes")),
             "simpleDatatype": self.transformer.cleanup_html_encoding(variable_data.get("Type")),
             "ordinal": self.transformer.cleanup_html_encoding(variable_data.get("Seq. for Order")),
-            "datastructure": self.transformer.cleanup_html_encoding(variable_data.get("Dataset Name", variable_data.get("Class")).strip()),
-            "codelist": self.transformer.cleanup_html_encoding(variable_data.get("Codelist/Controlled Terms", variable_data.get("Codelist", ""))),
+            "datastructure": self.transformer.cleanup_html_encoding(variable_data.get("Class", variable_data.get("Dataset Name")).strip()),
+            "codelist": self.transformer.cleanup_html_encoding(variable_data.get("Codelist/Controlled Terms", variable_data.get("Codelist"))),
             "controlledTerms": self.transformer.cleanup_html_encoding(variable_data.get("Controlled Terms", "")),
             "varset": self.transformer.cleanup_html_encoding(variable_data.get("Variable Grouping", "").strip())
         }
@@ -121,6 +126,15 @@ class ADAMIG(ADAM):
         if self.product_type != "adamig" and not variable.get("datastructure"):
             variable["datastructure"] = self.product_type.split("-")[-1].upper()
         variable["_links"] = self.__build_variable_links(variable)
+        if "codelist" not in variable["_links"]:
+            describedValueDomain = self._get_variable_described_value_domain(variable)
+            valueList = self._get_variable_value_list(self, variable)
+            if describedValueDomain:
+                variable["describedValueDomain"] = describedValueDomain
+            else:
+                # The provided codelist is a value list
+                variable["valueList"] = valueList
+
         return variable
 
     def __build_variable_links(self, variable: dict) -> dict:
@@ -137,16 +151,11 @@ class ADAMIG(ADAM):
         prior_version = self._get_prior_version(self_link)
         if prior_version:
             links["priorVersion"] = prior_version
-        codelist = variable.get("codelist", variable.get("controlledTerms", ""))
+        codelist = variable.get("codelist")
         if self._iscodelist(codelist):
             codelist_links = self._get_codelist_links(codelist)
             if codelist_links:
                 links["codelist"] = codelist_links[0]
-        elif self._isdescribedvaluedomain(codelist):
-            variable["describedValueDomain"] = self._get_described_value_domain(codelist)
-        elif codelist:
-            # The provided codelist is a value list
-            variable["valueList"] = [code for code in re.split(r'[\n|;|\\n|,]', codelist)]
         return links
 
     def _build_object_links(self, data: dict, category: str) -> dict:
@@ -156,6 +165,7 @@ class ADAMIG(ADAM):
         self_link = {}
         if category == "varsets":
             datastructure_name = self.transformer.format_name_for_link(data.get("parentDatastructure", ""))
+            self_link["title"] = data.get("label")
             self_link["href"] = f"/mdr/{self.model_type}/{self.version_prefix+self.version}/datastructures/{datastructure_name}/varsets/{name}"
         else:
             self_link["href"] = f"/mdr/{self.model_type}/{self.version_prefix+self.version}/{category}/{name}"
@@ -167,14 +177,29 @@ class ADAMIG(ADAM):
         if prior_version:
             links["priorVersion"] = prior_version
         return links
+
+    def _get_variable_described_value_domain(self, variable: dict) -> str:
+        codelist = variable.get("codelist")
+        controlled_term = variable.get("controlledTerms")
+        if self._isdescribedvaluedomain(controlled_term or codelist):
+            return self._get_described_value_domain(controlled_term or codelist)
+        else:
+            return None
     
+    def _get_variable_value_list(self, variable: dict) -> str:
+        codelist = variable.get("codelist")
+        return [code.strip() for code in re.split(r'[\n|;|\\n|,]', codelist)]
+
     def _add_variable_to_varset(self, variable: dict, varsets: [dict]):
-        filtered_varsets = [varset for varset in varsets if variable.get("varset") == varset.get("name")
+        varset_name = self._get_varset_name(variable.get("varset"))
+        filtered_varsets = [varset for varset in varsets if varset_name == varset.get("name")
                  and variable.get("datastructure") == varset.get('parentDatastructure')]
         if filtered_varsets:
             for varset in filtered_varsets:
                 variable["_links"]["parentVariableSet"] = varset["_links"]["self"]
                 varset["analysisVariables"] = varset.get("analysisVariables", []) + [variable]
+        else:
+            logger.error(f"Unable to add variable {variable.get('name')} with datastructure {variable.get('datastructure')} to varset {variable.get('varset')}")
 
     def _add_varset_to_datastructure(self, varset: dict, datastructures: [dict]):
         parent_datastructure = varset.get("parentDatastructure")
@@ -202,3 +227,15 @@ class ADAMIG(ADAM):
             if variable_data.get(core):
                 return variable_data.get(core)
         return None
+
+    def _get_varset_name(self, name):
+        varset_name_mapping = {
+            "Period, Subperiod, and Phase Start and End Timing": "PeriodSubperiodStartEndTiming",
+            "Record-Level Dose": "RecordLevelDose",
+            "Record-Level Treatment and Dose": "RecordLevelTreatmentDose",
+            "Suffixes for User-Defined Timing": "SuffixesforUserDefinedTiming",
+            "Toxicity and Range": "ToxicityRange"
+        }
+        varset_name = varset_name_mapping.get(name, name)
+        varset_name = varset_name.replace(" ", "").replace("-", "")
+        return self.transformer.cleanup_html_encoding(varset_name)

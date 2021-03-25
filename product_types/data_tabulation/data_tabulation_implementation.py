@@ -38,3 +38,17 @@ class DataTabulationImplementation(SDTM):
             # The provided codelist is a value list
             variable["valueList"] = [code for code in re.split(r'[\n|;|\\n|,]', codelist)]
         return variable
+
+    def _cleanup_document(self, document: dict) -> dict:
+        """
+        Remove unnecessary keys from a json document
+        """
+        logger.info("Cleaning generated document")
+        for c in document.get("classes", []):
+            self._cleanup_json(c, ["hasParentClass", "id"])
+            for dataset in c.get("datasets", []):
+                self._cleanup_json(dataset, ["hasParentContext", "id"])
+                for var in dataset.get("datasetVariables", []):
+                    self._cleanup_json(var, ["class", "dataset", "name_no_prefix", "codelist", "qualifiesVariables", "id"])
+        logger.info("Finished cleaning document")
+        return document

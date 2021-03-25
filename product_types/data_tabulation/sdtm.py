@@ -10,8 +10,8 @@ class SDTM(BaseProduct):
         self.product_category = "data-tabulation"
         self.codelist_types = ["sdtmct"]
         self.is_ig = False
-        self.expected_class_fields = set(["name", "label", "description", "ordinal", "hasParentClass", "ccode", "classStructure"])
-        self.expected_dataset_fields = set(["name", "label", "description", "ordinal", "datasetStructure", "hasParentContext", "ccode"])
+        self.expected_class_fields = set(["name", "label", "description", "ordinal", "hasParentClass"])
+        self.expected_dataset_fields = set(["name", "label", "description", "ordinal", "datasetStructure", "hasParentContext"])
         self.model_type = "sdtm"
         self.dataset_name_mappings = {
             "SUPP--": "SUPPQUAL",
@@ -50,13 +50,14 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
+            if variable.get("qualifiesVariables"):
+                self._add_qualified_variables_link(variable, variables)
             if self.has_parent_model:
                 self._build_model_variable_link(variable, classes)
             if variable.get("dataset"):
                 self._add_variable_to_dataset(variable, variable.get("dataset"), datasets)
-            else:
+            elif not self.is_ig:
                 self._add_variable_to_class(variable, variable.get("class"), classes)
-            self._cleanup_json(variable, ["class", "dataset", "name_no_prefix", "codelist"])
 
         # set up parent class links
         for c in classes:
@@ -190,7 +191,14 @@ class SDTM(BaseProduct):
             "core": variable_data.get("Core"),
             "dataset": self.dataset_name_mappings.get(variable_data.get("Dataset Name", ""), variable_data.get("Dataset Name", "")),
             "class": self.class_name_mappings.get(variable_data["Observation Class"], variable_data["Observation Class"]),
-            "codelist": variable_data.get("Controlled Terms, Codelist, or Format", "")
+            "codelist": variable_data.get("Controlled Terms, Codelist, or Format", variable_data.get("Controlled Terms, Codelist or Format", "")),
+            "describedValueDomain": variable_data.get("Format"),
+            "usageRestrictions": variable_data.get("Usage Restrictions"),
+            "variableCcode": variable_data.get("Variable C-code"),
+            "definition": variable_data.get("Definition"),
+            "examples": variable_data.get("Examples"),
+            "notes": variable_data.get("Notes"),
+            "qualifiesVariables": variable_data.get("Variable(s) Qualified")
         }
 
         if not self.is_ig:
@@ -331,8 +339,7 @@ class SDTM(BaseProduct):
         filtered_classes = [c for c in classes if c.get("id") == parent_class or c.get("label") == parent_class]
         for filtered_class in filtered_classes:
             dataset["_links"]["parentClass"] = filtered_class["_links"]["self"]
-            if self.is_ig:
-                filtered_class["datasets"] = filtered_class.get("datasets", []) +  [dataset]
+            filtered_class["datasets"] = filtered_class.get("datasets", []) +  [dataset]
         if not filtered_classes:
             logger.error(f"No parent class found with id: {dataset['hasParentContext']}")
 
@@ -371,6 +378,24 @@ class SDTM(BaseProduct):
             except:
                 pass
     
+    def _add_qualified_variables_link(self, variable: dict, variables: [dict]):
+        """
+        Adds qualifiesVariables link to a variable if another variable is found with the correct name and class
+
+        Arguments:
+        variable: variable that qualifies other variables
+        variables: list of all other variables.
+        """
+        variables_qualified_names = set(list(map(lambda x: x.strip(), variable.get("qualifiesVariables", "").split(";"))))
+        variables_qualified = [v for v in variables if v.get("name") in variables_qualified_names and \
+            (v.get("class") == variable.get("class") or v.get("dataset") == variable.get("dataset"))]
+        for v in variables_qualified:
+            variable["_links"]["qualifiesVariables"] = variable["_links"].get('qualifiesVariables', []) + [v["_links"]["self"]]
+
+        unmatched_variables = variables_qualified_names - set([v.get("name") for v in variables_qualified])
+        for var in unmatched_variables:
+            logger.error(f"Unable to find qualified variable: {var} for qualifier variable {variable.get('name')}")
+
     def _cleanup_document(self, document: dict) -> dict:
         """
         Remove unnecessary keys from a json document
@@ -378,9 +403,11 @@ class SDTM(BaseProduct):
         logger.info("Cleaning generated document")
         for c in document.get("classes", []):
             self._cleanup_json(c, ["hasParentClass", "id"])
-            for dataset in c.get("datasets", []):
-                self._cleanup_json(dataset, ["hasParentContext", "id"])
+            for var in c.get("classVariables", []):
+                self._cleanup_json(var, ["class", "dataset", "name_no_prefix", "codelist", "qualifiesVariables", "id"])
         for dataset in document.get("datasets", []):
             self._cleanup_json(dataset, ["hasParentContext", "id"])
+            for var in dataset.get("datasetVariables", []):
+                self._cleanup_json(var, ["class", "dataset", "name_no_prefix", "codelist", "qualifiesVariables", "id"])
         logger.info("Finished cleaning document")
         return document
