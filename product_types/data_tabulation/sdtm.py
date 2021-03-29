@@ -181,7 +181,7 @@ class SDTM(BaseProduct):
         An SDTM variable
         """
         variable = {
-            "name": variable_data.get("Variable Name", ""),
+            "name": self.transformer.format_name_for_link(variable_data.get("Variable Name", "").strip()),
             "name_no_prefix": variable_data.get("Variable Name (no prefix)"),
             "label": variable_data.get("Variable Label"),
             "simpleDatatype": variable_data.get("Type"),
