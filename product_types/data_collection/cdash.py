@@ -25,14 +25,19 @@ class CDASH(BaseProduct):
                 self._add_variable_to_domain(variable, variable.get("domain"), domains)
             if variable.get("class") and variable.get("class") != "Domain Specific" and not self.has_parent_model:
                 self._add_variable_to_class(variable, variable.get("class"), classes)
+
+        for domain in domains:
+            if domain.get("parentClass"):
+                self._add_domain_to_class(domain, classes)
         document = self._cleanup_document(document)
+
         return document
 
-    def get_metadata(self, parent_href: str = None) -> ([dict], [dict], [dict]):
+    def get_metadata(self, scenarios = []) -> ([dict], [dict], [dict]):
         self.codelist_mapping = self._get_codelist_mapping()
         classes = self.get_classes()
         domains = self.get_domains()
-        variables = self.get_variables()
+        variables = self.get_variables(scenarios)
 
         return classes, domains, variables
 
@@ -73,7 +78,7 @@ class CDASH(BaseProduct):
         logger.info(f"Finished loading domains: {i}/{len(domains_data['list']['entry'])}")
         return domains
     
-    def get_variables(self) -> [dict]:
+    def get_variables(self, scenarios = []) -> [dict]:
         try:
             document_id = self.config.get(constants.VARIABLES)
         except KeyError:
@@ -84,7 +89,7 @@ class CDASH(BaseProduct):
         if variables_data:
             reader = self._parse_spec_grabber_output(variables_data)
             for row in reader:
-                variable = self._build_variable(row)
+                variable = self._build_variable(row, scenarios)
                 variables.append(variable)
             logger.info("Finished loading variables")
         return variables
@@ -98,7 +103,8 @@ class CDASH(BaseProduct):
                 data[field_mappings.get(key, key)] = record["fields"][key]
         return data
 
-    def _build_variable(self, variable_data: dict) -> dict:
+    def _build_variable(self, variable_data: dict, scenarios = []) -> dict:
+        scenario_label = variable_data.get("Data Collection Scenario") if variable_data.get("Data Collection Scenario") != "N/A" else None
         variable = {
             "name": variable_data[f"{self.product_type.upper()} Variable"],
             "label": variable_data[f"{self.product_type.upper()} Variable Label"],
@@ -110,34 +116,56 @@ class CDASH(BaseProduct):
             "mappingInstructions": self.transformer.cleanup_html_encoding(variable_data["Mapping Instructions"]),
             "definition": variable_data.get(f"DRAFT {self.product_type.upper()} Definition", ""),
             "domain": variable_data.get("Domain") if variable_data.get("Domain") != "N/A" else None,
-            "codelist": variable_data["Controlled Terminology Codelist Name"],
+            "codelist": variable_data.get("Controlled Terminology Codelist Name"),
             "class": self.class_name_mappings.get(variable_data["Observation Class"], variable_data["Observation Class"]),
             "mappingTargets": variable_data.get(self.tabulation_mapping.upper() + " Target") if \
                  variable_data.get(self.tabulation_mapping.upper() + " Target") != "N/A" else None,
-            "scenario": variable_data.get("Data Collection Scenario") if variable_data.get("Data Collection Scenario") != "N/A" else None,
+            "scenario": self._get_scenario_name_from_label(scenario_label, scenarios),
             "implementationOption": variable_data.get("Implementation Options") if variable_data.get("Implementation Options") != "N/A" else None
         }
         variable["_links"] = self.__build_variable_links(variable)
         if variable_data.get("Observation Class") == "Domain Specific":
-            variable["domainSpecific"] = True
+            variable["domainSpecific"] = "true"
         return variable
 
-    def __build_variable_links(self, variable: dict) -> dict:
-        variable_type = "domains" if variable.get("domain") else "classes"
-        mapping_key = "sdtmClassMappingTargets" if variable_type == "classes" else "sdtmigDatasetMappingTargets"
-        if variable_type == "domains":
-            parent_name = variable.get("domain")
+    def _get_variable_type(self, variable: dict):
+        if variable.get("scenario"):
+            return "scenarios"
+        elif variable.get("domain"):
+            return "domains"
         else:
-            parent_name = self.transformer.format_name_for_link(variable.get("class"))
+            return "classes"
+
+    def _get_variable_parent_name(self, variable: dict):
+        variable_type = self._get_variable_type(variable)
+        if variable_type == "scenarios":
+            return f'{variable.get("domain")}.{self.transformer.format_name_for_link(variable.get("scenario"))}'
+        elif variable_type == "domains":
+            return variable.get("domain")
+        else:
+            return self.transformer.format_name_for_link(variable.get("class"))
+
+    def _get_scenario_name_from_label(self, label, scenarios: [dict]) -> str:
+        if self.is_ig:
+            for scenario in scenarios:
+                if scenario.get("label") == label:
+                    return scenario.get("name")
+        return None
+
+    def __build_variable_links(self, variable: dict) -> dict:
+        variable_type = self._get_variable_type(variable)
+        mapping_key = "sdtmClassMappingTargets" if variable_type == "classes" else "sdtmigDatasetMappingTargets"
+        parent_name = self._get_variable_parent_name(variable)
         type_label = "Class Variable" if variable_type == "classes" else "Data Collection Field"
+        variable_name = variable['name'].split("_")[-1]
         links = {
             "self": {
-                "href": f"/mdr/{self.product_type}/{self.version}/{variable_type}/{parent_name}/fields/{variable['name']}",
+                "href": f"/mdr/{self.product_type}/{self.version}/{variable_type}/{parent_name}/fields/{variable_name}",
                 "title": variable["label"],
                 "type": type_label
             },
             "rootItem": {
-                "href": f"/mdr/root/{self.product_type}/{variable_type}/{parent_name}/fields/{variable['name']}",
+                "href": f"/mdr/root/{self.product_type}/{variable_type}/{parent_name}/fields/{variable_name}",
                 "title": variable["label"],
                 "type": "Root Data Element"
             }
@@ -147,11 +175,11 @@ class CDASH(BaseProduct):
         if prior_version:
             links["priorVersion"] = prior_version
         codelist = variable.get("codelist", "")
-        if self._iscodelist(codelist):
+        if self._iscodelist(codelist) and codelist != "N/A":
             links["codelist"] = self._get_codelist_links(codelist)
-        elif self._isdescribedvaluedomain(codelist):
+        elif self._isdescribedvaluedomain(codelist) and codelist != "N/A":
             variable["describedValueDomain"] = self._get_described_value_domain(codelist)
-        elif codelist:
+        elif codelist and codelist != "N/A":
             # The provided codelist is a value list
             variable["valueList"] = [code for code in re.split(r'[\n|;|\\n|,]', codelist)]
         mapping_links = self._build_mapping_links(variable, parent_name)
@@ -245,6 +273,18 @@ class CDASH(BaseProduct):
         logger.info(f"Retrieved {len(new_classes)} classes from parent {parent_link}")
         return new_classes
 
+    def _add_domain_to_class(self, domain: [dict], classes: [dict]):
+        """
+        Adds a domain with a known parent class to the parent class' list of domains
+        """
+        parent_class = domain.get("parentClass")
+        filtered_classes = [c for c in classes if c["name"] == parent_class or c.get("id") == parent_class]
+        if filtered_classes:
+            parent = filtered_classes[0]
+            domain["_links"]["parentClass"] = parent["_links"]["self"]
+        else:
+            logger.error(f"No parent class found with name: {parent_class}")
+
     def _cleanup_document(self, document: dict) -> dict:
         logger.info("Cleaning generated document")
         for c in document.get("classes", []):
@@ -256,7 +296,7 @@ class CDASH(BaseProduct):
             for field in domain.get("fields", []):
                 self._cleanup_json(field, ["class", "domain", "scenario", "codelist",  "mappingTargets"])
         logger.info("Finished cleaning generated document")
-        return document 
+        return document
     
     def _cleanup_fields(self, fields: [dict]):
         for field in fields:

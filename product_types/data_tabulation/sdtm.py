@@ -181,7 +181,7 @@ class SDTM(BaseProduct):
         An SDTM variable
         """
         variable = {
-            "name": self.transformer.format_name_for_link(variable_data.get("Variable Name", "").strip()),
+            "name": variable_data.get("Variable Name", "").strip(),
             "name_no_prefix": variable_data.get("Variable Name (no prefix)"),
             "label": variable_data.get("Variable Label"),
             "simpleDatatype": variable_data.get("Type"),
@@ -244,15 +244,16 @@ class SDTM(BaseProduct):
         else:
             parent_name = self.transformer.format_name_for_link(variable.get("class"))
         type_label = "SDTM Class Variable" if variable_type == "classes" else "SDTM Dataset Variable"
+        variable_name = self.transformer.format_name_for_link(variable['name'], [" ", ",","\n", "\\n", '"'])
         links = {
             "self": {
-                "href": f"/mdr/{self.product_type}/{self.version}/{variable_type}/{parent_name}/variables/{variable['name']}",
+                "href": f"/mdr/{self.product_type}/{self.version}/{variable_type}/{parent_name}/variables/{variable_name}",
                 "title": variable["label"],
                 "type": type_label
             },
             "rootItem": {
-                "href": f"/mdr/root/{self.product_type}/{variable_type}/{parent_name}/variables/{variable['name']}",
-                "title": f"Version-agnostic anchor resource for {self.product_type.upper()} variable {parent_name}.{variable['name']}",
+                "href": f"/mdr/root/{self.product_type}/{variable_type}/{parent_name}/variables/{variable_name}",
+                "title": f"Version-agnostic anchor resource for {self.product_type.upper()} variable {parent_name}.{variable_name}",
                 "type": "Root Data Element"
             }
         }

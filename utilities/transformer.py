@@ -7,9 +7,9 @@ class Transformer:
     def __init__(self, config = None):
         self.config = config
     
-    def format_name_for_link(self, name: str) -> str:
+    def format_name_for_link(self, name: str, chars_to_remove = None) -> str:
         formatted_name = name
-        characters_to_remove = [" ", "-", ",","\n", "\\n"]
+        characters_to_remove = chars_to_remove or [" ", "-", ",","\n", "\\n", '"']
         characters_to_replace = {
             "*": "s"
         }
