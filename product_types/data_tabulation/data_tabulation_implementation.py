@@ -14,7 +14,7 @@ class DataTabulationImplementation(SDTM):
         self.summary["_links"]["model"] = self._build_model_link()
         sdtm_document = deepcopy(self.summary)
         classes, datasets, variables = self.get_metadata()
-        sdtm_document["classes"] = classes
+        sdtm_document["classes"] = [c.to_json() for c in classes]
         sdtm_document = self._cleanup_document(sdtm_document)
         return sdtm_document
     
@@ -29,14 +29,13 @@ class DataTabulationImplementation(SDTM):
 
     def _build_variable(self, variable_data: dict) -> dict:
         variable = super()._build_variable(variable_data)
-        codelist = variable.get("codelist", "")
-        if self._iscodelist(codelist):
-            variable["_links"]["codelist"] = self._get_codelist_links(codelist)
-        elif self._isdescribedvaluedomain(codelist):
-            variable["describedValueDomain"] = self._get_described_value_domain(codelist)
-        elif codelist:
+        if self._iscodelist(variable.codelist) and variable.codelist != "N/A":
+            variable.set_codelist_links(variable.codelist)
+        elif self._isdescribedvaluedomain(variable.codelist) and variable.codelist != "N/A":
+            variable.set_described_value_domain(variable.codelist)
+        elif variable.codelist and variable.codelist != "N/A":
             # The provided codelist is a value list
-            variable["valueList"] = [code for code in re.split(r'[\n|;|\\n|,]', codelist)]
+            variable.set_value_list(variable.codelist)
         return variable
 
     def _cleanup_document(self, document: dict) -> dict:

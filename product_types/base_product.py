@@ -58,6 +58,16 @@ class BaseProduct:
 
     def generate_document(self, document_id: str) -> dict:
         raise NotImplementedError
+    
+    def get_dataset_name(self, name: str) -> str:
+        if not name:
+            return None
+        if re.match("^SUPP.*$", name.strip()):
+            return "SUPPQUAL"
+        elif re.match("^AP--$", name.strip()):
+            return "APRELSUB"
+        else: 
+            return name
 
     def _get_all_prior_versions(self) -> [dict]:
         """ returns all versions of a product returned by the /mdr/products CDISC library endpoint. """
@@ -76,7 +86,7 @@ class BaseProduct:
         return []
 
 
-    def _get_prior_version(self, link: str) -> dict:
+    def _get_prior_version(self, link: dict) -> dict:
         prior_versions = self._get_all_prior_versions()
         data_link = '/'.join(link["href"].split('/')[4:])
         # Sort prior versions
@@ -93,21 +103,6 @@ class BaseProduct:
             output_file = self.summary["name"].replace(" ", "") + ".json"
         with codecs.open(output_file, 'w', encoding='ascii') as f:
             json.dump(document, f, indent=4, ensure_ascii=False)
-    
-    def _get_variable_prior_version(self, root_link: str) -> dict:
-        try:
-            root_data = self.library_client.get_api_json(root_link["href"])
-            versions = root_data["_links"]["versions"]
-            filtered_versions = [v for v in versions if self._get_version_prefix(v["href"].split("/")[3]) == self.version_prefix]
-            if len(filtered_versions) >= 1:
-                sorted_versions = sorted(filtered_versions, key=lambda version: version["href"].split("/")[3])
-                for version in reversed(sorted_versions):
-                    if self._get_version_number(version["href"].split("/")[3]) < self.version_number:
-                        return version
-        except Exception as e:
-            logger.error(e)
-            return None
-        return None
         
     def validate_document(self, document: dict):
         pass
@@ -189,7 +184,7 @@ class BaseProduct:
     def _get_codelist_links(self, codelist: str) -> [dict]:
         if not codelist or not codelist.startswith("("):
             return None
-        codelist_array = [ct for ct in re.split(r'[\n|;|\\n]', codelist) if ct]
+        codelist_array = [ct for ct in re.split(r'[\n|;|\\n|or]', codelist) if ct]
         codelists = []
         for ct in codelist_array:
             ct = ct.strip()
@@ -203,7 +198,8 @@ class BaseProduct:
     def _get_described_value_domain(self, codelist: str) -> str:
         described_value_domain_mapping = {
             "(nullflavor)": "ISO 21090 NullFlavor enumeration",
-            "nullflavor": "ISO 21090 NullFlavor enumeration"
+            "nullflavor": "ISO 21090 NullFlavor enumeration",
+
         }
         return described_value_domain_mapping.get(codelist.lower(), codelist)
     
@@ -237,7 +233,11 @@ class BaseProduct:
         return codelist.startswith("(") and "nullflavor" not in codelist.lower()
 
     def _isdescribedvaluedomain(self, described_value_domain: str) -> bool:
-        return described_value_domain.lower() in self.described_value_domains
+        domain_map = {
+            "WHODRUGw*": "who drug",
+            "MedDRAw*": "meddra"
+        }
+        return domain_map.get(described_value_domain, described_value_domain.lower()) in self.described_value_domains
 
     @staticmethod
     def _cleanup_json(json_data: dict, unwanted_keys: [str]):

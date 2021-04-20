@@ -196,3 +196,45 @@ def mock_products_payload():
         }
     }
 }
+
+@pytest.fixture()
+def mock_adamig_summary():
+    return {
+        "name": "Test ADAMIG",
+        "parentModel": "2-1",
+        "_links": {
+            "self": {
+                "href": "/mdr/adam/adamig-5-0",
+                "title": "Test ADAMIG link",
+                "type": "Test Implementation Guide"
+            }
+        }
+    }
+
+@pytest.fixture()
+def mock_sdtm_summary():
+    return {
+        "name": "Test SDTM",
+        "parentModel": "1-2",
+        "_links": {
+            "self": {
+                "href": "/mdr/sdtm/test",
+                "title": "Test SDTM link",
+                "type": "Test foundational model"
+            }
+        }
+    }
+
+@pytest.fixture()
+def mock_cdash_summary():
+    return {
+        "name": "Test CDASH",
+        "parentModel": "2-1",
+        "_links": {
+            "self": {
+                "href": "/mdr/cdash/5-0",
+                "title": "Test CDASH link",
+                "type": "Test Foundational Model"
+            }
+        }
+    }

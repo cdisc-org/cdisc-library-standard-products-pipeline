@@ -21,7 +21,8 @@ class ProductFactory:
         self.trasformer = Transformer()
     
     def get_summary(self, document_id):
-        expected_fields = set(["name", "label", "effectiveDate", "registrationStatus", "source", "version", "priorVersion", "description", "parentModel"])
+        expected_fields = set(["name", "label", "effectiveDate", "registrationStatus", \
+            "source", "version", "priorVersion", "description", "parentModel", "sdtmVersion", "sdtmigVersion"])
         summary = {
             "_links": {},
         }
@@ -30,12 +31,17 @@ class ProductFactory:
             summary_data = data["list"]["entry"][0]
         else:
             return None
+
+        registrationStatus = summary_data["fields"].get("registrationStatus")
         for key in summary_data["fields"]:
             if key in expected_fields:
                 if key == "version":
                     summary[key] = str(summary_data["fields"][key])
                 elif key == "effectiveDate":
-                    summary[key] = datetime.fromtimestamp(summary_data["fields"][key]/1000).strftime('%Y-%m-%d')
+                    if registrationStatus == "Final":
+                        summary[key] = datetime.fromtimestamp(summary_data["fields"][key]/1000).strftime('%Y-%m-%d')
+                    else:
+                        summary[key] = datetime.now().strftime('%Y-%m-%d')
                 else:
                     summary[key] = summary_data["fields"][key]
 

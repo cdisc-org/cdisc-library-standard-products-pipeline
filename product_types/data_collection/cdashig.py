@@ -1,5 +1,9 @@
 from product_types.data_collection.cdash import CDASH
 from product_types.base_product import BaseProduct
+from product_types.data_collection.variable import Variable
+from product_types.data_collection.domain import Domain
+from product_types.data_collection.data_collection_class import DataCollectionClass
+from product_types.data_collection.scenario import Scenario
 from copy import deepcopy
 from utilities import logger, constants
 
@@ -19,20 +23,34 @@ class CDASHIG(CDASH):
         classes, domains, variables = self.get_metadata(scenarios)
     
         for variable in variables:
-            if variable.get("scenario") or variable.get("implementationOption"):
-                self._add_variable_to_scenario(variable, scenarios)
-            else:
-                self._add_variable_to_domain(variable, variable.get("domain"), domains)
+            parent_domain = self._find_domain(variable.parent_domain_name, domains)
+            if variable.parent_scenario:
+                new_variable = variable.copy()
+                new_variable.set_parent_scenario(variable.parent_scenario)
+                variable.parent_scenario.add_variable(new_variable)
+            elif parent_domain:
+                variable.set_parent_domain(parent_domain)
+                parent_domain.add_variable(variable)
 
         for scenario in scenarios:
-            self._add_scenario_to_domain(scenario, domains)
-            self._add_scenario_to_class(scenario, classes)
+            parent_domain = self._find_domain(scenario.parent_domain_name, domains)
+            parent_class = self._find_class(scenario.parent_class_name, classes)
+
+            if parent_domain:
+                scenario.set_parent_domain(parent_domain) 
+                parent_domain.add_scenario(scenario)
+            if parent_class:
+                scenario.set_parent_class(parent_class)
+                parent_class.add_scenario(scenario)
 
         for domain in domains:
-            self._add_domain_to_class(domain, classes)
+            parent_class = self._find_class(domain.parent_class_name, classes)
+            if parent_class:
+                domain.set_parent_class(parent_class)
+                parent_class.add_domain(domain)
 
     
-        document["classes"] = classes
+        document["classes"] = [c.to_json() for c in classes]
         document = self._cleanup_document(document)
         return document
     
@@ -44,109 +62,19 @@ class CDASHIG(CDASH):
         i = 0
         for record in scenarios_data["list"]["entry"]:
             i = i+1
-            scenario_data = {
-                "parentClass": record["fields"].get("parentClass"),
-                "parentDomain": record["fields"].get("parentDomain"),
-                "implementationOption": record["fields"].get("implementationOption", False),
-                "ordinal": record["fields"].get("ordinal"),
-                "name": record["fields"].get("name"),
-                "label": record["fields"].get("label")
-            }
-            if scenario_data.get("implementationOption"):
-                name = self.transformer.format_name_for_link(record["fields"].get("name"))
-                scenario_data["scenario"] = f"{scenario_data.get('parentDomain')} - Implementation Options: {name}"
-            else:
-                scenario_data["scenario"] = record["fields"].get("label")
-            scenario_data["_links"] = self._build_object_links(scenario_data, "scenarios")
-            scenarios.append(scenario_data)
+            scenario = Scenario(record["fields"], self)
+            prior_version = self._get_prior_version(scenario.links["self"])
+            if prior_version:
+                scenario.add_link("priorVersion", prior_version)
+            scenarios.append(scenario)
         logger.info(f"Finished loading scenarios: {i}/{len(scenarios_data['list']['entry'])}")
         return scenarios
     
     def get_variables(self, scenarios = []) -> [dict]:
         variables = super().get_variables(scenarios)
         for variable in variables:
-            name = variable.get("name", "")
-            if variable.get("domain"):
-                name = self.transformer.replace_str(name, variable.get('domain'), "--", 1)
-            class_name = self.transformer.format_name_for_link(variable.get('class'))
-            parent_href = self.summary["_links"]["parentModel"]["href"] + f"/classes/{class_name}/fields/{name}"
-            variable["_links"]["implements"] = {
-                "href": parent_href,
-                "title": variable["label"],
-                "type": "Class Variable"
-            }
+            variable.build_implements_link()
         return variables
-
-    def _add_domain_to_class(self, domain: [dict], classes: [dict]):
-        """
-        Adds a domain with a known parent class to the parent class' list of domains
-        """
-        parent_class = domain.get("parentClass")
-        filtered_classes = [c for c in classes if c["name"] == parent_class or c.get("id") == parent_class]
-        if filtered_classes:
-            parent = filtered_classes[0]
-            domain["_links"]["parentClass"] = parent["_links"]["self"]
-            parent = filtered_classes[0]
-            parent["domains"] = parent.get("domains", []) +  [domain]
-        else:
-            logger.error(f"No parent class found with name: {class_name}")
-    
-    def _add_variable_to_scenario(self, variable: dict, scenarios: [dict]):
-        new_variable = deepcopy(variable)
-        parent_scenario = new_variable.get("scenario") if new_variable.get("scenario") else new_variable.get("implementationOption")
-        parent_class = new_variable.get("class")
-        if not parent_scenario:
-            return
-        filtered_scenarios = [scenario for scenario in scenarios if parent_scenario == scenario.get("name") and parent_class == scenario.get("parentClass")]
-        if filtered_scenarios:
-            for scenario in filtered_scenarios:
-                # Modify variable links for scenario use before inserting
-                scenario_name = self.transformer.format_name_for_link(scenario.get("name"))
-                new_variable["_links"]["parentScenario"] = scenario["_links"]["self"]
-                new_variable["_links"]["self"]["href"] = f"/mdr/{self.product_type}/{self.version}/scenarios/{scenario_name}/fields/{variable['name']}" 
-                new_variable["_links"]["self"]["type"] = "Data Collection Field"
-                new_variable["_links"]["rootItem"]["href"] =  f"/mdr/root/{self.product_type}/scenarios/{scenario_name}/fields/{variable['name']}"
-                new_variable["_links"]["rootItem"]["title"] = f"Version-agnostic anchor element for scenario field {scenario_name}.{variable['name']}"
-                if new_variable["_links"].get("priorVersion"):
-                    del new_variable["_links"]["priorVersion"]
-                if new_variable["_links"].get("implements"):
-                    del new_variable["_links"]["implements"]
-                prior_version = self._get_variable_prior_version(variable["_links"]["rootItem"])
-                if prior_version:
-                    new_variable["_links"]["priorVersion"] = prior_version
-                # Add variable to scenario
-                scenario["fields"] = scenario.get("fields", []) + [new_variable]
-        else:
-            logger.error("Failed attempting to add variable to scenario. " + \
-                    f"Variable {new_variable.get('name')} specified scenario {parent_scenario} " + \
-                    f"but none found with label {parent_scenario} and class {parent_class}." )
-
-    def _add_scenario_to_domain(self, scenario: dict, domains: [dict]):
-        parent_domain = scenario.get("parentDomain")
-        filtered_domains = [domain for domain in domains if parent_domain == domain.get("name") or parent_domain == domain.get("id")]
-        if filtered_domains:
-            for domain in filtered_domains:
-                scenario["_links"]["parentDomain"] = domain["_links"]["self"]
-                scenario["domain"] = domain.get("label")
-                scenario["domainName"] = domain.get("name")
-                domain["_links"]["scenarios"] = domain["_links"].get("scenarios", []) + [scenario["_links"]["self"]]
-        else:
-            logger.error("Failed attempting to add scenario to domain. " + \
-                f"Scenario {scenario.get('name')} specified domain {scenario.get('parentDomain')} " + \
-                f"but none found with label or id {scenario.get('parentDomain')}." )
-
-    
-    def _add_scenario_to_class(self, scenario: dict, classes: [dict]):
-        parent_class = scenario.get("parentClass")
-        filtered_classes = [c for c in classes if parent_class == c.get("name") or parent_class == c.get("id")]
-        if filtered_classes:
-            for c in filtered_classes:
-                scenario["_links"]["parentClass"] = c["_links"]["self"]
-                c["scenarios"] = c.get("scenarios", []) + [scenario]
-        else:
-            logger.error("Failed attempting to add scenario to domain. " + \
-                f"Scenario {scenario.get('name')} specified class {scenario.get('parentClass')} " + \
-                f"but none found with label or id {scenario.get('parentClass')}." )
 
     def validate_document(self, document: dict):
         logger.info("Begin validating")
@@ -164,6 +92,7 @@ class CDASHIG(CDASH):
     
     def _cleanup_document(self, document: dict) -> dict:
         logger.info("Cleaning generated document")
+        self._cleanup_json(document, ["sdtmigVersion"])
         for c in document.get("classes", []):
             self._cleanup_json(c, ["id"])
             for domain in c.get("domains", []):
