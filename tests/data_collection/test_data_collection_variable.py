@@ -140,3 +140,85 @@ def test_to_json(mock_wiki_client, mock_library_client, mock_cdash_summary, mock
     assert json_data.get("questionText") == variable.question_text
     assert json_data.get("mappingInstructions") == variable.mapping_instructions
     assert json_data.get("implementationNotes") == variable.implementation_notes
+
+@pytest.mark.parametrize("parent_class_name, expected_mapping_type", [
+    ("Domain Specific", "sdtmig"),
+    ("Findings", "sdtm")
+])
+def test_get_variable_mapping_target_type(mock_wiki_client,
+                                            mock_library_client,
+                                            mock_cdash_summary,
+                                            mock_variable_data,
+                                            parent_class_name,
+                                            expected_mapping_type):
+    config = Config({
+        constants.CLASSES: "12345"
+    })
+    version = "5-0"
+    cdash = CDASH(mock_wiki_client, mock_library_client,mock_cdash_summary,"cdash",version, config)
+    variable = Variable(mock_variable_data, cdash)
+    variable.parent_class_name = parent_class_name
+    mapping_target_type = variable._get_mapping_target_type()
+    assert mapping_target_type == expected_mapping_type
+
+
+@pytest.mark.parametrize("parent_class_name, parent_domain_name, target, expected_variable_type", [
+    ("Domain Specific", "Test", "TEST", "Dataset"),
+    ("Identifiers", None, "TSVAL", "Dataset"),
+    ("Identifiers", None, "CO.COVAL", "Dataset"),
+    ("Identifiers", None, "SUPP--.QVAL", "Dataset"),
+    ("Identifiers", "DM", "CoolTarget", "Dataset"),
+    ("Identifiers", None, "DM.CoolTarget", "Dataset"),
+    ("Interventions", "LS", "CoolTarget", "Class"),
+    ("Findings", "LS", "CoolTarget", "Class"),
+    ("Events", "LS", "CoolTarget", "Class"),
+    ("Findings About", "LS", "CoolTarget", "Class"),
+])
+def test_get_variable_mapping_target_variable_type(mock_wiki_client,
+                                            mock_library_client,
+                                            mock_cdash_summary,
+                                            mock_variable_data,
+                                            parent_class_name,
+                                            parent_domain_name,
+                                            target,
+                                            expected_variable_type):
+    config = Config({
+        constants.CLASSES: "12345"
+    })
+    version = "5-0"
+    cdash = CDASH(mock_wiki_client, mock_library_client,mock_cdash_summary,"cdash",version, config)
+    variable = Variable(mock_variable_data, cdash)
+    variable.parent_class_name = parent_class_name
+    variable.parent_domain_name = parent_domain_name
+    mapping_target_type = variable._get_mapping_target_variable_type(target)
+    assert mapping_target_type == expected_variable_type
+
+@pytest.mark.parametrize("parent_class_name, parent_domain_name, target, expected_parent", [
+    ("Domain Specific", "QR", "TEST", "QR"),
+    ("Identifiers", None, "TSVAL", "TS"),
+    ("Identifiers", None, "CO.COVAL", "CO"),
+    ("Identifiers", None, "SUPP--.QVAL", "SUPPQUAL"),
+    ("Identifiers", "DM", "CoolTarget", "DM"),
+    ("Identifiers", None, "DM.CoolTarget", "DM"),
+    ("Interventions", "LS", "CoolTarget", "Interventions"),
+    ("Findings", "LS", "CoolTarget", "Findings"),
+    ("Events", "LS", "CoolTarget", "Events"),
+    ("Findings About", "LS", "CoolTarget", "Findings About"),
+])
+def test_get_mapping_parent(mock_library_client,
+                            mock_cdash_summary,
+                            mock_variable_data,
+                            parent_class_name,
+                            parent_domain_name,
+                            target,
+                            expected_parent):
+    config = Config({
+        constants.CLASSES: "12345"
+    })
+    version = "5-0"
+    cdash = CDASH(mock_wiki_client, mock_library_client,mock_cdash_summary,"cdash",version, config)
+    variable = Variable(mock_variable_data, cdash)
+    variable.parent_class_name = parent_class_name
+    variable.parent_domain_name = parent_domain_name
+    mapping_parent = variable._get_mapping_parent(target)
+    assert mapping_parent == expected_parent

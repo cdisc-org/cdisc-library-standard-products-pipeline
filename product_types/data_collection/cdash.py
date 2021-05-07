@@ -35,7 +35,7 @@ class CDASH(BaseProduct):
                 variable.set_parent_class(parent_class)
             if parent_domain:
                 variable.set_parent_domain(parent_domain)
-                domain.add_variable(variable)
+                parent_domain.add_variable(variable)
             elif parent_class:
                 parent_class.add_variable(variable)
 

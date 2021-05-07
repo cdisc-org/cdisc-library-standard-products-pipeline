@@ -69,6 +69,14 @@ class BaseProduct:
         else: 
             return name
 
+    def get_class_name(self, name: str) -> str:
+        if not name:
+            return None
+        if "Findings About" in name:
+            return "Findings About"
+        else:
+            return name
+
     def _get_all_prior_versions(self) -> [dict]:
         """ returns all versions of a product returned by the /mdr/products CDISC library endpoint. """
         try:

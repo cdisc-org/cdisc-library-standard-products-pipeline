@@ -64,7 +64,7 @@ class Variable(BaseVariable):
     def _build_self_link(self):
         variable_type = self._get_type()
         parent_name = self._get_parent_obj_name()
-        variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1])
+        variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1], [" ", ",","\n", "\\n", '"', "/", "."])
         return {
                 "href": f"/mdr/{self.product_type}/{self.parent_product.version}/{variable_type}/{parent_name}/fields/{variable_name}",
                 "title": self.label,
@@ -96,9 +96,9 @@ class Variable(BaseVariable):
         scenario_name = self.transformer.format_name_for_link(parent_scenario.name)
         variable_name = self.name
         self.add_link("parentScenario", parent_scenario.links.get("self"))
-        self.links["self"]["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/scenarios/{scenario_name}/fields/{variable_name}" 
+        self.links["self"]["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/scenarios/{self.parent_domain_name}.{scenario_name}/fields/{variable_name}"
         self.links["self"]["type"] = "Data Collection Field"
-        self.links["rootItem"]["href"] =  f"/mdr/root/{self.parent_product.product_type}/scenarios/{scenario_name}/fields/{variable_name}"
+        self.links["rootItem"]["href"] =  f"/mdr/root/{self.parent_product.product_type}/scenarios/{self.parent_domain_name}.{scenario_name}/fields/{variable_name}"
         self.links["rootItem"]["title"] = f"Version-agnostic anchor element for scenario field {scenario_name}.{variable_name}"
         if "priorVersion" in self.links:
             del self.links["priorVersion"]
@@ -106,9 +106,18 @@ class Variable(BaseVariable):
             del self.links["implements"]
         self.set_prior_version()
         self.parent_scenario = parent_scenario
+
+    def build_mapping_target_links(self):
+        if not self._has_mapping_target():
+            return
+        targets = [] if not self.mapping_targets else self.mapping_targets.split(";")
+        for target in targets:
+            self._set_target(target)
     
     def _get_type(self):
-        if self.scenario:
+        if not self.parent_product.is_ig and self.name.startswith("--"):
+            return "classes"
+        elif self.scenario:
             return "scenarios"
         elif self.parent_domain_name:
             return "domains"
@@ -118,58 +127,82 @@ class Variable(BaseVariable):
     def _get_parent_obj_name(self):
         variable_type = self._get_type()
         domain_name = self.transformer.format_name_for_link(self.parent_domain_name)
+        class_name = self.parent_product.get_class_name(self.parent_class_name)
         if variable_type == "scenarios":
             return f'{domain_name}.{self.transformer.format_name_for_link(self.scenario)}'
         elif variable_type == "domains":
             return domain_name
         else:
-            return self.transformer.format_name_for_link(self.parent_class_name)
+            return self.transformer.format_name_for_link(class_name)
 
-    def build_mapping_target_links(self):
-        targets = [] if not self.mapping_targets else self.mapping_targets.split(";")
-        links = []
-        category = "datasets" if self.parent_domain_name else "classes"
+    def _has_mapping_target(self):
+        """
+        Determines whether or not a variable has a mapping target.
+        """
+        if self.parent_domain_name and self.parent_domain_name.startswith("SUPP") and not self.parent_domain_name.endswith("--"):
+            return False
+        else:
+            return True
+
+    def _get_mapping_parent(self, target: str = None):
+        """
+        Returns the appropriate parent class or dataset given a target
+        """
         parent_dataset = self.parent_product.get_dataset_name(self.parent_domain_name)
-        parent_class = self.parent_class_name
-        for target in targets:
-            target_data = target.split(".")
-            target_name = target_data[-1].strip()
-            if len(target_data) > 1:
-                parent_dataset = self.parent_product.get_dataset_name(target_data[0])
-                category = "datasets"
-            if target:
-                latest_version = self._get_target("datasets", parent_dataset, target_name)
-                if latest_version:
-                    links.append(latest_version)
-                else:
-                    latest_version = self._get_target("classes", parent_class, target_name)
-                    if latest_version:
-                        links.append(latest_version)
-                    
-                    else:
-                        # Fallback to checking for a version of the variable in GeneralObservations before not providing a link
-                        latest_version = self._get_target("classes", "GeneralObservations", target_name)
-                        if latest_version:
-                            links.append(latest_version)
-                        else:
-                            logger.error(f"Failed to find mapping target for variable: {self.to_string()}")
-        if links:
-            link = links[0].get("href")
-            mapping_key = "MappingTargets"
-            if "classes" in link:
-                mapping_key = "Class" + mapping_key
-            else:
-                mapping_key = "Dataset" + mapping_key
-            if "sdtmig" in link:
-                mapping_key = "sdtmig" + mapping_key
-            else:
-                mapping_key = "sdtm" + mapping_key
-            self.links[mapping_key] = links
+        parent_class = "Associated Persons" if self.parent_domain_name == "AP--" else self.parent_product.get_class_name(self.parent_class_name)
+        parent_mapping = {
+            "SUPP--.QVAL": "SUPPQUAL",
+            "TSVAL": "TS",
+            "CO.COVAL": "CO",
+        }
+        if self.parent_product.is_ig:
+            return parent_dataset
+        elif target in parent_mapping:
+            return parent_mapping.get(target)
+        elif str(target).startswith("DM."):
+            return "DM"
+        elif self._get_mapping_target_variable_type(target) == "Class":
+            return parent_class
+        else:
+            return parent_dataset
+
+    def _get_mapping_target_type(self):
+        """
+        Determines whether the mapping target should be an sdtm or sdtmig variable.
+
+        * If the parent class is Interventions, Events, Findings, or Findings About then the mapping target should be an sdtm variable
+        * Additionally if the parent domain is DM then the mapping target should also be an sdtm variable
+        * If the class specified is "Domain Specific" then the mapping target should be an sdtmig variable, otherwise it will be an sdtm variable
+        """
+        if self.parent_class_name == "Domain Specific":
+            return "sdtmig"
+        elif self.parent_product.is_ig:
+            return "sdtmig"
+        else:
+            return "sdtm"
     
+    def _get_mapping_target_variable_type(self, target: str = None):
+        """
+        Determines whether the mapping target should be a dataset or class variable.
+
+        * If the parent class is Interventions, Events, Findings, or Findings About then the mapping target should be a class variable
+        * Except for mapping targets CO.COVAL, SUPP--.QVAL, and TSVAL which map to dataset variables.
+        * Additionally if the parent domain is DM or the target starts with DM. then the mapping target should also be a dataset variable
+        * Domain Specific variables should also map to "Dataset" variables
+        """
+        if self.parent_product.is_ig:
+            return "Dataset"
+        elif self.parent_domain_name == "DM" or "DM." in str(target):
+            return "Dataset"
+        elif target in ["SUPP--.QVAL", "TSVAL", "CO.COVAL"]:
+            return "Dataset"
+        elif self.parent_class_name == "Domain Specific":
+            return "Dataset"
+        else:
+            return "Class"
+
     def build_implements_link(self):
         name = self.name
-        if self.parent_domain_name:
-            name = self.transformer.replace_str(name, self.parent_domain_name, "--", 1)
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
         parent_href = self.parent_product.summary["_links"]["parentModel"]["href"] + f"/classes/{class_name}/fields/{name}"
         self.links["implements"] = {
@@ -178,21 +211,30 @@ class Variable(BaseVariable):
             "type": "Class Variable"
         }
 
-    def _get_target(self, category: str, parent: str, variable: str) -> dict:
-        sdtm_href = f"/mdr/sdtm/{self.parent_product.sdtm_version}/{category}/{parent}/variables/{variable}"
-        sdtmig_href = f"/mdr/sdtmig/{self.parent_product.sdtmig_version}/{category}/{parent}/variables/{variable}"
+    def _set_target(self, variable: str) -> dict:
+        category = self._get_mapping_target_variable_type(variable)
+        mapping_product = self._get_mapping_target_type()
+        parent = self.transformer.format_name_for_link(self._get_mapping_parent(variable))
+        version = self.parent_product.sdtm_version if mapping_product == 'sdtm' else self.parent_product.sdtmig_version
+        mapping_target_key = f"{mapping_product}{category}MappingTargets"
+        category_name = "classes" if category == "Class" else "datasets"
+        variable_name = variable.split(".")[-1].strip()
+        href = f"/mdr/{mapping_product}/{version}/{category_name}/{parent}/variables/{variable_name}"
         if not parent:
-            return None
+            return
         try:
-            data = self.parent_product.library_client.get_api_json(sdtm_href)
-            return data["_links"]["self"]
+            data = self.parent_product.library_client.get_api_json(href)
+            self.links[mapping_target_key] = self.links.get(mapping_target_key, []) + [data["_links"]["self"]]
         except:
             try:
-                data = self.parent_product.library_client.get_api_json(sdtmig_href)
-                return data["_links"]["self"]
+                if category == "Class":
+                    href = f"/mdr/{mapping_product}/{version}/{category_name}/GeneralObservations/variables/{variable_name}"
+                    data = self.parent_product.library_client.get_api_json(href)
+                    self.links[mapping_target_key] = self.links.get(mapping_target_key, []) + [data["_links"]["self"]]
+                else:
+                    logger.debug(f'Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
             except:
-                pass
-        return None
+                logger.debug(f'Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
     
     def to_json(self):
         json_data = {
