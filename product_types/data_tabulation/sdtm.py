@@ -44,7 +44,7 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
-            parent_datset = self._find_dataset(variable.parent_dataset_name, datasets)
+            parent_dataset = self._find_dataset(variable.parent_dataset_name, datasets)
             parent_class = self._find_class_by_name(variable.parent_class_name, classes)
             if variable.variables_qualified:
                 self._add_qualified_variables_link(variable, variables)
@@ -53,9 +53,9 @@ class SDTM(BaseProduct):
                     variable.build_model_class_variable_link()
                 else:
                     variable.build_model_dataset_variable_link()
-            if parent_datset:
-                variable.set_parent_dataset(parent_datset)
-                parent_datset.add_variable(variable)
+            if parent_dataset:
+                variable.set_parent_dataset(parent_dataset)
+                parent_dataset.add_variable(variable)
             elif not self.is_ig and parent_class:
                 variable.set_parent_class(parent_class)
                 parent_class.add_variable(variable)
@@ -70,8 +70,7 @@ class SDTM(BaseProduct):
             parent_class = self._find_class(dataset.parent_class_name, classes)
             if parent_class:
                 dataset.set_parent_class(parent_class)
-                if self.is_ig:
-                    parent_class.add_dataset(dataset)
+                parent_class.add_dataset(dataset)
         return classes, datasets, variables
 
     def validate_document(self, document: dict):
@@ -85,6 +84,9 @@ class SDTM(BaseProduct):
             self._validate_links(c)
         for d in document["datasets"]:
             self._validate_links(d)
+            for variable in d.get("datasetVariables", []):
+                if "parentClass" in variable["_links"]:
+                    logger.error(f"Dataset variable found with parent class link: {variable.get('name')}, Parent Dataset: {variable['links'].get('parentDataset')}")
         logger.info("Finished validating")
     
     def get_classes(self) -> [dict]:
