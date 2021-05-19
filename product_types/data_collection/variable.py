@@ -15,6 +15,7 @@ class Variable(BaseVariable):
         self.label = variable_data.get(f"{self.product_type.upper()} Variable Label")
         self.data_type = variable_data.get("Data Type")
         self.ordinal = str(variable_data.get("Order Number"))
+        self.completion_instructions = variable_data.get("Case Report Form Completion Instructions")
         self.core = variable_data.get("CDASHIG Core")
         self.prompt = self.transformer.cleanup_html_encoding(variable_data.get("Prompt", ""))
         self.question_text = self.transformer.cleanup_html_encoding(variable_data.get("Question Text", ""))
@@ -254,6 +255,8 @@ class Variable(BaseVariable):
             "definition": self.definition,
         }
 
+        if self.parent_product.is_ig:
+            json_data["completionInstructions"] = self.completion_instructions
         if self.core:
             json_data["core"] = self.core
 
