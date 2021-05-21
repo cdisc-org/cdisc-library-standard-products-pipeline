@@ -77,6 +77,27 @@ class BaseProduct:
         else:
             return name
 
+    def _query_data(self, link, keys: [str]):
+        """
+        Gets a piece of data from the library given a link and an expected key.
+        Arguments:
+        - link: A valid library link
+        - key: The expected key(s) in the response that need to be retrieved.
+
+        Returns:
+        - The value of the key in the payload or none.
+        """
+
+        try:
+            values = []
+            data = self.library_client.get_api_json(link)
+            for key in keys:
+                values.append(data.get(key))
+            return values
+        except:
+            logger.error(f"QUERY DATA: Failed to get {key} from {link} response.")
+            return None
+
     def _get_all_prior_versions(self) -> [dict]:
         """ returns all versions of a product returned by the /mdr/products CDISC library endpoint. """
         try:

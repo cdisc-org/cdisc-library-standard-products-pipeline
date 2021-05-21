@@ -52,6 +52,7 @@ class Variable(BaseVariable):
         new.mapping_instructions = self.mapping_instructions
         new.parent_domain_name = self.parent_domain_name
         new.parent_class_name = self.parent_class_name
+        new.completion_instructions = self.completion_instructions
         new.scenario = self.scenario
         new.mapping_targets =  self.mapping_targets
         new.links = self.links
@@ -237,9 +238,9 @@ class Variable(BaseVariable):
                     data = self.parent_product.library_client.get_api_json(href)
                     self.links[mapping_target_key] = self.links.get(mapping_target_key, []) + [data["_links"]["self"]]
                 else:
-                    logger.debug(f'Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
+                    logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
             except:
-                logger.debug(f'Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
+                logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
     
     def to_json(self):
         json_data = {

@@ -66,6 +66,7 @@ class CDASHIG(CDASH):
             prior_version = self._get_prior_version(scenario.links["self"])
             if prior_version:
                 scenario.add_link("priorVersion", prior_version)
+                scenario.scenario, scenario.domain_label = self._query_data(prior_version["href"], ["scenario", "domain"])
             scenarios.append(scenario)
         logger.info(f"Finished loading scenarios: {i}/{len(scenarios_data['list']['entry'])}")
         return scenarios
