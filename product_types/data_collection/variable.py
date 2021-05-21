@@ -159,12 +159,12 @@ class Variable(BaseVariable):
             "TSVAL": "TS",
             "CO.COVAL": "CO",
         }
-        if self.parent_product.is_ig:
-            return parent_dataset
-        elif target in parent_mapping:
+        if target in parent_mapping:
             return parent_mapping.get(target)
         elif str(target).startswith("DM."):
             return "DM"
+        elif self.parent_product.is_ig:
+            return parent_dataset
         elif self._get_mapping_target_variable_type(target) == "Class":
             return parent_class
         else:
@@ -238,9 +238,9 @@ class Variable(BaseVariable):
                     data = self.parent_product.library_client.get_api_json(href)
                     self.links[mapping_target_key] = self.links.get(mapping_target_key, []) + [data["_links"]["self"]]
                 else:
-                    logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
+                    logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}, {href}')
             except:
-                logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
+                logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}, {href}')
     
     def to_json(self):
         json_data = {
