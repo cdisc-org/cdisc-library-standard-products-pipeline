@@ -48,7 +48,8 @@ class Scenario:
 
     def set_parent_domain(self, parent_domain):
         self.parent_domain = parent_domain
-        self.domain_label = parent_domain.label
+        if not self.domain_label:
+            self.domain_label = parent_domain.label
         self.add_link("parentDomain", parent_domain.links.get("self"))
 
     

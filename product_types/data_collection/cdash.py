@@ -113,21 +113,23 @@ class CDASH(BaseProduct):
                     variable.set_value_list(variable.codelist)
                 variable.build_mapping_target_links()
                 variable.set_prior_version()
+                variable.validate()
                 variables.append(variable)
             logger.info("Finished loading variables")
         return variables
     
     def _find_scenario(self, variable_data, scenarios):
         implementation_option = variable_data.get("Implementation Options") if variable_data.get("Implementation Options") != "N/A" else None
-        scenario_name = variable_data.get("Data Collection Scenario") or implementation_option
+        scenario_name = implementation_option or variable_data.get("Data Collection Scenario")
         class_name = self.class_name_mappings.get(variable_data["Observation Class"], variable_data["Observation Class"])
+        domain_name = variable_data.get("Domain")
         if not scenario_name or scenario_name == "N/A":
             return None
-        filtered_scenarios = [s for s in scenarios if s.label == scenario_name and s.parent_class_name == class_name]
+        filtered_scenarios = [s for s in scenarios if s.label == scenario_name and s.parent_class_name == class_name and s.parent_domain_name == domain_name]
         if filtered_scenarios:
             return filtered_scenarios[0]
         else:
-            logger.error(f"No scenarios found with name {scenario_name} and class {class_name}." )
+            logger.error(f"No scenarios found with name {scenario_name} and class {class_name} and domain name {domain_name}" )
             return None
 
     def _find_domain(self, domain_name: str, domains):
@@ -147,7 +149,7 @@ class CDASH(BaseProduct):
         if filtered_classes:
             return filtered_classes[0]
         else:
-            logger.error(f"No parent class found with name: {parent_class}")
+            logger.error(f"No parent class found with name: {class_id}")
             return None
     
     def _find_class_by_label(self, class_label: str, classes):

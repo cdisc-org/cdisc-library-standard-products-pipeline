@@ -147,12 +147,4 @@ class ADAMIG(ADAM):
         return document
 
     def _get_varset_name(self, name):
-        varset_name_mapping = {
-            "Period, Subperiod, and Phase Start and End Timing": "PeriodSubperiodStartEndTiming",
-            "Record-Level Dose": "RecordLevelDose",
-            "Record-Level Treatment and Dose": "RecordLevelTreatmentDose",
-            "Suffixes for User-Defined Timing": "SuffixesforUserDefinedTiming",
-            "Toxicity and Range": "ToxicityRange"
-        }
-        varset_name = varset_name_mapping.get(name, name)
-        return self.transformer.cleanup_html_encoding(varset_name)
+        return self.transformer.cleanup_html_encoding(name)

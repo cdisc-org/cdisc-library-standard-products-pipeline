@@ -15,6 +15,7 @@ class Variable(BaseVariable):
         self.label = variable_data.get(f"{self.product_type.upper()} Variable Label")
         self.data_type = variable_data.get("Data Type")
         self.ordinal = str(variable_data.get("Order Number"))
+        self.completion_instructions = variable_data.get("Case Report Form Completion Instructions")
         self.core = variable_data.get("CDASHIG Core")
         self.prompt = self.transformer.cleanup_html_encoding(variable_data.get("Prompt", ""))
         self.question_text = self.transformer.cleanup_html_encoding(variable_data.get("Question Text", ""))
@@ -34,7 +35,6 @@ class Variable(BaseVariable):
         self.codelist = variable_data.get("Controlled Terminology Codelist Name")
         self.described_value_domain = None
         self.value_list = None
-        self.validate()
     
     def copy(self):
         new = Variable({}, self.parent_product)
@@ -52,6 +52,7 @@ class Variable(BaseVariable):
         new.mapping_instructions = self.mapping_instructions
         new.parent_domain_name = self.parent_domain_name
         new.parent_class_name = self.parent_class_name
+        new.completion_instructions = self.completion_instructions
         new.scenario = self.scenario
         new.mapping_targets =  self.mapping_targets
         new.links = self.links
@@ -93,19 +94,19 @@ class Variable(BaseVariable):
         self.add_link("parentDomain", parent_domain.links.get("self"))
 
     def set_parent_scenario(self, parent_scenario):
-        scenario_name = self.transformer.format_name_for_link(parent_scenario.name)
-        variable_name = self.name
+        self.parent_scenario = parent_scenario
+        parent_name = self._get_parent_obj_name()
+        variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1], [" ", ",","\n", "\\n", '"', "/", "."])
         self.add_link("parentScenario", parent_scenario.links.get("self"))
-        self.links["self"]["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/scenarios/{self.parent_domain_name}.{scenario_name}/fields/{variable_name}"
+        self.links["self"]["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/scenarios/{parent_name}/fields/{variable_name}"
         self.links["self"]["type"] = "Data Collection Field"
-        self.links["rootItem"]["href"] =  f"/mdr/root/{self.parent_product.product_type}/scenarios/{self.parent_domain_name}.{scenario_name}/fields/{variable_name}"
-        self.links["rootItem"]["title"] = f"Version-agnostic anchor element for scenario field {scenario_name}.{variable_name}"
+        self.links["rootItem"]["href"] =  f"/mdr/root/{self.parent_product.product_type}/scenarios/{parent_name}/fields/{variable_name}"
+        self.links["rootItem"]["title"] = f"Version-agnostic anchor element for scenario field {parent_scenario.name}.{variable_name}"
         if "priorVersion" in self.links:
             del self.links["priorVersion"]
         if "implements" in self.links:
             del self.links["implements"]
         self.set_prior_version()
-        self.parent_scenario = parent_scenario
 
     def build_mapping_target_links(self):
         if not self._has_mapping_target():
@@ -128,8 +129,11 @@ class Variable(BaseVariable):
         variable_type = self._get_type()
         domain_name = self.transformer.format_name_for_link(self.parent_domain_name)
         class_name = self.parent_product.get_class_name(self.parent_class_name)
+        scenario_name = self.transformer.format_name_for_link(self.scenario)
+        # If the scenario name is HorizontalGeneric the name in the variable links should be Generic
+        scenario_name = "Generic" if scenario_name == "HorizontalGeneric" else scenario_name
         if variable_type == "scenarios":
-            return f'{domain_name}.{self.transformer.format_name_for_link(self.scenario)}'
+            return f'{domain_name}.{scenario_name}'
         elif variable_type == "domains":
             return domain_name
         else:
@@ -155,12 +159,12 @@ class Variable(BaseVariable):
             "TSVAL": "TS",
             "CO.COVAL": "CO",
         }
-        if self.parent_product.is_ig:
-            return parent_dataset
-        elif target in parent_mapping:
+        if target in parent_mapping:
             return parent_mapping.get(target)
         elif str(target).startswith("DM."):
             return "DM"
+        elif self.parent_product.is_ig:
+            return parent_dataset
         elif self._get_mapping_target_variable_type(target) == "Class":
             return parent_class
         else:
@@ -203,6 +207,8 @@ class Variable(BaseVariable):
 
     def build_implements_link(self):
         name = self.name
+        if self.parent_domain_name:
+            name = self.transformer.replace_str(name, self.parent_domain_name, "--", 1)
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
         parent_href = self.parent_product.summary["_links"]["parentModel"]["href"] + f"/classes/{class_name}/fields/{name}"
         self.links["implements"] = {
@@ -232,9 +238,9 @@ class Variable(BaseVariable):
                     data = self.parent_product.library_client.get_api_json(href)
                     self.links[mapping_target_key] = self.links.get(mapping_target_key, []) + [data["_links"]["self"]]
                 else:
-                    logger.debug(f'Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
+                    logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}, {href}')
             except:
-                logger.debug(f'Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}')
+                logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}, {href}')
     
     def to_json(self):
         json_data = {
@@ -250,6 +256,8 @@ class Variable(BaseVariable):
             "definition": self.definition,
         }
 
+        if self.parent_product.is_ig:
+            json_data["completionInstructions"] = self.completion_instructions
         if self.core:
             json_data["core"] = self.core
 
@@ -268,6 +276,6 @@ class Variable(BaseVariable):
     
     def to_string(self):
         string = f"Name: {self.name}, Parent Class: {self.parent_class_name}, Parent Domain: {self.parent_domain_name}"
-        if self.parent_scenario:
-            string = string + f", Parent Scenario: {self.parent_scenario.name}"
+        if self.scenario:
+            string = string + f", Parent Scenario: {self.scenario}"
         return string
