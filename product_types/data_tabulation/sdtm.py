@@ -109,6 +109,7 @@ class SDTM(BaseProduct):
             prior_version = self._get_prior_version(class_obj.links["self"])
             if prior_version:
                 class_obj.add_link("priorVersion", prior_version)
+            class_obj.set_ordinal(len(classes) + 1)
             classes.append(class_obj)
         logger.info(f"Finished loading classes: {class_count}/{len(classes_data['list']['entry'])}")
         return classes
@@ -133,6 +134,7 @@ class SDTM(BaseProduct):
             prior_version = self._get_prior_version(dataset.links["self"])
             if prior_version:
                 dataset.add_link("priorVersion", prior_version)
+            dataset.set_ordinal(len(datasets) + 1)
             datasets.append(dataset)
         logger.info(f"Finished loading datasets: {dataset_count}/{len(datasets_data['list']['entry'])}")
         return datasets

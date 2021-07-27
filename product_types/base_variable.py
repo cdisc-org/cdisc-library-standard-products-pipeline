@@ -29,7 +29,7 @@ class BaseVariable:
             logger.error(f"No prior version found for variable: {self.to_string()}")
     
     def set_value_list(self, value_list_string):
-        value_list = [code for code in re.split(r'[\n|;|\\n|,]', value_list_string)]
+        value_list = [code for code in re.split(r'[\n|;|,]', value_list_string)]
         value_list = [value.strip() for value in value_list if len(value) > 0]
         if value_list:
             self.value_list = value_list
@@ -38,7 +38,9 @@ class BaseVariable:
         self.described_value_domain = self.parent_product._get_described_value_domain(described_value_domain)
 
     def set_codelist_links(self, codelist):
-        self.links["codelist"] = self.parent_product._get_codelist_links(codelist)
+        codelists = self.parent_product._get_codelist_links(codelist)
+        if codelists:
+            self.links["codelist"] = codelists
     
     def to_string(self):
         return self.name

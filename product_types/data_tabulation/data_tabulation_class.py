@@ -53,6 +53,9 @@ class DataTabulationClass:
     def add_dataset(self, dataset):
         self.datasets.append(dataset)
     
+    def set_ordinal(self, ordinal):
+        self.ordinal = ordinal
+
     def to_json(self):
         json_data = {
             "_links": self.links,

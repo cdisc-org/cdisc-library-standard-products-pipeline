@@ -109,8 +109,6 @@ class Variable(BaseVariable):
         self.set_prior_version()
 
     def build_mapping_target_links(self):
-        if not self._has_mapping_target():
-            return
         targets = [] if not self.mapping_targets else self.mapping_targets.split(";")
         for target in targets:
             self._set_target(target)
@@ -139,15 +137,6 @@ class Variable(BaseVariable):
         else:
             return self.transformer.format_name_for_link(class_name)
 
-    def _has_mapping_target(self):
-        """
-        Determines whether or not a variable has a mapping target.
-        """
-        if self.parent_domain_name and self.parent_domain_name.startswith("SUPP") and not self.parent_domain_name.endswith("--"):
-            return False
-        else:
-            return True
-
     def _get_mapping_parent(self, target: str = None):
         """
         Returns the appropriate parent class or dataset given a target
@@ -155,12 +144,13 @@ class Variable(BaseVariable):
         parent_dataset = self.parent_product.get_dataset_name(self.parent_domain_name)
         parent_class = "Associated Persons" if self.parent_domain_name == "AP--" else self.parent_product.get_class_name(self.parent_class_name)
         parent_mapping = {
-            "SUPP--.QVAL": "SUPPQUAL",
             "TSVAL": "TS",
             "CO.COVAL": "CO",
         }
         if target in parent_mapping:
             return parent_mapping.get(target)
+        elif target.startswith("SUPP"):
+            return self.parent_product.get_dataset_name(target)
         elif str(target).startswith("DM."):
             return "DM"
         elif self.parent_product.is_ig:
@@ -198,7 +188,9 @@ class Variable(BaseVariable):
             return "Dataset"
         elif self.parent_domain_name == "DM" or "DM." in str(target):
             return "Dataset"
-        elif target in ["SUPP--.QVAL", "TSVAL", "CO.COVAL"]:
+        elif target.startswith("SUPP"):
+            return "Dataset"
+        elif target in ["TSVAL", "CO.COVAL"]:
             return "Dataset"
         elif self.parent_class_name == "Domain Specific":
             return "Dataset"

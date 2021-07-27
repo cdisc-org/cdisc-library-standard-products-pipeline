@@ -31,7 +31,7 @@ class BaseProduct:
             "Findings-General": "Findings",
             "Findings About-Findings": "Findings About"
         }
-        self.described_value_domains = {"iso 8601", "(nullflavor)", "nullflavor", "meddra", "number-number", "who drug"}
+        self.described_value_domains = {"iso 8601", "(nullflavor)", "nullflavor", "meddra", "number-number", "who drug", "loinc"}
         logger.info(f"Loading product of type: {product_type}")
         
     def _get_version_prefix(self, version: str) -> str:
@@ -213,9 +213,9 @@ class BaseProduct:
     def _get_codelist_links(self, codelist: str) -> [dict]:
         if not codelist or not codelist.startswith("("):
             return None
-        codelist_array = [ct for ct in re.split(r'[\n|;|\\n|or]', codelist) if ct]
+        codelist_input = self._parse_codelist_input(codelist)
         codelists = []
-        for ct in codelist_array:
+        for ct in codelist_input:
             ct = ct.strip()
             # remove parenthesis
             ct = ct.replace("(", "").replace(")", "")
@@ -224,6 +224,14 @@ class BaseProduct:
                 codelists.append(self._build_codelist_link(codelist_type, concept_id))
         return codelists
     
+    def _parse_codelist_input(self, codelist: str) -> [str]:
+        codelists = []
+        input_data = [ct for ct in re.split(r'[\n|;|\\n|or]', codelist) if ct]
+        for ct in input_data:
+            submission_values = re.findall("\((.*?)\)", ct)
+            codelists += submission_values
+        return codelists
+
     def _get_described_value_domain(self, codelist: str) -> str:
         described_value_domain_mapping = {
             "(nullflavor)": "ISO 21090 NullFlavor enumeration",
@@ -266,7 +274,8 @@ class BaseProduct:
             "WHODRUGw*": "who drug",
             "MedDRAw*": "meddra"
         }
-        return domain_map.get(described_value_domain, described_value_domain.lower()) in self.described_value_domains
+        isdescribedvaluedomain = domain_map.get(described_value_domain, described_value_domain.lower()) in self.described_value_domains
+        return isdescribedvaluedomain or described_value_domain.startswith("ISO")
 
     @staticmethod
     def _cleanup_json(json_data: dict, unwanted_keys: [str]):
