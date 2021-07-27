@@ -155,12 +155,13 @@ class Variable(BaseVariable):
         parent_dataset = self.parent_product.get_dataset_name(self.parent_domain_name)
         parent_class = "Associated Persons" if self.parent_domain_name == "AP--" else self.parent_product.get_class_name(self.parent_class_name)
         parent_mapping = {
-            "SUPP--.QVAL": "SUPPQUAL",
             "TSVAL": "TS",
             "CO.COVAL": "CO",
         }
         if target in parent_mapping:
             return parent_mapping.get(target)
+        elif target.startswith("SUPP"):
+            return self.parent_product.get_dataset_name(target)
         elif str(target).startswith("DM."):
             return "DM"
         elif self.parent_product.is_ig:
@@ -198,7 +199,9 @@ class Variable(BaseVariable):
             return "Dataset"
         elif self.parent_domain_name == "DM" or "DM." in str(target):
             return "Dataset"
-        elif target in ["SUPP--.QVAL", "TSVAL", "CO.COVAL"]:
+        elif target.startswith("SUPP"):
+            return "Dataset"
+        elif target in ["TSVAL", "CO.COVAL"]:
             return "Dataset"
         elif self.parent_class_name == "Domain Specific":
             return "Dataset"
