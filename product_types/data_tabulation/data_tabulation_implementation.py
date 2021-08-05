@@ -22,8 +22,10 @@ class DataTabulationImplementation(SDTM):
         logger.info("Begin validating document")
         self._validate_links(document)
         for c in document["classes"]:
+            assert isinstance(c.get("ordinal"), str)
             self._validate_links(c)
             for dataset in c.get("datasets", []):
+                assert isinstance(dataset.get("ordinal"), str)
                 self._validate_links(dataset)
         logger.info("Finished validating document")
 
