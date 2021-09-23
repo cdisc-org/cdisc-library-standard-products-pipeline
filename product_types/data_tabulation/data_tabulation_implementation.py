@@ -32,7 +32,7 @@ class DataTabulationImplementation(SDTM):
     def _build_variable(self, variable_data: dict) -> dict:
         variable = super()._build_variable(variable_data)
         if self._iscodelist(variable.codelist) and variable.codelist != "N/A":
-            variable.set_codelist_links(variable.codelist)
+            variable.add_codelist_links(variable.codelist)
         elif self._isdescribedvaluedomain(variable.codelist) and variable.codelist != "N/A":
             variable.set_described_value_domain(variable.codelist)
         elif variable.codelist and variable.codelist != "N/A":

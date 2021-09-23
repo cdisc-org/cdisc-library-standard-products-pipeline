@@ -192,12 +192,14 @@ class BaseProduct:
         package_types = {
             "sendct": self._get_latest_codelist_with_type("send", packages),
             "sdtmct": self._get_latest_codelist_with_type("sdtm", packages),
-            "adamct": self._get_latest_codelist_with_type("adam", packages)
+            "adamct": self._get_latest_codelist_with_type("adam", packages),
+            "cdashct": self._get_latest_codelist_with_type("cdash", packages)
         }
         codelist_mapping = {
             "sendct": {},
             "sdtmct": {},
-            "adamct": {}
+            "adamct": {},
+            "cdashct": {}
         }
         for package_type, latest_package in package_types.items():
             logger.debug(f"Building map of submissionValue -> concept id for {package_type} using latest package {latest_package}")

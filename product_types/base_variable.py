@@ -37,10 +37,10 @@ class BaseVariable:
     def set_described_value_domain(self, described_value_domain):
         self.described_value_domain = self.parent_product._get_described_value_domain(described_value_domain)
 
-    def set_codelist_links(self, codelist):
+    def add_codelist_links(self, codelist):
         codelists = self.parent_product._get_codelist_links(codelist)
         if codelists:
-            self.links["codelist"] = codelists
+            self.links.setdefault("codelist", []).extend(codelists)
     
     def to_string(self):
         return self.name

@@ -12,7 +12,7 @@ class CDASH(BaseProduct):
     def __init__(self, wiki_client, library_client, summary, product_type, version, config):
         super().__init__(wiki_client, library_client, summary, product_type, version, config)
         self.product_category = "data-collection"
-        self.codelist_types = ["sdtmct"]
+        self.codelist_types = ["sdtmct", "cdashct"]
         self.model_type = "cdash"
         self.tabulation_mapping = "sdtm"
         self.sdtm_version = summary.get("sdtmVersion")
@@ -105,12 +105,14 @@ class CDASH(BaseProduct):
                 parent_scenario = self._find_scenario(row, scenarios)
                 variable = Variable(row, self, parent_scenario=parent_scenario)
                 if self._iscodelist(variable.codelist) and variable.codelist != "N/A":
-                    variable.set_codelist_links(variable.codelist)
-                elif self._isdescribedvaluedomain(variable.codelist) and codelist != "N/A":
+                    variable.add_codelist_links(variable.codelist)
+                elif self._isdescribedvaluedomain(variable.codelist) and variable.codelist != "N/A":
                     variable.set_described_value_domain(variable.codelist)
                 elif variable.codelist and variable.codelist != "N/A":
                     # The provided codelist is a value list
                     variable.set_value_list(variable.codelist)
+                if variable.subset_codelist != "N/A":
+                    variable.add_codelist_links(variable.subset_codelist)
                 variable.build_mapping_target_links()
                 variable.set_prior_version()
                 variable.validate()

@@ -33,6 +33,7 @@ class Variable(BaseVariable):
             "rootItem": self._build_root_link()
         }
         self.codelist = variable_data.get("Controlled Terminology Codelist Name")
+        self.subset_codelist = variable_data.get("Subset Controlled Terminology/CDASH Codelist Name")
         self.described_value_domain = None
         self.value_list = None
     
@@ -57,6 +58,7 @@ class Variable(BaseVariable):
         new.mapping_targets =  self.mapping_targets
         new.links = self.links
         new.codelist = self.codelist
+        new.subset_codelist = self.subset_codelist
         new.described_value_domain = self.described_value_domain
         new.value_list = self.value_list
         new.core = self.core

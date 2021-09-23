@@ -57,6 +57,7 @@ The pipeline requires the location of the expected wiki content be defined in 1 
 * -r, --report_file: File to log report output. Defaults to report.txt
 * -l, --log_level: Log level for all reporting. Options: info, debug, error. Defaults to info
 * -i, --ignore_errors: Boolean flag for determining whether or not spec grabber/wiki document errors should stop pipeline execution. These errors will be reported either way.
+* -o, --output: Specifies output file
 
 Once the config or environment variables are set up, the pipeline can be run using the following command:
 
