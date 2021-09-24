@@ -16,9 +16,9 @@ class CDASHIG(CDASH):
 
     def generate_document(self) -> dict:
         if self.has_parent_model:
-            self.summary["_links"]["parentModel"] = self._build_model_link()
+            self.summary["_links"]["model"] = self._build_model_link()
         document = deepcopy(self.summary)
-        parent_href = self.summary["_links"]["parentModel"]["href"]
+        parent_href = self.summary["_links"]["model"]["href"]
         scenarios = self.get_scenarios()
         classes, domains, variables = self.get_metadata(scenarios)
     

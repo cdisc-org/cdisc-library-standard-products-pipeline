@@ -204,7 +204,7 @@ class Variable(BaseVariable):
         if self.parent_domain_name:
             name = self.transformer.replace_str(name, self.parent_domain_name, "--", 1)
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
-        parent_href = self.parent_product.summary["_links"]["parentModel"]["href"] + f"/classes/{class_name}/fields/{name}"
+        parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/{class_name}/fields/{name}"
         self.links["implements"] = {
             "href": parent_href,
             "title": self.label,
