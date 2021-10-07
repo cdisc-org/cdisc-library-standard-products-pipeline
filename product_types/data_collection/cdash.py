@@ -71,6 +71,8 @@ class CDASH(BaseProduct):
             prior_version = self._get_prior_version(class_obj.links["self"])
             if prior_version:
                 class_obj.add_link("priorVersion", prior_version)
+            if self.is_ig:
+                class_obj.set_model_link(self.summary["_links"]["model"]["href"])
             classes.append(class_obj)
         logger.info(f"Finished loading classes: {i}/{len(classes_data['list']['entry'])}")
         return classes

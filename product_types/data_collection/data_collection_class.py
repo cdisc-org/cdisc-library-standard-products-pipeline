@@ -29,6 +29,20 @@ class DataCollectionClass:
         self_link["type"] = "Class"
         return self_link
 
+    def set_model_link(self, model_href: str):
+        name = self.transformer.format_name_for_link(self.name)
+        try:
+            model_href = model_href + f"/classes/{name}"
+            self.parent_product.library_client.get_api_json(model_href)
+            model_link = {
+                    "href": model_href,
+                    "title": self.label,
+                    "type": "Class"
+                }
+            self.links["modelClass"] = model_link
+        except:
+            pass
+
     def add_link(self, key, link):
         self.links[key] = link
 

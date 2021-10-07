@@ -199,17 +199,38 @@ class Variable(BaseVariable):
         else:
             return "Class"
 
+    def try_get_api_json(self, link):
+        try:
+            return self.parent_product.library_client.get_api_json(link)
+        except Exception as e:
+            None
+
     def build_implements_link(self):
         name = self.name
         if self.parent_domain_name:
             name = self.transformer.replace_str(name, self.parent_domain_name, "--", 1)
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
         parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/{class_name}/fields/{name}"
-        self.links["implements"] = {
-            "href": parent_href,
-            "title": self.label,
-            "type": "Class Variable"
-        }
+        # try class link
+        data = self.try_get_api_json(parent_href)
+
+        # try Findings class if class_name == "FindingsAboutEventsorInterventions"
+        if not data and class_name == "FindingsAboutEventsorInterventions":
+            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Findings/fields/{name}"
+            data = self.try_get_api_json(parent_href)
+
+        # try Identifiers
+        if not data:
+            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Identifiers/fields/{name}"
+            data = self.try_get_api_json(parent_href)
+
+        # try timing
+        if not data:
+            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Timing/fields/{name}"
+            data = self.try_get_api_json(parent_href)
+
+        if data:
+            self.links["implements"] = data["_links"]["self"]
 
     def _set_target(self, variable: str) -> dict:
         category = self._get_mapping_target_variable_type(variable)

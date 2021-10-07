@@ -15,7 +15,7 @@ http.mount("http://", adapter)
 class LibraryClient:
 
     def __init__(self, api_key):
-        self.base_api_url = "https://library.cdisc.org/api"
+        self.base_api_url = "https://dev.cdisclibrary.org/api"
         self.api_key = api_key
 
     def get_api_json(self, href):
