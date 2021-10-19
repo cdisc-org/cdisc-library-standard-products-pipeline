@@ -118,9 +118,11 @@ class Variable(BaseVariable):
             "name": self.name,
             "label": self.label,
             "simpleDatatype": self.data_type,
-            "core": self.core,
             "ordinal": self.ordinal,
         }
+        
+        if self.core:
+            json_data["core"] = self.core
         
         if self.role:
             json_data["role"] = self.role

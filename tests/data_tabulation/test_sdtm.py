@@ -1,5 +1,6 @@
 import pytest
 from product_types.data_tabulation.sdtm import SDTM
+from product_types.data_tabulation.variable import Variable
 from utilities.config import Config
 from utilities import constants
 from unittest.mock import patch
@@ -9,6 +10,7 @@ from tests.conftest import (
     mock_classes_data,
     mock_products_payload,
     mock_sdtm_summary,
+    mock_sdtm_variable_data,
 )
 
 
@@ -143,3 +145,40 @@ def test_get_described_value_domain(
     is_described_value_domain = sdtm._isdescribedvaluedomain(described_value_domain)
     assert is_described_value_domain == True
     assert expected_output == sdtm._get_described_value_domain(described_value_domain)
+
+def test_get_qualifiesVariables_links(
+    mock_wiki_client,
+    mock_library_client,
+    mock_sdtm_summary,
+    mock_sdtm_variable_data,
+):
+    config = Config({})
+    version = "5-0"
+    sdtm = SDTM(
+        mock_wiki_client,
+        mock_library_client,
+        mock_sdtm_summary,
+        "sdtm",
+        version,
+        config,
+    )
+    variable = Variable(mock_sdtm_variable_data, sdtm)
+    variable.parent_class_name = "Findings"
+    variable.parent_dataset_name = "test"
+    variable.variables_qualified = "var"
+    var1 = Variable(mock_sdtm_variable_data, sdtm)
+    var2 = Variable(mock_sdtm_variable_data, sdtm)
+    var3 = Variable(mock_sdtm_variable_data, sdtm)
+    var4 = Variable(mock_sdtm_variable_data, sdtm)
+    var1.parent_class_name = "Findings"
+    var1.name = "var"
+    var2.parent_class_name = "Interventions"
+    var2.parent_dataset_name = "test"
+    var2.name = "var"
+    var3.parent_dataset_name = "test"
+
+    sdtm._add_qualified_variables_link(variable, [var1, var2, var3, var4])
+    # only var1 should appear in the qualifiesVariables links because it has the same parent_class
+    # var2 should not appear because, though it has the same parent dataset name, its class is in [Interventions, Events, and Findings]
+    # none of the other variables should appear because they are not in the list of variables qualified
+    assert len(variable.links.get("qualifiesVariables", [])) == 1

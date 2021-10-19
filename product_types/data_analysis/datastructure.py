@@ -11,6 +11,7 @@ class Datastructure:
         self.label = self.transformer.cleanup_html_encoding(datastructure_data.get("label"))
         self.description = self.transformer.cleanup_html_encoding(datastructure_data.get("description"))
         self.ordinal = str(datastructure_data.get("ordinal"))
+        self.sub_class = self.transformer.cleanup_html_encoding(datastructure_data.get("subClass", ""))
         self.parent_class_name = self.transformer.cleanup_html_encoding(datastructure_data.get("className"))
         self.varsets = []
         self.links = {
@@ -43,6 +44,9 @@ class Datastructure:
             "label": self.label,
             "ordinal": self.ordinal
         }
+
+        if self.sub_class:
+            json_data["subClass"] = self.sub_class
 
         if self.varsets:
             json_data["analysisVariableSets"] = [varset.to_json() for varset in self.varsets]

@@ -33,7 +33,10 @@ class ADAMIG(ADAM):
 
         # Assign variables to appropriate variable sets
         for variable in variables:
-            parent_varset = self._find_varset(variable.parent_varset_name, variable.parent_datastructure_name, varsets)
+            if len(datastructures) > 1:
+                parent_varset = self._find_varset(variable.parent_varset_name, variable.parent_datastructure_name, varsets)
+            else:
+                parent_varset = self._find_varset(variable.parent_varset_name, datastructures[0].name, varsets)
             if parent_varset:
                 variable.set_parent_varset(parent_varset)
                 parent_varset.add_variable(variable)

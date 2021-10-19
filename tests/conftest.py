@@ -425,6 +425,23 @@ def mock_sdtm_summary():
         },
     }
 
+@pytest.fixture()
+def mock_sdtm_variable_data():
+    return {
+        "Variable Name": "cool_variable",
+        "Variable Label": "cool_label",
+        "Type": "number",
+        "Seq. For Order": 1,
+        "CDISC Notes": "This is the best variable",
+        "Core": "Perm",
+        "Observation Class": "cool_class",
+        "Format": "wingdings",
+        "Usage Restrictions": "plz do not use this variable",
+        "Definition": "the coolest variable",
+        "Examples": ":)",
+        "Notes": "See cdisc notes",
+    }
+
 
 @pytest.fixture()
 def mock_cdash_summary():
