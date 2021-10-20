@@ -48,8 +48,14 @@ class ADAMIG(ADAM):
                 varset_copy.set_parent_datastructure(parent_datastructure)
                 parent_datastructure.add_varset(varset_copy)
                 for variable in varset_copy.variables:
-                    variable.set_parent_datastructure(parent_datastructure)
-                    variable.set_parent_varset(varset_copy)
+                    if (
+                        not parent_datastructure.sub_class
+                        or parent_datastructure.sub_class in variable.subclass_core
+                    ):
+                        variable.set_parent_datastructure(parent_datastructure)
+                        variable.set_parent_varset(varset_copy)
+                    else:
+                        varset_copy.variables.remove(variable)
         
         return datastructures
     
