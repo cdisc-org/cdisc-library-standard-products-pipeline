@@ -29,8 +29,9 @@ class BaseVariable:
             logger.error(f"No prior version found for variable: {self.to_string()}")
     
     def set_value_list(self, value_list_string):
-        value_list = [code for code in re.split(r'[\n|;|,]', value_list_string)]
+        value_list = [code for code in re.split(r'[\n|;|,| or ]', value_list_string)]
         value_list = [value.strip() for value in value_list if len(value) > 0]
+        value_list = list(dict.fromkeys(value_list).keys())
         if value_list:
             self.value_list = value_list
 

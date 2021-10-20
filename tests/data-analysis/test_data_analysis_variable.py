@@ -81,3 +81,23 @@ def test_to_json(mock_library_client,
     assert json_data.get("core") == variable.core
     assert json_data.get("ordinal") == variable.ordinal
     assert json_data.get("description") == variable.description
+
+
+@pytest.mark.parametrize("value_list_string, expected_value_list", [
+    ("Y, N", ["Y", "N"]),
+    ("Y or Y, N", ["Y", "N"])
+])
+def test_set_value_list(mock_library_client, 
+                            mock_wiki_client, 
+                            mock_adamig_summary, 
+                            mock_variable_data,
+                            value_list_string,
+                            expected_value_list):
+    config = Config({
+        constants.DATASTRUCTURES: "12345"
+    })
+    version = "5-0"
+    adamig= ADAMIG(mock_wiki_client, mock_library_client,mock_adamig_summary,"adamig",version, config)
+    variable = Variable(mock_variable_data, adamig)
+    variable.set_value_list(value_list_string)
+    assert variable.value_list == expected_value_list
