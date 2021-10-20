@@ -8,17 +8,15 @@ class Varset:
         self.parent_datastructure = parent_datastructure
         self.parent_product = parent_product
         self.id = varset_data.get("id")
-        self.parent_datastructure_name = self.transformer.cleanup_html_encoding(varset_data.get("parentDatastructure", ""))
+        self.source_parent_datastructure_name = self.transformer.cleanup_html_encoding(varset_data.get("parentDatastructure", ""))
         self.name = self.transformer.cleanup_html_encoding(varset_data.get("name"))
-        self.label = f'{self.parent_datastructure_name} {self.transformer.cleanup_html_encoding(varset_data.get("label"))}'
+        self.source_label = self.transformer.cleanup_html_encoding(varset_data.get("label"))
         self.description = self.transformer.cleanup_html_encoding(varset_data.get("description"))
         self.ordinal = str(varset_data.get("ordinal"))
         self.variables = []
         self.links = {
             "parentProduct": self.parent_product.summary["_links"]["self"],
-            "self": self._build_self_link(),
         }
-        self.validate()
     
     def _build_self_link(self) -> dict:
         name = self.transformer.format_name_for_link(self.name)
@@ -35,7 +33,14 @@ class Varset:
     
     def set_parent_datastructure(self, datastructure):
         self.parent_datastructure = datastructure
+        self.parent_datastructure_name = self.parent_datastructure.name
+        self.label = f'{self.parent_datastructure_name} {self.source_label}'
         self.add_link("parentDatastructure", datastructure.links.get("self"))
+        self.add_link("self", self._build_self_link())
+        prior_version = self.parent_product._get_prior_version(self.links["self"])
+        if prior_version:
+            self.add_link("priorVersion", prior_version)
+        self.validate()
 
     def add_variable(self, variable):
         self.variables.append(variable)

@@ -2,6 +2,7 @@
 from utilities.transformer import Transformer
 from utilities import logger
 from product_types.base_variable import BaseVariable
+from re import compile
 
 class Variable(BaseVariable):
 
@@ -28,6 +29,14 @@ class Variable(BaseVariable):
             "parentProduct": self.parent_product.summary["_links"]["self"],
             "self": self._build_self_link(),
         }
+        subclass_core_regex = compile("^SubClass (.+) Core$")
+        self.subclass_core = {
+            subclass_core_regex.match(key).group(
+                1
+            ): self.transformer.cleanup_html_encoding(value)
+            for key, value in variable_data.items()
+            if subclass_core_regex.match(key)
+        }
         self.validate()
 
     def _build_self_link(self):
@@ -45,6 +54,11 @@ class Variable(BaseVariable):
         self.parent_varset = varset
         self.add_link("parentVarset", varset.links.get("self"))
     
+    def set_parent_datastructure(self, datastructure):
+        self.add_link("parentDatastructure", datastructure.links.get("self"))
+        if datastructure.sub_class:
+            self.core = self.subclass_core[datastructure.sub_class]
+
     def add_link(self, key, link):
         self.links[key] = link
     

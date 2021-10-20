@@ -106,10 +106,11 @@ def test_get_varsets(
     mock_wiki_client,
     mock_library_client,
     mock_adamig_summary,
+    mock_datastructure_data,
     mock_varset_data,
     product_type,
 ):
-    config = Config({constants.VARSETS: "12345"})
+    config = Config({constants.DATASTRUCTURES: "12345", constants.VARSETS: "12345"})
     version = "5-0"
     adamig = ADAMIG(
         mock_wiki_client,
@@ -121,9 +122,12 @@ def test_get_varsets(
     )
     mock_wiki_client.get_wiki_table.return_value = mock_varset_data
     varsets = adamig.get_varsets()
+    mock_wiki_client.get_wiki_table.return_value = mock_datastructure_data
+    datastructures = adamig.get_datastructures()
     varset_names = [c["fields"]["name"] for c in mock_varset_data["list"]["entry"]]
     version_string = product_type + "-" + version
     for varset in varsets:
+        varset.set_parent_datastructure(datastructures[0])
         parent_datastructure = varset.parent_datastructure_name.replace(" ", "")
         assert varset.name in varset_names
         assert (

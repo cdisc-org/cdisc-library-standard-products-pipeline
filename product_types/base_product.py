@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from utilities.transformer import Transformer
 from utilities import logger
 import utilities.constants as constants
+from utilities.doc_sort import doc_sort
 
 class BaseProduct:
     def __init__(self, wiki_client, library_client, summary, product_type, version, config = None):
@@ -131,7 +132,7 @@ class BaseProduct:
         if not output_file:
             output_file = self.summary["name"].replace(" ", "") + ".json"
         with codecs.open(output_file, 'w', encoding='ascii') as f:
-            json.dump(document, f, indent=4, ensure_ascii=False)
+            json.dump(doc_sort(document), f, indent=4, ensure_ascii=False)
         
     def validate_document(self, document: dict):
         pass

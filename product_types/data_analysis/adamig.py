@@ -20,7 +20,7 @@ class ADAMIG(ADAM):
             self.summary["_links"]["model"] = self._build_model_link()
         document = deepcopy(self.summary)
         
-        datastructures, varsets, variables = self.get_metadata()
+        datastructures = self.get_metadata()
         document["dataStructures"] = [datastructure.to_json() for datastructure in datastructures]
         document = self._cleanup_document(document)
         return document
@@ -38,19 +38,20 @@ class ADAMIG(ADAM):
             else:
                 parent_varset = self._find_varset(variable.parent_varset_name, datastructures[0].name, varsets)
             if parent_varset:
-                variable.set_parent_varset(parent_varset)
                 parent_varset.add_variable(variable)
 
         # Assign variable sets to appropriate data structures
         for varset in varsets:
-            parent_datastructure = self._find_datastructure(varset.parent_datastructure_name, datastructures)
-            if parent_datastructure:
-                varset.set_parent_datastructure(parent_datastructure)
-                parent_datastructure.add_varset(varset)
-                for variable in varset.variables:
-                    variable.add_link("parentDatastructure", parent_datastructure.links.get("self"))
+            parent_datastructures = self._find_datastructures(varset.source_parent_datastructure_name, datastructures)
+            for parent_datastructure in parent_datastructures:
+                varset_copy = deepcopy(varset)
+                varset_copy.set_parent_datastructure(parent_datastructure)
+                parent_datastructure.add_varset(varset_copy)
+                for variable in varset_copy.variables:
+                    variable.set_parent_datastructure(parent_datastructure)
+                    variable.set_parent_varset(varset_copy)
         
-        return datastructures, varsets, variables
+        return datastructures
     
     def get_datastructures(self) -> [dict]:
         datastructures = []
@@ -62,6 +63,8 @@ class ADAMIG(ADAM):
             if prior_version:
                 datastructure.add_link("priorVersion", prior_version)
             datastructures.append(datastructure)
+        for datastructure in datastructures:
+            datastructure.add_parent_class_shortname(datastructures)
         logger.info(f"Finished loading {len(datastructures)} datastructures")
         return datastructures
     
@@ -71,9 +74,6 @@ class ADAMIG(ADAM):
         data = self.wiki_client.get_wiki_table(document_id, constants.VARSETS)
         for record in data["list"]["entry"]:
             varset = Varset(record["fields"], self)
-            prior_version = self._get_prior_version(varset.links["self"])
-            if prior_version:
-                varset.add_link("priorVersion", prior_version)
             varsets.append(varset)
         logger.info(f"Finished loading {len(varsets)} Variable sets")
         return varsets
@@ -125,18 +125,26 @@ class ADAMIG(ADAM):
     def _find_varset(self, varset_name: str, datastructure: str, varsets: [Varset]) -> Varset:
         varset_name = self._get_varset_name(varset_name)
         filtered_varsets = [varset for varset in varsets if varset_name == varset.name
-                 and varset.parent_datastructure_name == datastructure]
+                 and varset.source_parent_datastructure_name == datastructure]
         if filtered_varsets:
             return filtered_varsets[0]
         else:
             logger.error(f"Unable to find varset with name {varset_name} and datastructure {datastructure}")
 
-    def _find_datastructure(self, datastructure_id: str, datastructures: [Datastructure]) -> Datastructure:
-        filtered_datastructures = [datastructure for datastructure in datastructures if datastructure_id == datastructure.name \
-            or datastructure_id == datastructure.id]
+    def _find_datastructures(self, datastructure_id: str, datastructures: [Datastructure]) -> Datastructure:
+        filtered_datastructures = [
+            datastructure
+            for datastructure in datastructures
+            if datastructure_id == datastructure.name
+            or datastructure_id == datastructure.id
+            or (
+                datastructure.sub_class
+                and datastructure_id == datastructure.parent_class_shortname
+            )
+        ]
         
         if filtered_datastructures:
-            return filtered_datastructures[0]
+            return filtered_datastructures
         else:
             logger.error(f"Unable to find datastructure with name or id {datastructure_id}")
 
