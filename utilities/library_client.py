@@ -2,7 +2,7 @@ import requests
 import json
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-from functools import cache
+
 retry_strategy = Retry(
     total=3,
     status_forcelist=[429, 502, 503, 504, 408],
@@ -19,7 +19,6 @@ class LibraryClient:
         self.base_api_url = "https://dev.cdisclibrary.org/api"
         self.api_key = api_key
 
-    @cache
     def get_api_json(self, href):
         headers = {
             'Accept': 'application/json',
