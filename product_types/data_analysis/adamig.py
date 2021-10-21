@@ -81,8 +81,6 @@ class ADAMIG(ADAM):
             if prior_version:
                 datastructure.add_link("priorVersion", prior_version)
             datastructures.append(datastructure)
-        for datastructure in datastructures:
-            datastructure.add_parent_class_shortname(datastructures)
         logger.info(f"Finished loading {len(datastructures)} datastructures")
         return datastructures
     

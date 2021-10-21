@@ -56,14 +56,3 @@ class Datastructure:
     def validate(self):
         if not self.label:
             logger.info(f"Datastructure with name: {self.name} is missing a label. This will cause the title in links to this datastructure to be empty.")
-
-    def add_parent_class_shortname(self, other_datastructures):
-        parent_shortnames = [
-            other_datastructure.name
-            for other_datastructure in other_datastructures
-            if self.parent_class_name == other_datastructure.parent_class_name
-            and not other_datastructure.sub_class
-        ]
-        self.parent_class_shortname = (
-            parent_shortnames[0] if len(parent_shortnames) == 1 else self.name
-        )
