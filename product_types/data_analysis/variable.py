@@ -27,7 +27,6 @@ class Variable(BaseVariable):
         self.value_list = None
         self.links = {
             "parentProduct": self.parent_product.summary["_links"]["self"],
-            "self": self._build_self_link(),
         }
         subclass_core_regex = compile("^SubClass (.+) Core$")
         self.subclass_core = {
@@ -55,9 +54,13 @@ class Variable(BaseVariable):
         self.add_link("parentVarset", varset.links.get("self"))
     
     def set_parent_datastructure(self, datastructure):
+        self.parent_datastructure = datastructure
+        self.parent_datastructure_name = self.parent_datastructure.name
         self.add_link("parentDatastructure", datastructure.links.get("self"))
-        if datastructure.sub_class:
-            self.core = self.subclass_core[datastructure.sub_class]
+        self.add_link("self", self._build_self_link())
+        prior_version = self.parent_product._get_prior_version(self.links["self"])
+        if prior_version:
+            self.add_link("priorVersion", prior_version)
 
     def add_link(self, key, link):
         self.links[key] = link

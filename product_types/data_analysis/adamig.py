@@ -38,24 +38,36 @@ class ADAMIG(ADAM):
             else:
                 parent_varset = self._find_varset(variable.parent_varset_name, datastructures[0].name, varsets)
             if parent_varset:
-                parent_varset.add_variable(variable)
+                variable_copy = deepcopy(variable)
+                parent_varset.add_variable(variable_copy)
+            for (sub_class, core) in [
+                (sub_class, core)
+                for (sub_class, core) in variable.subclass_core.items()
+                if core
+            ]:
+                parent_varset = self._find_subclass_varset(
+                    variable.parent_varset_name,
+                    variable.parent_datastructure_name,
+                    varsets,
+                    datastructures,
+                    sub_class,
+                )
+                if parent_varset:
+                    variable_copy = deepcopy(variable)
+                    variable_copy.core = core
+                    parent_varset.add_variable(variable_copy)
 
         # Assign variable sets to appropriate data structures
         for varset in varsets:
-            parent_datastructures = self._find_datastructures(varset.source_parent_datastructure_name, datastructures)
-            for parent_datastructure in parent_datastructures:
-                varset_copy = deepcopy(varset)
-                varset_copy.set_parent_datastructure(parent_datastructure)
-                parent_datastructure.add_varset(varset_copy)
-                for variable in varset_copy.variables:
-                    if (
-                        not parent_datastructure.sub_class
-                        or parent_datastructure.sub_class in variable.subclass_core
-                    ):
-                        variable.set_parent_datastructure(parent_datastructure)
-                        variable.set_parent_varset(varset_copy)
-                    else:
-                        varset_copy.variables.remove(variable)
+            parent_datastructure = self._find_datastructure(
+                varset.parent_datastructure_name, datastructures
+            )
+            if parent_datastructure:
+                varset.set_parent_datastructure(parent_datastructure)
+                parent_datastructure.add_varset(varset)
+                for variable in varset.variables:
+                    variable.set_parent_datastructure(parent_datastructure)
+                    variable.set_parent_varset(varset)
         
         return datastructures
     
@@ -113,9 +125,6 @@ class ADAMIG(ADAM):
 
     def _build_variable(self, variable_data: dict) -> dict:
         variable = Variable(variable_data, self)
-        prior_version = self._get_prior_version(variable.links["self"])
-        if prior_version:
-            variable.add_link("priorVersion", prior_version)
         if self._iscodelist(variable.codelist):
             codelist_links = self._get_codelist_links(variable.codelist)
             if codelist_links:
@@ -131,28 +140,67 @@ class ADAMIG(ADAM):
     def _find_varset(self, varset_name: str, datastructure: str, varsets: [Varset]) -> Varset:
         varset_name = self._get_varset_name(varset_name)
         filtered_varsets = [varset for varset in varsets if varset_name == varset.name
-                 and varset.source_parent_datastructure_name == datastructure]
+                 and varset.parent_datastructure_name == datastructure]
         if filtered_varsets:
             return filtered_varsets[0]
         else:
             logger.error(f"Unable to find varset with name {varset_name} and datastructure {datastructure}")
 
-    def _find_datastructures(self, datastructure_id: str, datastructures: [Datastructure]) -> Datastructure:
+    def _find_subclass_varset(
+        self,
+        varset_name: str,
+        parent_class: str,
+        varsets: [Varset],
+        datastructures: [Datastructure],
+        sub_class: str,
+    ) -> Varset:
+        varset_name = self._get_varset_name(varset_name)
+        sub_class_short_name = [
+            datastructure.name
+            for datastructure in datastructures
+            if datastructure.sub_class == sub_class
+        ][0]
+        filtered_varsets = [
+            varset
+            for varset in varsets
+            if varset_name == varset.name
+            and varset.parent_datastructure_name == sub_class_short_name
+        ]
+        if filtered_varsets:
+            return filtered_varsets[0]
+        filtered_varsets = [
+            varset
+            for varset in varsets
+            if varset_name == varset.name
+            and varset.parent_datastructure_name == parent_class
+        ]
+        if filtered_varsets:
+            varset_copy = deepcopy(filtered_varsets[0])
+            varset_copy.parent_datastructure_name = sub_class_short_name
+            varset_copy.variables = []
+            varsets += [varset_copy]
+            return varset_copy
+        else:
+            logger.error(
+                f"Unable to find varset with name {varset_name} and datastructure {parent_class}"
+            )
+
+    def _find_datastructure(
+        self, datastructure_id: str, datastructures: [Datastructure]
+    ) -> Datastructure:
         filtered_datastructures = [
             datastructure
             for datastructure in datastructures
             if datastructure_id == datastructure.name
             or datastructure_id == datastructure.id
-            or (
-                datastructure.sub_class
-                and datastructure_id == datastructure.parent_class_shortname
-            )
         ]
-        
+
         if filtered_datastructures:
-            return filtered_datastructures
+            return filtered_datastructures[0]
         else:
-            logger.error(f"Unable to find datastructure with name or id {datastructure_id}")
+            logger.error(
+                f"Unable to find datastructure with name or id {datastructure_id}"
+            )
 
     def _cleanup_document(self, document: dict) -> dict:
         for datastructure in document.get("dataStructures", []):
