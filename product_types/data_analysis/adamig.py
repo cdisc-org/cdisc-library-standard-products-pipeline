@@ -69,6 +69,38 @@ class ADAMIG(ADAM):
                     variable.set_parent_datastructure(parent_datastructure)
                     variable.set_parent_varset(varset)
         
+        # Add parent class links
+        for datastructure in datastructures:
+            if datastructure.sub_class:
+                parent_class_datastructure = self._find_parent_class_datastructure(
+                    datastructure.parent_class_name, datastructures
+                )
+                if parent_class_datastructure:
+                    datastructure.add_link(
+                        "parentClassDatastructure",
+                        deepcopy(parent_class_datastructure.links["self"]),
+                    )
+                    for varset in datastructure.varsets:
+                        parent_class_varset = self._find_parent_class_varset(
+                            varset.name, parent_class_datastructure.varsets
+                        )
+                        if parent_class_varset:
+                            varset.add_link(
+                                "parentClassVarset",
+                                deepcopy(parent_class_varset.links["self"]),
+                            )
+                            for variable in varset.variables:
+                                parent_class_variable = (
+                                    self._find_parent_class_variable(
+                                        variable.name, parent_class_varset.variables
+                                    )
+                                )
+                                if parent_class_variable:
+                                    variable.add_link(
+                                        "parentClassVariable",
+                                        deepcopy(parent_class_variable.links["self"]),
+                                    )
+
         return datastructures
     
     def get_datastructures(self) -> [dict]:
@@ -198,6 +230,55 @@ class ADAMIG(ADAM):
         else:
             logger.error(
                 f"Unable to find datastructure with name or id {datastructure_id}"
+            )
+
+    def _find_parent_class_datastructure(
+        self, parent_class: str, datastructures: [Datastructure]
+    ) -> Datastructure:
+        filtered_datastructures = [
+            datastructure
+            for datastructure in datastructures
+            if parent_class == datastructure.parent_class_name
+            and not datastructure.sub_class
+        ]
+
+        if len(filtered_datastructures) == 1:
+            return filtered_datastructures[0]
+        else:
+            logger.error(
+                f"Unable to find single parent class datastructure with class name {parent_class}"
+            )
+
+    def _find_parent_class_varset(
+        self, varset_name: str, varsets: [Varset]
+    ) -> Varset:
+        filtered_varsets = [
+            varset
+            for varset in varsets
+            if varset_name == varset.name
+        ]
+
+        if len(filtered_varsets) == 1:
+            return filtered_varsets[0]
+        else:
+            logger.error(
+                f"Unable to find single parent class varset with varset name {varset_name}"
+            )
+
+    def _find_parent_class_variable(
+        self, variable_name: str, variables: [Variable]
+    ) -> Variable:
+        filtered_variables = [
+            variable
+            for variable in variables
+            if variable_name == variable.name
+        ]
+
+        if len(filtered_variables) == 1:
+            return filtered_variables[0]
+        else:
+            logger.error(
+                f"Unable to find single parent class variable with variable name {variable_name}"
             )
 
     def _cleanup_document(self, document: dict) -> dict:
