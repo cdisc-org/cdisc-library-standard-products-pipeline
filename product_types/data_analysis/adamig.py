@@ -70,39 +70,10 @@ class ADAMIG(ADAM):
                     variable.set_parent_varset(varset)
         
         # Add parent class links
-        for datastructure in datastructures:
-            if datastructure.sub_class:
-                parent_class_datastructure = self._find_parent_class_datastructure(
-                    datastructure.parent_class_name, datastructures
-                )
-                if parent_class_datastructure:
-                    datastructure.add_link(
-                        "parentClassDatastructure",
-                        deepcopy(parent_class_datastructure.links["self"]),
-                    )
-                    for varset in datastructure.varsets:
-                        parent_class_varset = self._find_parent_class_varset(
-                            varset.name, parent_class_datastructure.varsets
-                        )
-                        if parent_class_varset:
-                            varset.add_link(
-                                "parentClassVarset",
-                                deepcopy(parent_class_varset.links["self"]),
-                            )
-                            for variable in varset.variables:
-                                parent_class_variable = (
-                                    self._find_parent_class_variable(
-                                        variable.name, parent_class_varset.variables
-                                    )
-                                )
-                                if parent_class_variable:
-                                    variable.add_link(
-                                        "parentClassVariable",
-                                        deepcopy(parent_class_variable.links["self"]),
-                                    )
+        self._add_parent_class_datastructure_links(datastructures)
 
         return datastructures
-    
+
     def get_datastructures(self) -> [dict]:
         datastructures = []
         document_id = self.config.get(constants.DATASTRUCTURES)
@@ -280,6 +251,44 @@ class ADAMIG(ADAM):
             logger.error(
                 f"Unable to find single parent class variable with variable name {variable_name}"
             )
+
+    def _add_parent_class_datastructure_links(self, datastructures: [Datastructure]) -> None:
+        for datastructure in datastructures:
+            if datastructure.sub_class:
+                parent_class_datastructure = self._find_parent_class_datastructure(
+                    datastructure.parent_class_name, datastructures
+                )
+                if parent_class_datastructure:
+                    datastructure.add_link(
+                        "parentClassDatastructure",
+                        deepcopy(parent_class_datastructure.links["self"]),
+                    )
+                    self._add_parent_class_varset_links(datastructure.varsets, parent_class_datastructure.varsets)
+
+    def _add_parent_class_varset_links(self, varsets: [Varset], parent_class_varsets: [Varset]) -> None:
+        for varset in varsets:
+            parent_class_varset = self._find_parent_class_varset(
+                varset.name, parent_class_varsets
+            )
+            if parent_class_varset:
+                varset.add_link(
+                    "parentClassVarset",
+                    deepcopy(parent_class_varset.links["self"]),
+                )
+                self._add_parent_class_variable_links(varset.variables, parent_class_varset.variables)
+    
+    def _add_parent_class_variable_links(self, variables: [Variable], parent_class_variables: [Variable]) -> None:
+        for variable in variables:
+            parent_class_variable = (
+                self._find_parent_class_variable(
+                    variable.name, parent_class_variables
+                )
+            )
+            if parent_class_variable:
+                variable.add_link(
+                    "parentClassVariable",
+                    deepcopy(parent_class_variable.links["self"]),
+                )
 
     def _cleanup_document(self, document: dict) -> dict:
         for datastructure in document.get("dataStructures", []):
