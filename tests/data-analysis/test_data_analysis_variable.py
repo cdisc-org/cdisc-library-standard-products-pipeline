@@ -1,4 +1,6 @@
 import pytest
+from product_types.data_analysis.varset import Varset
+from product_types.data_analysis.datastructure import Datastructure
 from product_types.data_analysis.variable import Variable
 from product_types.data_analysis.adamig import ADAMIG
 from utilities.config import Config
@@ -19,16 +21,28 @@ def mock_variable_data():
         "Variable Grouping": "best_varset"
     }
 
+@pytest.fixture()
+def mock_datastructure_data():
+    return {
+        "name": "cool_class",
+        "label": "cool_label",
+        "description": "this is actually the best datastructure",
+        "ordinal": 1
+    }
+
 def test_variable_creation(mock_library_client, 
                             mock_wiki_client, 
                             mock_adamig_summary, 
-                            mock_variable_data):
+                            mock_variable_data,
+                            mock_datastructure_data):
     config = Config({
         constants.DATASTRUCTURES: "12345"
     })
     version = "5-0"
     adamig= ADAMIG(mock_wiki_client, mock_library_client,mock_adamig_summary,"adamig",version, config)
     variable = Variable(mock_variable_data, adamig)
+    datastructure = Datastructure(mock_datastructure_data, adamig)
+    variable.set_parent_datastructure(datastructure)
     assert variable.name == mock_variable_data.get("Variable Name")
     assert variable.label == mock_variable_data.get("Variable Label")
     assert variable.data_type == mock_variable_data.get("Type")
@@ -43,15 +57,19 @@ def test_variable_creation(mock_library_client,
 def test_variable_creation_with_invalid_link_characters(mock_library_client, 
                             mock_wiki_client, 
                             mock_adamig_summary, 
-                            mock_variable_data):
+                            mock_variable_data,
+                            mock_datastructure_data):
     config = Config({
         constants.DATASTRUCTURES: "12345"
     })
     version = "5-0"
     adamig= ADAMIG(mock_wiki_client, mock_library_client,mock_adamig_summary,"adamig",version, config)
+    mock_datastructure_data["name"] = "cool class"
+    datastructure = Datastructure(mock_datastructure_data, adamig)
     mock_variable_data["Variable Name"] = "cool variable"
     mock_variable_data["Class"] = "cool class"
     variable = Variable(mock_variable_data, adamig)
+    variable.set_parent_datastructure(datastructure)
     assert variable.name == mock_variable_data.get("Variable Name")
     assert variable.label == mock_variable_data.get("Variable Label")
     assert variable.data_type == mock_variable_data.get("Type")
