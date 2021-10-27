@@ -272,7 +272,7 @@ class ADAMIG(ADAM):
             )
             if parent_class_varset:
                 varset.add_link(
-                    "parentClassVarset",
+                    "parentClassVariableSet",
                     deepcopy(parent_class_varset.links["self"]),
                 )
                 self._add_parent_class_variable_links(varset.variables, parent_class_varset.variables)
