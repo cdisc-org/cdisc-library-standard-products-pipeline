@@ -178,8 +178,6 @@ class SDTM(BaseProduct):
         """
         variable = Variable(variable_data, self)
 
-        if not self.is_ig:
-            variable.set_role_description()
         variable.set_prior_version()
         return variable
     

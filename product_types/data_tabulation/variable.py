@@ -29,7 +29,6 @@ class Variable(BaseVariable):
         self.examples = variable_data.get("Examples")
         self.notes = variable_data.get("Notes")
         self.variables_qualified = variable_data.get("Variable(s) Qualified")
-        self.role_description = None
         self.value_list = None
         self.links = {
             "parentProduct": self.parent_product.summary["_links"]["self"],
@@ -85,9 +84,6 @@ class Variable(BaseVariable):
         except Exception as e:
             pass
     
-    def set_role_description(self):
-      self.role_description = self.role
-    
     def add_link(self, key, link):
         self.links[key] = link
     
@@ -126,8 +122,6 @@ class Variable(BaseVariable):
         
         if self.role:
             json_data["role"] = self.role
-        if self.role_description:
-            json_data["roleDescription"] = self.role_description
         if self.description:
             json_data["description"] = self.description
         if self.notes:
