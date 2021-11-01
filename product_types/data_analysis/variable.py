@@ -51,7 +51,7 @@ class Variable(BaseVariable):
     
     def set_parent_varset(self, varset):
         self.parent_varset = varset
-        self.add_link("parentVarset", varset.links.get("self"))
+        self.add_link("parentVariableSet", varset.links.get("self"))
     
     def set_parent_datastructure(self, datastructure):
         self.parent_datastructure = datastructure
