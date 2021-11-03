@@ -19,6 +19,8 @@ class WikiClient:
     def get_json(self, url):
         raw_data = requests.get(url, auth=(self.username, self.password))
         if raw_data.status_code == 200:
+            if not raw_data.encoding:
+                raw_data.encoding = 'UTF-8'
             return json.loads(raw_data.text)
         else:
             raise Exception(f"Get request to {url} returned unsuccessful response {raw_data.status_code}")
