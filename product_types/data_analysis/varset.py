@@ -9,7 +9,7 @@ class Varset:
         self.parent_product = parent_product
         self.id = varset_data.get("id")
         self.parent_datastructure_name = self.transformer.cleanup_html_encoding(varset_data.get("parentDatastructure", ""))
-        self.name = self.transformer.cleanup_html_encoding(varset_data.get("name"))
+        self.name = self.transformer.cleanup_html_encoding(varset_data.get("name")).replace("Variables", "")
         self.source_label = self.transformer.cleanup_html_encoding(varset_data.get("label"))
         self.description = self.transformer.cleanup_html_encoding(varset_data.get("description"))
         self.ordinal = str(varset_data.get("ordinal"))

@@ -70,7 +70,7 @@ class ProductFactory:
         if summary.get("priorVersion"):
             summary["_links"]["priorVersion"] = {
                 "href": prior_version_href,
-                "title": summary["label"].replace(str(summary["version"]), str(summary["priorVersion"])),
+                "title": summary["label"].replace(str(summary["version"]).replace("-", "."), str(summary["priorVersion"]).replace("-", ".")),
                 "type": type_label
             }
             del summary["priorVersion"]

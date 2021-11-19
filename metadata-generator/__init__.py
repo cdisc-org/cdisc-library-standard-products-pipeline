@@ -35,5 +35,5 @@ def main(config: dict) -> str:
     product.validate_document(product_document)
     file_name = f"{product_document.get('name', 'untitled').lower().replace(' ', '-').replace('.', '-')}.json" 
     blob = BlobClient.from_connection_string(conn_str=azure_connection_string, container_name="generated-json", blob_name=file_name)
-    blob.upload_blob(json.dumps(product_document), overwrite=True)
+    blob.upload_blob(json.dumps(product_document, indent=4), overwrite=True)
     return file_name
