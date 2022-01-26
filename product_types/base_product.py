@@ -270,7 +270,10 @@ class BaseProduct:
         }
 
     def _iscodelist(self, codelist: str) -> bool:
-        return codelist.startswith("(") and "nullflavor" not in codelist.lower()
+        if codelist:
+            return codelist.startswith("(") and "nullflavor" not in codelist.lower()
+        else:
+            return False
 
     def _isdescribedvaluedomain(self, described_value_domain: str) -> bool:
         domain_map = {

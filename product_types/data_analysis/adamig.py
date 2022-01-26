@@ -119,7 +119,7 @@ class ADAMIG(ADAM):
         for datastructure in document["dataStructures"]:
             self._validate_links(datastructure)
             for varset in datastructure.get("analysisVariableSet", []):
-                self._validate_links(dataset)
+                self._validate_links(varset)
                 for variable in varset.get("analysisVariables", []):
                     self._validate_links(variable)
         logger.info("Finished validating document")
