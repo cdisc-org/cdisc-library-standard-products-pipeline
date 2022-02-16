@@ -129,7 +129,7 @@ class ADAMIG(ADAM):
         if self._iscodelist(variable.codelist):
             codelist_links = self._get_codelist_links(variable.codelist)
             if codelist_links:
-                variable.add_link("codelist", codelist_links[0])
+                variable.add_link("codelist", codelist_links)
         else:
             if self._isdescribedvaluedomain(variable.codelist or variable.controlled_terms):
                 variable.set_described_value_domain(variable.codelist or variable.controlled_terms)

@@ -2,7 +2,7 @@ import pytest
 from product_types.data_analysis.datastructure import Datastructure
 from product_types.data_analysis.adamig import ADAMIG
 from utilities.config import Config
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from utilities import constants
 from tests.conftest import mock_library_client, mock_wiki_client, mock_adamig_summary
 
@@ -74,3 +74,21 @@ def test_to_json(mock_library_client,
     assert json_data.get("name") == datastructure.name
     assert json_data.get("ordinal") == datastructure.ordinal
     assert json_data.get("label") == datastructure.label
+
+
+# From PBI 3003 conversion from single values to list values    
+def test_codelist_creation(mock_library_client, 
+                            mock_wiki_client, 
+                            mock_adamig_summary, 
+                            mock_adam_variable_data):
+    config = Config({
+        constants.DATASTRUCTURES: "12345"
+    })
+    version = "5-0"
+    adamig= ADAMIG(mock_wiki_client, mock_library_client,mock_adamig_summary,"adamig",version, config)
+    mock = Mock(return_value=("latest","C66769"))
+    adamig._get_concept_data = mock
+    adam_variable = adamig._build_variable(mock_adam_variable_data)
+    assert isinstance(adam_variable.links['codelist'],list)
+    for codelist in adam_variable.links['codelist']:
+        assert codelist['href'].endswith('C66769')

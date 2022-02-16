@@ -30,12 +30,16 @@ Pipeline for generating CDISC library json from the wiki for the following produ
 
 The pipeline requires the location of the expected wiki content be defined in 1 of 2 ways. 
 
-1. Through a config file mapping expected metadata tables to a wiki document id:
+ex: https://wiki.cdisc.org/display/~nhaydel/ADaM+OCCDS+1.1+Metadata
+Page Information from the ... on the top-right of the page
+https://wiki.cdisc.org/pages/viewinfo.action?pageId=118327784
+
+1. Through a config file mapping expected metadata tables to a wiki document id (pageId=):
     ```
     {
         "summary": "11111111",
         "classMetadata": "11111111",
-        "domainsMetadata": "11111111"
+        "domainsMetadata": "11111111",
         "datasetMetadata": "11111111",
         "datastructures": "11111111",
         "variableSets": "11111111",
@@ -63,6 +67,7 @@ Once the config or environment variables are set up, the pipeline can be run usi
 
 `python .\parse_document.py -u '<confluence_username>' -p '<confluence_password>' -a '<api_key>' -l '<log_level>' -i`
 
+ex: `python .\parse_document.py -c config -l 'info' -i -o log.txt`
 
 ##### Tests
 

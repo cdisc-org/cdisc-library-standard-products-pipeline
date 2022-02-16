@@ -23,7 +23,7 @@ class Config:
             raise KeyError(f"Key {key} does not exist in config data")
 
     def add(self, key, value):
-        """ Add a new key value pair to the conig. """
+        """ Add a new key value pair to the config. """
         self.config_data[key] = value
 
     @staticmethod
