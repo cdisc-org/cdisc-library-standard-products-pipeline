@@ -55,7 +55,7 @@ class WikiClient:
                 "storage": post_value
             }
         }
-        self.put_json(document_url, json.dumps(post_data))
+        self.put_json(document_url, json.dumps(post_data, indent=4, sort_keys=True))
         return self.spec_doc_id
     
     def _get_spec_grabber_targets(self, product_type, version):

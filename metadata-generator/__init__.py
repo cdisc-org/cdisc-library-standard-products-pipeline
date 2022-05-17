@@ -1,15 +1,14 @@
 import os
 import sys
 import logging
-import json
 import azure.functions as func
-from azure.storage.blob import BlobClient
 
 sys.path.append(os.path.abspath(""))
 from product_types.product_factory import ProductFactory
 from utilities.config import Config
 from utilities import logger
 import utilities.constants as constants
+from utilities.blob_helper import BlobHelper
 
 def main(config: dict) -> str:
     # setup logging
@@ -23,7 +22,6 @@ def main(config: dict) -> str:
     username = os.environ.get(constants.CONFLUENCE_USERNAME)
     password = os.environ.get(constants.CONFLUENCE_PASSWORD)
     api_key = os.environ.get(constants.LIBRARY_API_KEY)
-    azure_connection_string = os.environ.get(constants.AZURE_CONNECTION_STRING)
 
     # generate json
     Config.validate_config_data(config)
@@ -34,6 +32,9 @@ def main(config: dict) -> str:
     product_document = product.generate_document()
     product.validate_document(product_document)
     file_name = f"{product_document.get('name', 'untitled').lower().replace(' ', '-').replace('.', '-')}.json" 
-    blob = BlobClient.from_connection_string(conn_str=azure_connection_string, container_name="generated-json", blob_name=file_name)
-    blob.upload_blob(json.dumps(product_document, indent=4), overwrite=True)
+    BlobHelper.upload_json(
+        product_document=product_document,
+        container_name="generated-json",
+        blob_name=file_name,
+    )
     return file_name
