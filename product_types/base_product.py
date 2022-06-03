@@ -212,27 +212,17 @@ class BaseProduct:
                 continue
         return codelist_mapping
     
-    def _get_codelist_links(self, codelist: str) -> [dict]:
-        if not codelist or not codelist.startswith("("):
-            return None
-        codelist_input = self._parse_codelist_input(codelist)
+    def _get_codelist_links(self, submission_values: [str]) -> [dict]:
         codelists = []
-        for ct in codelist_input:
-            ct = ct.strip()
-            # remove parenthesis
-            ct = ct.replace("(", "").replace(")", "")
-            codelist_type, concept_id = self._get_concept_data(ct)
+        for value in submission_values:
+            codelist_type, concept_id = self._get_concept_data(value)
             if concept_id:
                 codelists.append(self._build_codelist_link(codelist_type, concept_id))
         return codelists
     
-    def _parse_codelist_input(self, codelist: str) -> [str]:
-        codelists = []
-        input_data = [ct for ct in re.split(r'[\n|;|\\n|or]', codelist) if ct]
-        for ct in input_data:
-            submission_values = re.findall("\((.*?)\)", ct)
-            codelists += submission_values
-        return codelists
+    def parse_submission_values(self, codelist: str) -> [str]:
+        input_values = [ct.strip() for ct in re.split(r'[\n|;|\\n|or]', codelist) if ct]
+        return [value.replace('(', "").replace(")", "") for value in input_values if value]
 
     def _get_described_value_domain(self, codelist: str) -> str:
         described_value_domain_mapping = {

@@ -271,6 +271,9 @@ class Variable(BaseVariable):
             "definition": self.definition,
         }
 
+        if self.submission_values:
+            json_data["submission_values"] = self.submission_values
+
         if self.parent_product.is_ig:
             json_data["completionInstructions"] = self.completion_instructions
         if self.core:

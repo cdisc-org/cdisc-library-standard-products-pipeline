@@ -11,6 +11,7 @@ class BaseVariable:
         self.value_list = None
         self.links = {}
         self.name = None
+        self.submission_values = []
     
     def set_prior_version(self) -> dict:
         root_link = self.links.get("rootItem")
@@ -39,10 +40,16 @@ class BaseVariable:
     def set_described_value_domain(self, described_value_domain):
         self.described_value_domain = self.parent_product._get_described_value_domain(described_value_domain)
 
-    def add_codelist_links(self, codelist):
-        codelists = self.parent_product._get_codelist_links(codelist)
+    def add_codelist_links(self, submission_values: [str]):
+        codelists = self.parent_product._get_codelist_links(submission_values)
         if codelists:
             self.links.setdefault("codelist", []).extend(codelists)
     
+    def add_submission_values(self, values: [str]):
+        """
+        Converts a string into list of submission values
+        """
+        self.submission_values = self.submission_values + values
+
     def to_string(self):
         return self.name

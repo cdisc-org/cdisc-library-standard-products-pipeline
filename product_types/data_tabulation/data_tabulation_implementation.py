@@ -1,4 +1,6 @@
+
 from product_types.data_tabulation.sdtm import SDTM
+from product_types.data_tabulation.variable import Variable
 from copy import deepcopy
 from utilities import logger
 import re
@@ -30,9 +32,11 @@ class DataTabulationImplementation(SDTM):
         logger.info("Finished validating document")
 
     def _build_variable(self, variable_data: dict) -> dict:
-        variable = super()._build_variable(variable_data)
+        variable: Variable = super()._build_variable(variable_data)
         if self._iscodelist(variable.codelist) and variable.codelist != "N/A":
-            variable.add_codelist_links(variable.codelist)
+            submission_values = self.parse_submission_values(variable.codelist)
+            variable.add_codelist_links(submission_values)
+            variable.add_submission_values(submission_values)
         elif self._isdescribedvaluedomain(variable.codelist) and variable.codelist != "N/A":
             variable.set_described_value_domain(variable.codelist)
         elif variable.codelist and variable.codelist != "N/A":

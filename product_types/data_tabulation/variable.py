@@ -116,6 +116,9 @@ class Variable(BaseVariable):
             "simpleDatatype": self.data_type,
             "ordinal": self.ordinal,
         }
+
+        if self.submission_values:
+            json_data["submission_values"] = self.submission_values
         
         if self.core:
             json_data["core"] = self.core

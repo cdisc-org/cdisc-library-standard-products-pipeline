@@ -107,14 +107,18 @@ class CDASH(BaseProduct):
                 parent_scenario = self._find_scenario(row, scenarios)
                 variable = Variable(row, self, parent_scenario=parent_scenario)
                 if self._iscodelist(variable.codelist) and variable.codelist != "N/A":
-                    variable.add_codelist_links(variable.codelist)
+                    submission_values = self.parse_submission_values(variable.codelist)
+                    variable.add_codelist_links(submission_values)
+                    variable.add_submission_values(submission_values)
                 elif self._isdescribedvaluedomain(variable.codelist) and variable.codelist != "N/A":
                     variable.set_described_value_domain(variable.codelist)
                 elif variable.codelist and variable.codelist != "N/A":
                     # The provided codelist is a value list
                     variable.set_value_list(variable.codelist)
                 if variable.subset_codelist != "N/A":
-                    variable.add_codelist_links(variable.subset_codelist)
+                    submission_values = self.parse_submission_values(variable.subset_codelist)
+                    variable.add_codelist_links(submission_values)
+                    variable.add_submission_values(submission_values)
                 variable.build_mapping_target_links()
                 variable.set_prior_version()
                 variable.validate()
