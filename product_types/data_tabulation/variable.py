@@ -118,7 +118,7 @@ class Variable(BaseVariable):
         }
 
         if self.submission_values:
-            json_data["submission_values"] = self.submission_values
+            json_data["submissionValues"] = self.submission_values
         
         if self.core:
             json_data["core"] = self.core
