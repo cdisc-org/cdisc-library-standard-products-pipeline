@@ -7,6 +7,13 @@ class Transformer:
     def __init__(self, config = None):
         self.config = config
     
+    def get_raw_text(self, string: str):
+        characters_to_remove = ["\n", "\\n", "\r", "\\r"]
+        result = self.cleanup_html_encoding(string)
+        for char in characters_to_remove:
+            result = self.remove_str(result, char)
+        return result
+
     def format_name_for_link(self, name: str, chars_to_remove = None) -> str:
         if not name:
             return None

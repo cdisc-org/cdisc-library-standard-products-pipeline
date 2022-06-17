@@ -12,7 +12,7 @@ class Variable(BaseVariable):
         self.parent_varset = parent_varset
         self.parent_datastructure = parent_datastructure
         self.name = self.transformer.cleanup_html_encoding(variable_data.get("Variable Name")).strip()
-        self.label = self.transformer.cleanup_html_encoding(variable_data.get("Variable Label")).strip()
+        self.label = self.transformer.get_raw_text(variable_data.get("Variable Label")).strip()
         self.data_type =self.transformer.cleanup_html_encoding(variable_data.get("Type")).strip()
         self.ordinal = str(self.transformer.cleanup_html_encoding(variable_data.get("Seq. for Order"))).strip()
         self.description = self.transformer.cleanup_html_encoding(variable_data.get("CDISC Notes")).strip()

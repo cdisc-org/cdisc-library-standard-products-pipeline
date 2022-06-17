@@ -12,7 +12,7 @@ class Variable(BaseVariable):
         self.parent_dataset = parent_dataset
         self.name = variable_data.get("Variable Name", "").strip()
         self.name_no_prefix = variable_data.get("Variable Name (no prefix)")
-        self.label = variable_data.get("Variable Label")
+        self.label = self.transformer.get_raw_text(variable_data.get("Variable Label"))
         self.data_type = variable_data.get("Type")
         self.id = variable_data.get("id")
         self.ordinal = str(variable_data.get("Seq. for Order", "-1"))

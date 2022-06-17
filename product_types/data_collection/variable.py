@@ -12,7 +12,7 @@ class Variable(BaseVariable):
         self.parent_domain = parent_domain
         self.parent_scenario = parent_scenario
         self.name = variable_data.get(f"{self.product_type.upper()} Variable", "").strip()
-        self.label = variable_data.get(f"{self.product_type.upper()} Variable Label")
+        self.label = self.transformer.get_raw_text(variable_data.get(f"{self.product_type.upper()} Variable Label"))
         self.data_type = variable_data.get("Data Type")
         self.ordinal = str(variable_data.get("Order Number"))
         self.completion_instructions = variable_data.get("Case Report Form Completion Instructions")
