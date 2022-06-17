@@ -8,6 +8,8 @@ class Transformer:
         self.config = config
     
     def get_raw_text(self, string: str):
+        if not string:
+            return ""
         characters_to_remove = ["\n", "\\n", "\r", "\\r"]
         result = self.cleanup_html_encoding(string)
         for char in characters_to_remove:
