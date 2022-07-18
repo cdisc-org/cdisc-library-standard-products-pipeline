@@ -4,7 +4,7 @@ from utilities import logger
 
 class WikiClient:
     
-    def __init__(self, username: str, password: str, spec_doc_id: str):
+    def __init__(self, username: str, password: str, spec_doc_id: str = None):
         self.username = username
         self.password = password
         self.spec_doc_id = spec_doc_id
@@ -13,8 +13,18 @@ class WikiClient:
             "summary": "35f2235a-e526-4b40-ad26-8161cd9defd7"
         }
 
-    def get_wiki_json(self, document_id, doc_format = "view"):
-        return self.get_json(self.content_api_base_url+f"{document_id}?expand=body.{doc_format}")
+    def get_wiki_json(self, document_id, doc_format = "view", path = ""):
+        return self.get_json(self.content_api_base_url+f"{document_id}{path}?expand=body.{doc_format}")
+
+    def get_page_labels(self, document_id):
+        return self.get_json(self.content_api_base_url+f"{document_id}/label")
+
+    def get_html(self, url):
+        raw_data = requests.get(url, auth=(self.username, self.password))
+        if raw_data.status_code == 200:
+            return raw_data.text
+        else:
+            raise Exception(f"Get request to {url} returned unsuccessful response {raw_data.status_code}")
     
     def get_json(self, url):
         raw_data = requests.get(url, auth=(self.username, self.password))

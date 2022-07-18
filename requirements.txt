@@ -5,7 +5,10 @@ beautifulsoup4==4.8.1
 pytest==6.2.1
 azure-functions
 azure-functions-durable
-azure-core==1.10.0
+azure-core==1.24.1
 aiohttp==3.6.2
 aiohttp-retry==1.0
 azure-storage-blob==12.3.1
+azure-cosmos ==4.3.0
+python-dotenv
+markdownify
