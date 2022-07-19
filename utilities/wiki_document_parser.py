@@ -35,7 +35,7 @@ class Parser:
             children = self._get_page_children(page_data["id"])
             html = page_data["body"]["view"]["value"]
             markdown_data = self._html_to_markdown(html)
-            parsed_html = markdown(markdown_data)
+            parsed_html = self._parse_html(html)
             labels = self._get_labels(page_data["id"])
             sections = [section.split("-")[1] for section in labels if section.startswith("section-")]
             domains = [domain.split("-")[1].upper() for domain in labels if domain.startswith("domain-")]
@@ -76,6 +76,17 @@ class Parser:
 
     def _html_to_markdown(self, html_data):
         return markdownify(str(html_data), strip=['a'])
+    
+    def _parse_html(self, html) -> str:
+        parser = BeautifulSoup(html, 'html.parser')
+        for div in parser.find_all("div", {'class':'expand-control'}): 
+            div.decompose()
+        for div in parser.find_all("div", {'class':'confluence-embedded-file-wrapper'}): 
+            div.decompose()
+        if parser.a:
+            parser.a.extract()
+        return parser.decode()
+        
 
     def _get_markdown_from_html(self, html):
         parser = BeautifulSoup(html, 'html.parser')
