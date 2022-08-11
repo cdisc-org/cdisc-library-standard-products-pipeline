@@ -169,7 +169,7 @@ def test_get_variable_codelists(
         variables[0].links["codelist"][1]["href"]
         == "/mdr/root/ct/cdashct/codelists/C78419"
     )
-    assert(variables[0].submission_values == ["FREQ", "CMDOSFRQ"])
+    assert(variables[0].codelist_submission_values == ["FREQ", "CMDOSFRQ"])
     # DSDECOD - 2 sdtm codelists
     assert len(variables[1].links["codelist"]) == 2
     # DSDECOD - Codelist - PROTMLST
@@ -182,7 +182,7 @@ def test_get_variable_codelists(
         variables[1].links["codelist"][1]["href"]
         == "/mdr/root/ct/sdtmct/codelists/C150811"
     )
-    assert(variables[1].submission_values == ["PROTMLST", "OTHEVENT"])
+    assert(variables[1].codelist_submission_values == ["PROTMLST", "OTHEVENT"])
     # IEORRES - 1 sdtm subset
     assert len(variables[2].links["codelist"]) == 1
     # IEORRES - Codelist - NY
@@ -190,7 +190,7 @@ def test_get_variable_codelists(
         variables[2].links["codelist"][0]["href"]
         == "/mdr/root/ct/sdtmct/codelists/C66742"
     )
-    assert(variables[2].submission_values == ["NY"])
+    assert(variables[2].codelist_submission_values == ["NY"])
     # VPOS - 1 sdtm codelist & 1 cdash subset
     assert len(variables[3].links["codelist"]) == 2
     # VPOS - Codelist - POSITION
@@ -203,7 +203,7 @@ def test_get_variable_codelists(
         variables[3].links["codelist"][1]["href"]
         == "/mdr/root/ct/cdashct/codelists/C78431"
     )
-    assert(variables[3].submission_values == ["POSITION", "VSPOS"])
+    assert(variables[3].codelist_submission_values == ["POSITION", "VSPOS"])
 
 
 @pytest.mark.parametrize(

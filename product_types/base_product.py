@@ -212,15 +212,15 @@ class BaseProduct:
                 continue
         return codelist_mapping
     
-    def _get_codelist_links(self, submission_values: [str]) -> [dict]:
+    def _get_codelist_links(self, codelist_submission_values: [str]) -> [dict]:
         codelists = []
-        for value in submission_values:
+        for value in codelist_submission_values:
             codelist_type, concept_id = self._get_concept_data(value)
             if concept_id:
                 codelists.append(self._build_codelist_link(codelist_type, concept_id))
         return codelists
     
-    def parse_submission_values(self, codelist: str) -> [str]:
+    def parse_codelist_submission_values(self, codelist: str) -> [str]:
         input_values = [ct.strip() for ct in re.split(r'[\n|;|\\n|or]', codelist) if ct]
         return [value.replace('(', "").replace(")", "") for value in input_values if value]
 

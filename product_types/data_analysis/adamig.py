@@ -127,11 +127,11 @@ class ADAMIG(ADAM):
     def _build_variable(self, variable_data: dict) -> dict:
         variable = Variable(variable_data, self)
         if self._iscodelist(variable.codelist):
-            submission_values = self.parse_submission_values(variable.codelist)
-            codelist_links = self._get_codelist_links(submission_values)
+            codelist_submission_values = self.parse_codelist_submission_values(variable.codelist)
+            codelist_links = self._get_codelist_links(codelist_submission_values)
             if codelist_links:
                 variable.add_link("codelist", codelist_links)
-            variable.add_submission_values(submission_values)
+            variable.add_codelist_submission_values(codelist_submission_values)
         else:
             if self._isdescribedvaluedomain(variable.codelist or variable.controlled_terms):
                 variable.set_described_value_domain(variable.codelist or variable.controlled_terms)

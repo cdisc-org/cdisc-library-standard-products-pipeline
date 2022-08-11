@@ -76,8 +76,8 @@ class Variable(BaseVariable):
             "description": self.description
         }
         
-        if self.submission_values:
-            json_data["submissionValues"] = self.submission_values
+        if self.codelist_submission_values:
+            json_data["codelistSubmissionValues"] = self.codelist_submission_values
 
         if self.described_value_domain:
             json_data["describedValueDomain"] = self.described_value_domain
