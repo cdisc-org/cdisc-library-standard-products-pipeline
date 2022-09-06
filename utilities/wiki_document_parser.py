@@ -3,6 +3,7 @@ from markdownify import markdownify
 from markdown import markdown
 from db_models.ig_document import IGDocument
 from uuid import uuid4
+from utilities.transformer import Transformer
 
 from utilities.wiki_client import WikiClient
 from logging import Logger, getLogger
@@ -12,6 +13,7 @@ class Parser:
     def __init__(self, client, logger=None):
         self.client: WikiClient = client
         self.logger: Logger = logger or getLogger("wiki-parser")
+        self.transformer = Transformer()
     
     def get_markdown(self, url):
         html = self.client.get_html(url)
@@ -79,13 +81,17 @@ class Parser:
     
     def _parse_html(self, html) -> str:
         parser = BeautifulSoup(html, 'html.parser')
-        for div in parser.find_all("div", {'class':'expand-control'}): 
+        for span in parser.find_all("span", {'class': 'jira-issue'}):
+            # Remove jira issues in content
+            span.decompose()
+        for div in parser.find_all("div", {'class':'confluence-information-macro'}):
             div.decompose()
-        for div in parser.find_all("div", {'class':'confluence-embedded-file-wrapper'}): 
+        for div in parser.find_all("div", {'class':'expand-control'}):
+            # Remove table dropdowns
             div.decompose()
         if parser.a:
             parser.a.extract()
-        return parser.decode()
+        return self.transformer.get_raw_text(str(parser))
         
 
     def _get_markdown_from_html(self, html):
