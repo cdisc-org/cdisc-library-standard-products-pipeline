@@ -39,8 +39,11 @@ class Parser:
             markdown_data = self._html_to_markdown(html)
             parsed_html = self._parse_html(html)
             labels = self._get_labels(page_data["id"])
-            sections = [section.split("-")[1] for section in labels if section.startswith("section-")]
+            sections = [" ".join(section.split("-")[1:]) for section in labels if section.startswith("section-")]
             domains = [domain.split("-")[1].upper() for domain in labels if domain.startswith("domain-")]
+            if "specifications" in sections:
+                # Ignore specification tables since they are already in the CDISC library
+                continue
 
             document = IGDocument.get_or_create({
                 "id": page["id"],
