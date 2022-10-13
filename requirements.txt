@@ -12,3 +12,4 @@ azure-storage-blob==12.3.1
 azure-cosmos ==4.3.0
 python-dotenv
 markdownify
+markdown
