@@ -184,7 +184,7 @@ class SDTM(BaseProduct):
     def _find_class(self, class_id: str, classes: DataTabulationClass) -> DataTabulationClass:
         if not class_id:
             return None
-        filtered_classes = [c for c in classes if c.id == class_id or c.label == class_id]
+        filtered_classes = [c for c in classes if c.id == class_id or c.label == class_id or c.name == class_id]
         if filtered_classes:
             return filtered_classes[0]
         else:
