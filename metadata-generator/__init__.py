@@ -8,7 +8,7 @@ from product_types.product_factory import ProductFactory
 from utilities.config import Config
 from utilities import logger
 import utilities.constants as constants
-from utilities.blob_helper import BlobHelper
+from utilities.blob_service import BlobService
 
 def main(config: dict) -> str:
     # setup logging
@@ -23,6 +23,7 @@ def main(config: dict) -> str:
     password = os.environ.get(constants.CONFLUENCE_PASSWORD)
     api_key = os.environ.get(constants.LIBRARY_API_KEY)
 
+    blob_service = BlobService("generated-json")
     # generate json
     Config.validate_config_data(config)
     config = Config(config)
@@ -32,9 +33,8 @@ def main(config: dict) -> str:
     product_document = product.generate_document()
     product.validate_document(product_document)
     file_name = f"{product_document.get('name', 'untitled').lower().replace(' ', '-').replace('.', '-')}.json" 
-    BlobHelper.upload_json(
+    blob_service.upload_json(
         product_document=product_document,
-        container_name="generated-json",
         blob_name=file_name,
     )
     return file_name

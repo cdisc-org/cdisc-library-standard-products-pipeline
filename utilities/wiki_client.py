@@ -8,7 +8,8 @@ class WikiClient:
         self.username = username
         self.password = password
         self.spec_doc_id = spec_doc_id
-        self.content_api_base_url = "https://wiki.cdisc.org/rest/api/content/"
+        self.wiki_base_url = "https://wiki.cdisc.org"
+        self.content_api_base_url = f"{self.wiki_base_url}/rest/api/content/"
         self.macros = {
             "summary": "35f2235a-e526-4b40-ad26-8161cd9defd7"
         }
@@ -88,3 +89,11 @@ class WikiClient:
         for i, value in enumerate(version_values):
             version_number = version_number + (value/(10.0**i))
         return version_number
+
+    def download_file(self, file_path):
+        url = f"{self.wiki_base_url}{file_path}"
+        raw_data = requests.get(url, auth=(self.username, self.password))
+        if raw_data.status_code == 200:
+            return raw_data.content
+        else:
+            raise Exception(f"Get request to {url} returned unsuccessful response {raw_data.status_code}")

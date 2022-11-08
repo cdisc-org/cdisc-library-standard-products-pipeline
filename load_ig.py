@@ -46,4 +46,3 @@ if __name__ == "__main__":
     logger.info(f"{len(documents)} documents found.")
     for document in documents.values():
         document._save_to_db()
-    # markdown = parser.get_markdown(args.target_url)

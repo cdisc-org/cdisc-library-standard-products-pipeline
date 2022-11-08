@@ -39,6 +39,12 @@ class IGDocument(BaseDBModel):
         )), None)
 
         if document:
+            document.html = record_params.get("html")
+            document.text = record_params.get("text")
+            document.parent_document = record_params.get("parent")
+            document.parent_document_title = record_params.get("parentDocumentTitle")
+            document.section = record_params.get("section")
+            document.structures = record_params.get("structures")
             return document
         else:
             return cls(record_params)
