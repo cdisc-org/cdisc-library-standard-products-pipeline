@@ -42,7 +42,7 @@ class WikiClient:
             raise Exception(f"Put request to {url} returned unsuccessful response {raw_data.status_code}")
         
     def get_wiki_table(self, document_id, table_name):
-        base_url = f"https://wiki.cdisc.org/ajax/confiforms/rest/filter.action?pageId={document_id}&f={table_name}&q="
+        base_url = f"https://wiki.cdisc.org/ajax/confiforms/rest/filter.action?pageId={document_id}&f={table_name}"
         response = requests.get(base_url, auth=(self.username, self.password))
         if response.status_code != 200:
             raise Exception(f"Invalid url for wiki document {document_id} and table {table_name}")
