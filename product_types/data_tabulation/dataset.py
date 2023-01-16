@@ -63,9 +63,9 @@ class Dataset:
             "_links": self.links,
             "name": self.name,
             "label": self.label,
-            "description": self.description,
+            **({} if self.description is None else {"description": self.description}),
             "ordinal": self.ordinal,
-            "datasetStructure": self.structure
+            **({} if self.structure is None else {"datasetStructure": self.structure}),
         }
 
         if self.variables:
