@@ -14,6 +14,7 @@ class Dataset:
         self.ordinal = str(dataset_data.get('ordinal'))
         self.parent_class_name = dataset_data.get("hasParentContext")
         self.structure = dataset_data.get("datasetStructure")
+        self.status = dataset_data.get("publicationStatus", "Final")
         self.variables = []
         self.datasets = []
         self.links = {
@@ -63,6 +64,7 @@ class Dataset:
             "_links": self.links,
             "name": self.name,
             "label": self.label,
+            "status": self.status,
             **({} if self.description is None else {"description": self.description}),
             "ordinal": self.ordinal,
             **({} if self.structure is None else {"datasetStructure": self.structure}),
@@ -76,4 +78,4 @@ class Dataset:
     def validate(self):
         if not self.label:
             logger.info(f"Dataset with name: {self.name} is missing a label. This will cause the title in links to this dataset to be empty.")
-    
+

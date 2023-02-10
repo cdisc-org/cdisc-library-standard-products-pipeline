@@ -69,6 +69,9 @@ class BaseProduct:
         else: 
             return name
 
+    def add_end_to_end_standard_link(self, link):
+        self.summary["_links"]["end_to_end_standard"] = link
+
     def get_class_name(self, name: str) -> str:
         if not name:
             return None

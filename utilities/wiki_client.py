@@ -1,6 +1,7 @@
 import requests
 import json
 from utilities import logger
+from bs4 import BeautifulSoup
 
 class WikiClient:
     
@@ -19,6 +20,12 @@ class WikiClient:
 
     def get_page_labels(self, document_id):
         return self.get_json(self.content_api_base_url+f"{document_id}/label")
+
+    def get_page_id(self, url):
+        html = self.get_html(url)
+        parser = BeautifulSoup(html, 'html.parser')
+        data = parser.find("meta", {"name": "ajs-page-id"})
+        return data.get("content")
 
     def get_html(self, url):
         raw_data = requests.get(url, auth=(self.username, self.password))

@@ -1,4 +1,5 @@
 from db_models.base_db_model import BaseDBModel
+from datetime import datetime
 
 class IGDocument(BaseDBModel):
 
@@ -42,6 +43,7 @@ class IGDocument(BaseDBModel):
             document.html = record_params.get("html")
             document.text = record_params.get("text")
             document.parent_document = record_params.get("parent")
+            document.updated_at = datetime.now().isoformat()
             document.parent_document_title = record_params.get("parentDocumentTitle")
             document.section = record_params.get("section")
             document.structures = record_params.get("structures")
