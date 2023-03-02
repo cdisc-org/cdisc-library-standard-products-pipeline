@@ -69,8 +69,8 @@ class BaseProduct:
         else: 
             return name
 
-    def add_end_to_end_standard_link(self, link):
-        self.summary["_links"]["end_to_end_standard"] = link
+    def add_integrated_standard_link(self, link):
+        self.summary["_links"]["integratedStandard"] = link
 
     def get_class_name(self, name: str) -> str:
         if not name:
@@ -130,10 +130,13 @@ class BaseProduct:
                 pass
         return None
     
-    def write_document(self, document: dict, output_file: str = None):
+    def write_document(self, document: dict, output_file: str = None, output_directory: str = None):
         if not output_file:
             output_file = self.summary["name"].replace(" ", "") + ".json"
-        with codecs.open(output_file, 'w', encoding='ascii') as f:
+        output_path = output_file
+        if output_directory:
+            output_path = f"{output_directory}/{output_path}"
+        with codecs.open(output_path, 'w', encoding='ascii') as f:
             json.dump(document, f, indent=4, ensure_ascii=False, sort_keys=True)
         
     def validate_document(self, document: dict):

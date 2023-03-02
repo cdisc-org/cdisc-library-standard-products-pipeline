@@ -32,6 +32,7 @@ def parse_arguments():
     parser.add_argument("-s", "--spec_grabber_doc", help="Doc ID for automated spec grabber output", default="113593236")
     parser.add_argument("-i", "--ignore_errors", help="Include this flag if you'd like to ignore spec grabber errors", action="store_true")
     parser.add_argument("-o", "--output", help="Specifies output file")
+    parser.add_argument("-od", "--output_directory", help="Directory to store output files")
     args = parser.parse_args()
     return args
 
@@ -63,18 +64,18 @@ if __name__ == "__main__":
     }
     factory = ProductFactory(username, password, api_key, **arguments)
     product = factory.build_product(config)
-    if product.product_category == "end-to-end":
+    if product.product_category == "integrated":
         document_id = config.get(constants.SUMMARY)
         directory = product._get_directory(document_id)
         for entry in directory["list"]["entry"]:
             product_config = Config(product.generate_config(entry))
             product_config.add(constants.IGNORE_ERRORS, args.ignore_errors)
             sub_product = factory.build_product(product_config)
-            sub_product.add_end_to_end_standard_link(product.build_self_link())
+            sub_product.add_integrated_standard_link(product.build_self_link())
             sub_document = sub_product.generate_document()
             sub_product.validate_document(sub_document)
-            sub_product.write_document(sub_document, args.output)
+            sub_product.write_document(sub_document, args.output, args.output_directory)
             product.add_standard(sub_product)
     product_document = product.generate_document()
     product.validate_document(product_document)
-    product.write_document(product_document, args.output)
+    product.write_document(product_document, args.output, args.output_directory)
