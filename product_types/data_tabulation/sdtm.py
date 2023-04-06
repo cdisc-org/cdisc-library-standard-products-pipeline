@@ -44,8 +44,10 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
-            parent_dataset = self._find_dataset(variable.parent_dataset_name, datasets)
-            parent_class = self._find_class_by_name(variable.parent_class_name, classes)
+            parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
+            parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
+            parent_dataset = self._find_dataset(parent_dataset_name, datasets)
+            parent_class = self._find_class_by_name(parent_class_name, classes)
             if variable.variables_qualified:
                 self._add_qualified_variables_link(variable, variables)
             if self.is_ig:
@@ -62,12 +64,12 @@ class SDTM(BaseProduct):
 
         # set up parent class links
         for c in classes:
-            parent_class = self._find_class(c.parent_class_name, classes)
+            parent_class = self._find_class(c.parent_class_name, classes) or self._find_class_by_name(c.parent_class_name, classes)
             if parent_class:
                 c.add_link("parentClass", parent_class.links["self"])
                 parent_class.links["subclasses"] = parent_class.links.get("subclasses", []) + [c.links["self"]]
         for dataset in datasets:
-            parent_class = self._find_class(dataset.parent_class_name, classes)
+            parent_class = self._find_class(dataset.parent_class_name, classes) or self._find_class_by_name(dataset.parent_class_name, classes)
             if parent_class:
                 dataset.set_parent_class(parent_class)
                 parent_class.add_dataset(dataset)
@@ -189,6 +191,7 @@ class SDTM(BaseProduct):
             return filtered_classes[0]
         else:
             logger.error(f"No parent class found with id: {class_id}")
+            return None
 
     def _find_class_by_name(self, class_name: str, classes: DataTabulationClass) -> DataTabulationClass:
         filtered_classes = [c for c in classes if c.name == class_name]

@@ -12,6 +12,7 @@ from product_types.data_collection.cdash import CDASH
 from product_types.data_collection.cdashig import CDASHIG
 from product_types.data_analysis.adamig import ADAMIG
 from product_types.data_analysis.adam import ADAM
+from product_types.integrated.integrated import Integrated
 
 class ProductFactory:
     def __init__(self, username, password, api_key, **args):
@@ -93,3 +94,5 @@ class ProductFactory:
             return ADAM(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, config)
         elif product_type.startswith("adam"):
             return ADAMIG(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, config)
+        elif product_type == "integrated":
+            return Integrated(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, config)
