@@ -14,6 +14,7 @@ class IGDocument(BaseDBModel):
         self.parent_document_title = params.get("parentDocumentTitle")
         self.section = params.get("section")
         self.structures = params.get("structures")
+        self.use_case = params.get("useCase")
         self.children = []
         self.children_titles = []
     
@@ -86,5 +87,6 @@ class IGDocument(BaseDBModel):
             data["section"] = self.section
         if self.structures:
             data["structures"] = self.structures
-
+        if self.use_case:
+            data["useCase"] = self.use_case
         return data

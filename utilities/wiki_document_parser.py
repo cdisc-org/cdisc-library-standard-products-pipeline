@@ -7,6 +7,8 @@ from utilities.transformer import Transformer
 from utilities.wiki_client import WikiClient
 from logging import Logger, getLogger
 from utilities.blob_service import BlobService
+from utilities import document_tags
+from typing import List
 import os
 
 class Parser:
@@ -35,19 +37,19 @@ class Parser:
         while pages:
             page = pages.pop()
             title = page.get("title")
+            if "specifications" in title.lower() or "content control" in title.lower():
+                continue
             page_data = page["page_data"]
             children = self._get_page_children(page_data["id"])
             html = page_data["body"]["view"]["value"]
             markdown_data = self._html_to_markdown(html)
             parsed_html = self._parse_html(html, page_data["id"])
             labels = self._get_labels(page_data["id"])
-            sections = [" ".join(section.split("-")[1:]) for section in labels if section.startswith("section-")]
-            domains = [domain.split("-")[1].upper() for domain in labels if domain.startswith("domain-")]
-            if "specifications" in sections:
+            tags = self._parse_labels(labels)
+            if "specifications" in tags.get("sections", []):
                 # Ignore specification tables since they are already in the CDISC library
                 continue
-
-            document = IGDocument.get_or_create({
+            doc_params = {
                 "id": page["id"],
                 "pageId": page_data["id"],
                 "standard": standard,
@@ -57,10 +59,15 @@ class Parser:
                 "text": markdown_data,
                 "parent": page.get("parent"),
                 "parentDocumentTitle": page.get("parentDocumentTitle"),
-                "section": next(iter(sections), "publication"),
-                "structures": domains
-            })
+                "section": next(iter(tags.get("sections", [])), "publication"),
+                "structures": tags.get("structures"),
+                "useCase": next(iter(tags.get("use_cases", [])), None),
+            }
 
+            if tags.get("integrated_standards"):
+                doc_params["standard"] = f'{tags["integrated_standards"][0]}ig'
+                doc_params["version"] = f"{standard}-{standard_version}"
+            document = IGDocument.get_or_create(doc_params)
             new_child_documents = [
                 {
                     "id": str(uuid4()),
@@ -77,6 +84,38 @@ class Parser:
             documents[document.id] = document
             pages = pages + new_child_documents
         return documents
+
+    def _parse_labels(self, labels: List[str]) -> dict:
+        """
+        Returns a dictionary mapping label type to label value
+        ex:
+
+        {
+            "sections": ["examples"],
+            "structures": ["AE", "DM", "TS"],
+            "integrated_standards: ["sdtm", "cdash"]
+        }
+        """
+        data = {
+            "sections": [],
+            "structures": [],
+            "integrated_standards": [],
+            "use_cases": []
+        }
+        for label in labels:
+            components = label.split("-")
+            if len(components) < 2:
+                continue
+            label_type = components[0]
+            if label_type == document_tags.SECTION:
+                data["sections"].append(" ".join(components[1:]))
+            elif label_type == document_tags.DOMAIN or label_type == document_tags.STRUCTURE:
+                data["structures"].append(components[1].upper())
+            elif label_type == document_tags.STANDARD:
+                data["integrated_standards"].append(components[1])
+            elif label_type == document_tags.USE_CASE:
+                data["use_cases"].append(" ".join(components[1].split("_")))
+        return data
 
     def _has_children(self, page_id):
         return bool(self._get_page_children(page_id))
@@ -111,11 +150,9 @@ class Parser:
                     "src": image_link_path
                 }
                 img.attrs = attrs
-                print(f"Successfully duplicated {img_link}")
+                self.logger.info(f"Successfully duplicated {img_link}")
             except:
-                print(f"Failed to duplicate {img_link}")
-        if parser.a:
-            parser.a.extract()
+                self.logger.error(f"Failed to duplicate {img_link}")
         return self.transformer.get_raw_text(str(parser))
         
 
