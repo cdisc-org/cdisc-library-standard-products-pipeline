@@ -1,0 +1,5 @@
+USE_CASE="use_case"
+STRUCTURE="structure"
+STANDARD="standard"
+DOMAIN="domain"
+SECTION="section"
