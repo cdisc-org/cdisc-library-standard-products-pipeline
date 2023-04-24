@@ -1,4 +1,5 @@
 
+from typing import List
 from utilities.transformer import Transformer
 from utilities import logger
 from product_types.base_variable import BaseVariable
@@ -11,22 +12,52 @@ class Variable(BaseVariable):
         self.parent_class = parent_class
         self.parent_domain = parent_domain
         self.parent_scenario = parent_scenario
-        self.name = variable_data.get(f"{self.product_type.upper()} Variable", "").strip()
-        self.label = self.transformer.get_raw_text(variable_data.get(f"{self.product_type.upper()} Variable Label"))
+        self.name = self._get_value_from_spec_grabber_data(variable_data, acceptable_keys = [
+                f"{self.product_type.upper()} Variable",
+                "Collection Variable"
+        ]).strip()
+        self.label = self.transformer.get_raw_text(
+                self._get_value_from_spec_grabber_data(
+                    variable_data, 
+                    acceptable_keys= [
+                        f"{self.product_type.upper()} Variable Label",
+                        "Collection Variable Label"
+                    ]
+                )
+            )
         self.data_type = variable_data.get("Data Type")
         self.ordinal = str(variable_data.get("Order Number"))
         self.completion_instructions = variable_data.get("Case Report Form Completion Instructions")
-        self.core = variable_data.get("CDASHIG Core")
+        self.core = self._get_value_from_spec_grabber_data(
+                     variable_data, 
+                     acceptable_keys= [
+                        "CDASHIG Core",
+                        "Collection Core"
+                     ]
+                )
         self.prompt = self.transformer.cleanup_html_encoding(variable_data.get("Prompt", ""))
         self.question_text = self.transformer.cleanup_html_encoding(variable_data.get("Question Text", ""))
-        self.definition = variable_data.get(f"DRAFT {self.product_type.upper()} Definition", "")
+        self.definition = self._get_value_from_spec_grabber_data(
+                    variable_data, 
+                    acceptable_keys= [
+                        f"DRAFT {self.product_type.upper()} Definition",
+                        "DRAFT Collection Definition"
+                    ]
+                )
         self.implementation_notes = self.transformer.cleanup_html_encoding(variable_data.get("Implementation Notes", ""))
         self.mapping_instructions = self.transformer.cleanup_html_encoding(variable_data.get("Mapping Instructions"))
         self.parent_domain_name = variable_data.get("Domain") if variable_data.get("Domain") != "N/A" else None
         self.parent_class_name = parent_product.class_name_mappings.get(variable_data.get("Observation Class", ""), variable_data.get("Observation Class", ""))
         self.scenario = parent_scenario.name if parent_scenario else None
-        self.mapping_targets =  variable_data.get(self.parent_product.tabulation_mapping.upper() + " Target") if \
-                 variable_data.get(self.parent_product.tabulation_mapping.upper() + " Target") != "N/A" else None
+        self.mapping_targets = self._get_value_from_spec_grabber_data(
+                    variable_data, 
+                    acceptable_keys= [
+                        f"{self.parent_product.tabulation_mapping.upper()} Target",
+                        "Tabulation Target"
+                    ]
+                )
+        if self.mapping_targets == "N/A":
+            self.mapping_targets = None
         self.links = {
             "parentProduct": self.parent_product.summary["_links"]["self"],
             "self": self._build_self_link(),
@@ -36,7 +67,17 @@ class Variable(BaseVariable):
         self.subset_codelist = variable_data.get("Subset Controlled Terminology/CDASH Codelist Name")
         self.described_value_domain = None
         self.value_list = None
-    
+
+    def _get_value_from_spec_grabber_data(self, variable_data: dict, acceptable_keys: List[str]) -> str:
+        """
+        Gets the variable name from the spec grabber variable data output
+        """
+        val = ""
+        for key in acceptable_keys:
+            if key in variable_data:
+                val = variable_data[key]
+        return val
+
     def copy(self):
         new = Variable({}, self.parent_product)
         new.product_type = self.product_type
