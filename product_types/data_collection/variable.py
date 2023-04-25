@@ -154,7 +154,7 @@ class Variable(BaseVariable):
     def build_mapping_target_links(self):
         targets = [] if not self.mapping_targets else self.mapping_targets.split(";")
         for target in targets:
-            self._set_target(target)
+            self._set_target(target.strip())
     
     def _get_type(self):
         if not self.parent_product.is_ig and self.name.startswith("--"):
