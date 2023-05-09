@@ -54,8 +54,17 @@ class Integrated(BaseProduct):
                 "cdashig": self._generate_cdash_config,
                 "sendig": self._generate_sdtm_config,
                 "sdtmig": self._generate_sdtm_config,
+                "adamig": self._generate_adam_config
         }
         return standard_to_config_mapping.get(standard)(doc_id)
+
+    def _generate_adam_config(self, document_id: str) -> dict:
+        return {
+            "summary": document_id,
+            "datastructures": document_id,
+            "variableSets": document_id,
+            "variables": document_id,
+        }
 
     def _generate_sdtm_config(self, document_id: str) -> dict:
         return {

@@ -146,9 +146,10 @@ class Parser:
                 image_link_path = f"{base_url}/{image_file_name}"
                 attrs = {
                     "width": img.attrs.get("width", 500),
-                    "height": img.attrs.get("height", 500),
                     "src": image_link_path
                 }
+                if "height" in img.attrs:
+                    attrs["height"] = img.attrs["height"]
                 img.attrs = attrs
                 self.logger.info(f"Successfully duplicated {img_link}")
             except:
