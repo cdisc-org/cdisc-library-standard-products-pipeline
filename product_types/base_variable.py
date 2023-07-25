@@ -26,7 +26,7 @@ class BaseVariable:
                         self.links["priorVersion"] = version
                         return
         except Exception as e:
-            logger.debug(e)
+            logger.error(e)
             logger.error(f"No prior version found for variable: {self.to_string()}")
     
     def set_value_list(self, value_list_string):

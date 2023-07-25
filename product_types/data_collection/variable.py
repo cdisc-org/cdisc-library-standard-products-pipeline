@@ -277,6 +277,8 @@ class Variable(BaseVariable):
         category = self._get_mapping_target_variable_type(variable)
         mapping_product = self._get_mapping_target_type()
         parent = self.transformer.format_name_for_link(self._get_mapping_parent(variable))
+        if parent == "AssociatedPersonsIdentifiers":
+            parent = "AssociatedPersons"
         version = self.parent_product.sdtm_version if mapping_product == 'sdtm' else self.parent_product.sdtmig_version
         mapping_target_key = f"{mapping_product}{category}MappingTargets"
         category_name = "classes" if category == "Class" else "datasets"
@@ -287,7 +289,8 @@ class Variable(BaseVariable):
         try:
             data = self.parent_product.library_client.get_api_json(href)
             self.links[mapping_target_key] = self.links.get(mapping_target_key, []) + [data["_links"]["self"]]
-        except:
+        except Exception as e:
+            logger.info(e)
             try:
                 if category == "Class":
                     href = f"/mdr/{mapping_product}/{version}/{category_name}/GeneralObservations/variables/{variable_name}"
@@ -295,7 +298,8 @@ class Variable(BaseVariable):
                     self.links[mapping_target_key] = self.links.get(mapping_target_key, []) + [data["_links"]["self"]]
                 else:
                     logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}, {href}')
-            except:
+            except Exception as e:
+                logger.info(e)
                 logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}, {href}')
     
     def to_json(self):
