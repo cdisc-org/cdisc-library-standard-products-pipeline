@@ -3,9 +3,6 @@ from product_types.data_analysis.adamig import ADAMIG
 from product_types.data_collection.cdashig import CDASHIG
 from product_types.data_tabulation.sdtmig import SDTMIG
 from product_types.data_tabulation.sendig import SENDIG
-import csv
-import sys
-from copy import deepcopy
 
 class Integrated(BaseProduct):
     def __init__(self, wiki_client, library_client, summary, product_type, version, config):
@@ -15,6 +12,7 @@ class Integrated(BaseProduct):
         self.label = self.summary["label"]
         self.summary["_links"]["self"] = self.build_self_link()
         self.summary["_links"]["standards"] = {}
+        self.models_links = set()
         self.summary["_links"]["models"] = []
 
     def build_self_link(self) -> dict:
@@ -28,20 +26,22 @@ class Integrated(BaseProduct):
 
     def _get_product_type(self, product: BaseProduct) -> str:
         if isinstance(product, ADAMIG):
-            return "adamig"
+            return "adam"
         elif isinstance(product, CDASHIG):
-            return "cdashig"
+            return "cdash"
         elif isinstance(product, SDTMIG):
-            return "sdtmig"
+            return "sdtm"
         elif isinstance(product, SENDIG):
-            return "sendig"
+            return "send"
         else:
             return "unknown"
 
     def add_standard(self, product: BaseProduct):
         product_type = self._get_product_type(product)   
         self.summary["_links"]["standards"][product_type] = product.summary["_links"]["self"]
-        self.summary["_links"]["models"].append(product.summary["_links"]["model"])
+        if product.summary["_links"]["model"]["href"] not in self.models_links:
+            self.summary["_links"]["models"].append(product.summary["_links"]["model"])
+            self.models_links.add(product.summary["_links"]["model"]["href"])
 
     def _get_directory(self, document_id: str):
         return self.wiki_client.get_wiki_table(document_id, "Directory")

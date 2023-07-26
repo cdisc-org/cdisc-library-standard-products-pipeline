@@ -227,6 +227,8 @@ class BaseProduct:
         return codelists
     
     def parse_codelist_submission_values(self, codelist: str) -> [str]:
+        if not codelist:
+            return []
         input_values = [ct.strip() for ct in re.split(r'[\n|;|\\n|or]', codelist) if ct]
         return [value.replace('(', "").replace(")", "") for value in input_values if value]
 
