@@ -128,6 +128,8 @@ class Parser:
         for span in parser.find_all("span", {'class': 'jira-issue'}):
             # Remove jira issues in content
             span.decompose()
+        for span in parser.find_all("span", {'class': 'tiny'}):
+            span.decompose()
         for div in parser.find_all("div", {'class':'confluence-information-macro'}):
             div.decompose()
         for div in parser.find_all("div", {'class':'plugin-tabmeta-details'}):
@@ -135,6 +137,9 @@ class Parser:
         for div in parser.find_all("div", {'class':'expand-control'}):
             # Remove table dropdowns
             div.decompose()
+        for div in parser.find_all():
+            del div["style"]
+
         for img in parser.find_all("img"):
             img_link = img.attrs["src"]
             try:
