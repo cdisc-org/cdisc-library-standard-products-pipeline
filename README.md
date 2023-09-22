@@ -14,7 +14,7 @@ Pipeline for generating CDISC library json from the wiki for the following produ
 
 ##### Creating a virtual enviornment
 
-1. Install python 3.7
+1. Install python 3.9
 2. Install virtualenv
    `pip install virtualenv`
 3. Create a virtual env
