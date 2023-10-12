@@ -277,8 +277,8 @@ class BaseProduct:
             "WHODRUGw*": "who drug",
             "MedDRAw*": "meddra"
         }
-        isdescribedvaluedomain = domain_map.get(described_value_domain, described_value_domain.lower()) in self.described_value_domains
-        return isdescribedvaluedomain or described_value_domain.startswith("ISO")
+        isdescribedvaluedomain = domain_map.get(described_value_domain, described_value_domain.lstrip().lower()) in self.described_value_domains
+        return isdescribedvaluedomain or described_value_domain.lstrip().startswith("ISO")
 
     @staticmethod
     def _cleanup_json(json_data: dict, unwanted_keys: [str]):
