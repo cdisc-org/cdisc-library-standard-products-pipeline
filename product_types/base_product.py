@@ -31,7 +31,7 @@ class BaseProduct:
             "Findings-General": "Findings",
             "Findings About-Findings": "Findings About"
         }
-        self.described_value_domains = {"iso 8601", "(nullflavor)", "nullflavor", "meddra", "number-number", "who drug", "loinc"}
+        self.described_value_domains = {"iso 8601", "(nullflavor)", "nullflavor", "meddra", "number-number", "who drug", "loinc", "iupac", "cas", "unii"}
         logger.info(f"Loading product of type: {product_type}")
         
     def _get_version_prefix(self, version: str) -> str:
