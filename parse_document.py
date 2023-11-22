@@ -14,7 +14,9 @@ def setup_logger(args):
         "error": logging.ERROR
     }
     logger.setLevel(log_levels.get(args.log_level, logging.INFO))
-    file_handler = logging.FileHandler(args.report_file, "w")
+    if not os.path.exists("logs"):
+        os.makedirs("logs", exist_ok=True)
+    file_handler = logging.FileHandler(f"logs/{args.report_file}", "w")
     file_handler.setFormatter(logFormatter)
     logger.addHandler(file_handler)
     console_handler = logging.StreamHandler()
