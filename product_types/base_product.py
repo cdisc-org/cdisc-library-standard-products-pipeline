@@ -4,6 +4,7 @@ import requests
 import csv
 import sys
 import re
+import os
 from bs4 import BeautifulSoup
 from utilities.transformer import Transformer
 from utilities import logger
@@ -136,6 +137,8 @@ class BaseProduct:
         output_path = output_file
         if output_directory:
             output_path = f"{output_directory}/{output_path}"
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory, exist_ok=True)
         with codecs.open(output_path, 'w', encoding='ascii') as f:
             json.dump(document, f, indent=4, ensure_ascii=False, sort_keys=True)
         
