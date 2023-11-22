@@ -6,6 +6,8 @@ from db_models.ig_document import IGDocument
 import argparse
 from dotenv import load_dotenv
 import json
+import os
+import utilities.constants as constants
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -32,8 +34,8 @@ if __name__ == "__main__":
     args = parse_arguments()
     logger = create_logger(args)
     load_dotenv()
-    username = args.username
-    password = args.password
+    username = args.username or os.environ.get(constants.CONFLUENCE_USERNAME)
+    password = args.password or os.environ.get(constants.CONFLUENCE_PASSWORD)
     if not username:
         logger.error("Missing required username. Username must be provided as an argument or defined in the environment variable `CONFLUENCE_USERNAME`")
         exit(1)
