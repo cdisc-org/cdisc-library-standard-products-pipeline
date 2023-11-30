@@ -64,10 +64,13 @@ class SDTM(BaseProduct):
 
         # set up parent class links
         for c in classes:
-            parent_class = self._find_class(c.parent_class_name, classes) or self._find_class_by_name(c.parent_class_name, classes)
-            if parent_class:
-                c.add_link("parentClass", parent_class.links["self"])
-                parent_class.links["subclasses"] = parent_class.links.get("subclasses", []) + [c.links["self"]]
+            if(c.parent_class_name == None):
+                logger.warning(f"Expected to find a parent class, found None in: {c.to_json()}")
+            else:
+                parent_class = self._find_class(c.parent_class_name, classes) or self._find_class_by_name(c.parent_class_name, classes)
+                if parent_class:
+                    c.add_link("parentClass", parent_class.links["self"])
+                    parent_class.links["subclasses"] = parent_class.links.get("subclasses", []) + [c.links["self"]]
         for dataset in datasets:
             parent_class = self._find_class(dataset.parent_class_name, classes) or self._find_class_by_name(dataset.parent_class_name, classes)
             if parent_class:
