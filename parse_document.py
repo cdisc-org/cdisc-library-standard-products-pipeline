@@ -16,11 +16,9 @@ def setup_logger(args):
     logger.setLevel(log_levels.get(args.log_level, logging.INFO))
 
     # Get only the path part of the file and safely make a folder
-    path = args.report_file.split("/")[0:-1]
-    if len(path) > 0:
-        path = "/".join(path)    
-        if not os.path.exists(path):
-            os.makedirs(path, exist_ok=True)
+    path = os.path.join("", *args.report_file.split("/")[0:-1])
+    if len(path) > 0 and not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
         
     file_handler = logging.FileHandler(f"{args.report_file}", "w")
     file_handler.setFormatter(logFormatter)
