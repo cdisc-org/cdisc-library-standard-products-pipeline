@@ -14,13 +14,7 @@ def setup_logger(args):
         "error": logging.ERROR
     }
     logger.setLevel(log_levels.get(args.log_level, logging.INFO))
-
-    # Get only the path part of the file and safely make a folder
-    path = os.path.join("", *args.report_file.split("/")[0:-1])
-    if len(path) > 0 and not os.path.exists(path):
-        os.makedirs(path, exist_ok=True)
-        
-    file_handler = logging.FileHandler(f"{args.report_file}", "w")
+    file_handler = logging.FileHandler(args.report_file, "w")
     file_handler.setFormatter(logFormatter)
     logger.addHandler(file_handler)
     console_handler = logging.StreamHandler()
