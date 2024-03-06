@@ -44,7 +44,7 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
-            parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
+            parent_dataset_name = (variable.parent_dataset_name or "").replace("SDTM ", "").replace("SEND ", "")
             parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
             parent_dataset = self._find_dataset(parent_dataset_name, datasets)
             parent_class = self._find_class_by_name(parent_class_name, classes)
