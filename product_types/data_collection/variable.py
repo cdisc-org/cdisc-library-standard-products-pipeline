@@ -1,6 +1,5 @@
 
 from typing import List
-from utilities.transformer import Transformer
 from utilities import logger
 from product_types.base_variable import BaseVariable
 
@@ -250,11 +249,9 @@ class Variable(BaseVariable):
 
     def build_implements_link(self):
         names = [self.name]
-        if self.parent_domain_name:
+        if self.parent_domain_name and len(self.name) > 1 and self.name[:2] == self.parent_domain_name:
             #needed for cases in which names like SU.SUBJID are processed while containing the parent class name
-            #if name not in {'AGE', 'AGEU', 'BRTHDAT', 'BRTHDD', 'BRTHMO', 'BRTHTIM', 'BRTHYY', 'CETHNIC', 'CRACE', 'DTHDAT', 'EPOCH', 'ETHNIC', 'FOCID', 'NHOID', 'RACE', 'RACEOTH', 'SEX', 'SITEID', 'STUDYID', 'SUBJID', 'VISDAT', 'VISIT'}:
-            if len(self.name)>1 and self.name[:2]==self.parent_domain_name:
-                names.append(self.transformer.replace_str(self.name, self.parent_domain_name, "--", 1))
+            names.append(self.transformer.replace_str(self.name, self.parent_domain_name, "--", 1))
                 
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
             

@@ -2,8 +2,6 @@ from product_types.base_product import BaseProduct
 from product_types.data_tabulation.variable import Variable
 from product_types.data_tabulation.data_tabulation_class import DataTabulationClass
 from product_types.data_tabulation.dataset import Dataset
-import csv
-import sys
 from copy import deepcopy
 from utilities import logger, constants
 
@@ -44,26 +42,27 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
+            if variable.parent_dataset_name is None:
+                parent_dataset_name = ""
+                logger.error("No parent dataset found for: ", variable)
+            else:
                 parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
-                parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
-                if parent_dataset_name is None:
-                    parent_dataset_name= ""
-                    logger.error("No parent dataset found for: ",variable)
-                parent_dataset = self._find_dataset(parent_dataset_name, datasets)
-                parent_class = self._find_class_by_name(parent_class_name, classes)
-                if variable.variables_qualified:
-                    self._add_qualified_variables_link(variable, variables)
-                if self.is_ig:
-                    if parent_class and parent_class.parent_class_name:
-                        variable.build_model_class_variable_link()
-                    else:
-                        variable.build_model_dataset_variable_link()
-                if parent_dataset:
-                    variable.set_parent_dataset(parent_dataset)
-                    parent_dataset.add_variable(variable)
-                elif not self.is_ig and parent_class:
-                    variable.set_parent_class(parent_class)
-                    parent_class.add_variable(variable)
+            parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
+            parent_dataset = self._find_dataset(parent_dataset_name, datasets)
+            parent_class = self._find_class_by_name(parent_class_name, classes)
+            if variable.variables_qualified:
+                self._add_qualified_variables_link(variable, variables)
+            if self.is_ig:
+                if parent_class and parent_class.parent_class_name:
+                    variable.build_model_class_variable_link()
+                else:
+                    variable.build_model_dataset_variable_link()
+            if parent_dataset:
+                variable.set_parent_dataset(parent_dataset)
+                parent_dataset.add_variable(variable)
+            elif not self.is_ig and parent_class:
+                variable.set_parent_class(parent_class)
+                parent_class.add_variable(variable)
 
         # set up parent class links
         for c in classes:
