@@ -21,8 +21,8 @@ class Variable(BaseVariable):
         if self.parent_product.product_type != "adamig" and not self.parent_datastructure_name:
             self.parent_datastructure_name = self.parent_product.product_type.split("-")[-1].upper()
         self.parent_varset_name = variable_data.get("Variable Grouping", "").replace("Variables", "").strip()
-        self.codelist = self.transformer.cleanup_html_encoding(variable_data.get("Codelist/Controlled Terms", variable_data.get("Codelist")))
-        self.controlled_terms = self.transformer.cleanup_html_encoding(variable_data.get("Controlled Terms", ""))
+        self.codelist = self.transformer.cleanup_html_encoding(variable_data.get("Codelist/Controlled Terms", variable_data.get("Codelist"))).lstrip()
+        self.controlled_terms = self.transformer.cleanup_html_encoding(variable_data.get("Controlled Terms", "")).lstrip()
         self.described_value_domain = None
         self.value_list = None
         self.links = {

@@ -1,6 +1,5 @@
 
 from typing import List
-from utilities.transformer import Transformer
 from utilities import logger
 from product_types.base_variable import BaseVariable
 
@@ -67,6 +66,7 @@ class Variable(BaseVariable):
         self.subset_codelist = variable_data.get("Subset Controlled Terminology/CDASH Codelist Name")
         self.described_value_domain = None
         self.value_list = None
+        self.codelist_submission_values = []
 
     def _get_value_from_spec_grabber_data(self, variable_data: dict, acceptable_keys: List[str]) -> str:
         """
@@ -99,6 +99,7 @@ class Variable(BaseVariable):
         new.mapping_targets =  self.mapping_targets
         new.links = self.links
         new.codelist = self.codelist
+        new.codelist_submission_values = self.codelist_submission_values
         new.subset_codelist = self.subset_codelist
         new.described_value_domain = self.described_value_domain
         new.value_list = self.value_list
@@ -247,28 +248,39 @@ class Variable(BaseVariable):
             None
 
     def build_implements_link(self):
-        name = self.name
-        if self.parent_domain_name:
-            name = self.transformer.replace_str(name, self.parent_domain_name, "--", 1)
+        names = [self.name]
+        if self.parent_domain_name and len(self.name) > 1 and self.name[:2] == self.parent_domain_name:
+            #needed for cases in which names like SU.SUBJID are processed while containing the parent class name
+            names.append(self.transformer.replace_str(self.name, self.parent_domain_name, "--", 1))
+                
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
-        parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/{class_name}/fields/{name}"
-        # try class link
-        data = self.try_get_api_json(parent_href)
-
-        # try Findings class if class_name == "FindingsAboutEventsorInterventions"
-        if not data and class_name == "FindingsAboutEventsorInterventions":
-            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Findings/fields/{name}"
+            
+        data = None
+        
+        for name in names:
+            
+            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/{class_name}/fields/{name}"
+            # try class link
             data = self.try_get_api_json(parent_href)
 
-        # try Identifiers
-        if not data:
-            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Identifiers/fields/{name}"
-            data = self.try_get_api_json(parent_href)
+            # try Findings class if class_name == "FindingsAboutEventsorInterventions"
+            if not data and class_name == "FindingsAboutEventsorInterventions":
+                parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Findings/fields/{name}"
+                data = self.try_get_api_json(parent_href)
 
-        # try timing
-        if not data:
-            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Timing/fields/{name}"
-            data = self.try_get_api_json(parent_href)
+            # try Identifiers
+            if not data:
+                parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Identifiers/fields/{name}"
+                data = self.try_get_api_json(parent_href)
+
+            # try timing
+            if not data:
+                parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Timing/fields/{name}"
+                data = self.try_get_api_json(parent_href)
+                
+            if data:
+                break
+
 
         if data:
             self.links["implements"] = data["_links"]["self"]

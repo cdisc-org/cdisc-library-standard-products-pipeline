@@ -2,8 +2,6 @@ from product_types.base_product import BaseProduct
 from product_types.data_tabulation.variable import Variable
 from product_types.data_tabulation.data_tabulation_class import DataTabulationClass
 from product_types.data_tabulation.dataset import Dataset
-import csv
-import sys
 from copy import deepcopy
 from utilities import logger, constants
 
@@ -44,7 +42,11 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
-            parent_dataset_name = (variable.parent_dataset_name or "").replace("SDTM ", "").replace("SEND ", "")
+            if variable.parent_dataset_name is None:
+                parent_dataset_name = ""
+                logger.error("No parent dataset found for: ", variable)
+            else:
+                parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
             parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
             parent_dataset = self._find_dataset(parent_dataset_name, datasets)
             parent_class = self._find_class_by_name(parent_class_name, classes)

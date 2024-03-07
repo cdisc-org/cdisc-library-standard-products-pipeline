@@ -115,7 +115,7 @@ class CDASH(BaseProduct):
                 elif variable.codelist and variable.codelist != "N/A":
                     # The provided codelist is a value list
                     variable.set_value_list(variable.codelist)
-                if variable.subset_codelist != "N/A":
+                if variable.subset_codelist and variable.subset_codelist != "N/A":
                     codelist_submission_values = self.parse_codelist_submission_values(variable.subset_codelist)
                     variable.add_codelist_links(codelist_submission_values)
                     variable.add_codelist_submission_values(codelist_submission_values)
