@@ -66,23 +66,17 @@ class Variable(BaseVariable):
         try:
             data = self.parent_product.library_client.get_api_json(model_link_href)
             self.links["modelClassVariable"] = data["_links"]["self"]
-        except Exception as e:
+        except:
             model_link_href = f"/mdr/{self.parent_product.model_type}/{parent_model_name}/classes/GeneralObservations/variables/{variable_name}"
-            try:
-                data = self.parent_product.library_client.get_api_json(model_link_href)
-                self.links["modelClassVariable"] = data["_links"]["self"]
-            except Exception as e:
-                pass
+            data = self.parent_product.library_client.get_api_json(model_link_href)
+            self.links["modelClassVariable"] = data["_links"]["self"]
 
     def build_model_dataset_variable_link(self):
         model_variable_parent = self.parent_dataset_name
         parent_model_name = self.transformer.replace_str(str(self.parent_product.parent_model), '.', '-')
         model_link_href = f"/mdr/{self.parent_product.model_type}/{parent_model_name}/datasets/{model_variable_parent}/variables/{self.name}"
-        try:
-            data = self.parent_product.library_client.get_api_json(model_link_href)
-            self.links["modelDatasetVariable"] = data["_links"]["self"]
-        except Exception as e:
-            pass
+        data = self.parent_product.library_client.get_api_json(model_link_href)
+        self.links["modelDatasetVariable"] = data["_links"]["self"]
     
     def add_link(self, key, link):
         self.links[key] = link

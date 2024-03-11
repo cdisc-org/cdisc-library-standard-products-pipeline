@@ -302,6 +302,8 @@ class Variable(BaseVariable):
                 break
         if data:
             self.links["implements"] = data["_links"]["self"]
+        else:
+            logger.error(f"No model dataset or class variable found for: {self.parent_domain_name}.{self.name}")
 
     def _set_target(self, variable: str) -> dict:
         category = self._get_mapping_target_variable_type(variable)

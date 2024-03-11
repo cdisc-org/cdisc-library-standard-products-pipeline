@@ -53,10 +53,13 @@ class SDTM(BaseProduct):
             if variable.variables_qualified:
                 self._add_qualified_variables_link(variable, variables)
             if self.is_ig:
-                if parent_class and parent_class.parent_class_name:
-                    variable.build_model_class_variable_link()
-                else:
+                try:
                     variable.build_model_dataset_variable_link()
+                except:
+                    try:
+                        variable.build_model_class_variable_link()
+                    except:
+                        logger.error(f"No model dataset or class variable found for: {variable.parent_dataset_name}.{variable.name}")
             if parent_dataset:
                 variable.set_parent_dataset(parent_dataset)
                 parent_dataset.add_variable(variable)
