@@ -1,5 +1,4 @@
 
-from utilities.transformer import Transformer
 from utilities import logger
 from product_types.base_variable import BaseVariable
 
@@ -58,18 +57,47 @@ class Variable(BaseVariable):
             "type": "Root Data Element"
         }
     
+    def potential_links(
+        self, class_name: str,  variable_name: str
+    ) -> list[BaseVariable.PotentialLink]:
+        return [
+            {
+                "condition": True,
+                "href": f"/classes/{class_name}/variables/{variable_name}",
+            },
+            {
+                "condition": class_name == "FindingsAbout",
+                "href": f"/classes/Findings/variables/{variable_name}",
+            },
+            {
+                "condition": True,
+                "href": f"/classes/GeneralObservations/variables/{variable_name}",
+            },
+        ]
+
     def build_model_class_variable_link(self):
-        model_variable_parent = self.parent_class_name
         parent_model_name = self.transformer.replace_str(str(self.parent_product.parent_model), '.', '-')
-        variable_name =  self.name if self.name == self.name_no_prefix else "--" + self.name_no_prefix
-        model_link_href = f"/mdr/{self.parent_product.model_type}/{parent_model_name}/classes/{model_variable_parent}/variables/{variable_name}"
-        try:
-            data = self.parent_product.library_client.get_api_json(model_link_href)
+        class_name = self.transformer.format_name_for_link(self.parent_class_name)
+        names = self.get_variable_variations(self.parent_dataset_name)
+        data = None
+        for name in names:
+            for link in self.potential_links(
+                class_name, name
+            ):
+                condition, href = link.values()
+                if condition:
+                    parent_href = (
+                        f"/mdr/{self.parent_product.model_type}/{parent_model_name}{href}"
+                    )
+                    data = self.try_get_api_json(parent_href)
+                if data:
+                    break
+            if data:
+                break
+        if data:
             self.links["modelClassVariable"] = data["_links"]["self"]
-        except:
-            model_link_href = f"/mdr/{self.parent_product.model_type}/{parent_model_name}/classes/GeneralObservations/variables/{variable_name}"
-            data = self.parent_product.library_client.get_api_json(model_link_href)
-            self.links["modelClassVariable"] = data["_links"]["self"]
+        else:
+            raise Exception
 
     def build_model_dataset_variable_link(self):
         model_variable_parent = self.parent_dataset_name

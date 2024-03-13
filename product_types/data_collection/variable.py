@@ -1,4 +1,4 @@
-from typing import List, TypedDict
+from typing import List
 from utilities import logger
 from product_types.base_variable import BaseVariable
 
@@ -240,17 +240,9 @@ class Variable(BaseVariable):
         else:
             return "Class"
 
-    def try_get_api_json(self, link):
-        try:
-            return self.parent_product.library_client.get_api_json(link)
-        except Exception as e:
-            None
-
-    PotentialLink = TypedDict("PotentialLink", {"condition": bool, "href": str})
-
     def potential_links(
         self, class_name: str, domain_name: str, variable_name: str
-    ) -> list[PotentialLink]:
+    ) -> list[BaseVariable.PotentialLink]:
         return [
             {
                 "condition": True,
@@ -273,17 +265,7 @@ class Variable(BaseVariable):
         ]
 
     def build_implements_link(self):
-        names = [self.name]
-        if (
-            self.parent_domain_name
-            and len(self.name) > 1
-            and self.name[:2] == self.parent_domain_name
-        ):
-            names.append(
-                self.transformer.replace_str(
-                    self.name, self.parent_domain_name, "--", 1
-                )
-            )
+        names = self.get_variable_variations(self.parent_domain_name)
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
         data = None
         for name in names:

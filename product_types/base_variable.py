@@ -1,8 +1,11 @@
 from utilities.transformer import Transformer
 from utilities import logger
 import re
+from typing import TypedDict
 
 class BaseVariable:
+
+    PotentialLink = TypedDict("PotentialLink", {"condition": bool, "href": str})
 
     def __init__(self, parent_product):
         self.transformer = Transformer(None)
@@ -50,6 +53,27 @@ class BaseVariable:
         Converts a string into list of submission values
         """
         self.codelist_submission_values = self.codelist_submission_values + values
+
+    def try_get_api_json(self, link):
+        try:
+            return self.parent_product.library_client.get_api_json(link)
+        except Exception as e:
+            None
+
+    def get_variable_variations(self, dataset_name):
+        names = [f"{self.name}"]
+        if (
+            dataset_name
+            and type(self.name) == str
+            and len(self.name) > 1
+            and self.name[:2] == dataset_name
+        ):
+            names.append(
+                self.transformer.replace_str(
+                    self.name, dataset_name, "--", 1
+                )
+            )
+        return names
 
     def to_string(self):
         return self.name

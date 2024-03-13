@@ -43,13 +43,13 @@ class SDTM(BaseProduct):
         # link variables to appropriate parent structure
         for variable in variables:
             if variable.parent_dataset_name is None:
-                parent_dataset_name = ""
+                variable.parent_dataset_name = ""
                 logger.error("No parent dataset found for: ", variable)
             else:
-                parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
-            parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
-            parent_dataset = self._find_dataset(parent_dataset_name, datasets)
-            parent_class = self._find_class_by_name(parent_class_name, classes)
+                variable.parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
+            variable.parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
+            parent_dataset = self._find_dataset(variable.parent_dataset_name, datasets)
+            parent_class = self._find_class_by_name(variable.parent_class_name, classes)
             if variable.variables_qualified:
                 self._add_qualified_variables_link(variable, variables)
             if self.is_ig:
