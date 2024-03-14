@@ -42,11 +42,13 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
-            if variable.parent_dataset_name is None:
-                variable.parent_dataset_name = ""
-                logger.error("No parent dataset found for: ", variable)
-            else:
-                variable.parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
+            variable.parent_dataset_name = (
+                ""
+                if variable.parent_dataset_name is None
+                else variable.parent_dataset_name.replace("SDTM ", "").replace(
+                    "SEND ", ""
+                )
+            )
             variable.parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
             parent_dataset = self._find_dataset(variable.parent_dataset_name, datasets)
             parent_class = self._find_class_by_name(variable.parent_class_name, classes)
@@ -227,11 +229,25 @@ class SDTM(BaseProduct):
         """
         variables_qualified_names = set(list(map(lambda x: x.strip(), variable.variables_qualified.split(";"))))
         is_general_observation_class = variable.parent_class_name in ["Findings", "Events", "Interventions"]
-        variables_qualified = [v for v in variables if v.name in variables_qualified_names and \
-            (
-                (v.parent_class_name == variable.parent_class_name and is_general_observation_class) or \
-                (v.parent_dataset_name == variable.parent_dataset_name and not is_general_observation_class)
-            )]
+        variables_qualified = [
+            v
+            for v in variables
+            if v.name in variables_qualified_names
+            and (
+                (
+                    v.parent_class_name == variable.parent_class_name
+                    and is_general_observation_class
+                )
+                or (
+                    v.parent_dataset_name == variable.parent_dataset_name
+                    and not is_general_observation_class
+                )
+                or (
+                    variable.parent_dataset_name == ""
+                    and v.parent_class_name == "General Observations"
+                )
+            )
+        ]
         if variables_qualified:
             variable.add_link("qualifiesVariables", [v.links["self"] for v in variables_qualified])
 
