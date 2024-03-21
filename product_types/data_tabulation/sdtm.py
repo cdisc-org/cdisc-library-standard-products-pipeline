@@ -42,21 +42,26 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
-            if variable.parent_dataset_name is None:
-                parent_dataset_name = ""
-                logger.error("No parent dataset found for: ", variable)
-            else:
-                parent_dataset_name = variable.parent_dataset_name.replace("SDTM ", "").replace("SEND ", "")
-            parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
-            parent_dataset = self._find_dataset(parent_dataset_name, datasets)
-            parent_class = self._find_class_by_name(parent_class_name, classes)
+            variable.parent_dataset_name = (
+                ""
+                if variable.parent_dataset_name is None
+                else variable.parent_dataset_name.replace("SDTM ", "").replace(
+                    "SEND ", ""
+                )
+            )
+            variable.parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
+            parent_dataset = self._find_dataset(variable.parent_dataset_name, datasets)
+            parent_class = self._find_class_by_name(variable.parent_class_name, classes)
             if variable.variables_qualified:
                 self._add_qualified_variables_link(variable, variables)
             if self.is_ig:
-                if parent_class and parent_class.parent_class_name:
-                    variable.build_model_class_variable_link()
-                else:
+                try:
                     variable.build_model_dataset_variable_link()
+                except:
+                    try:
+                        variable.build_model_class_variable_link()
+                    except:
+                        logger.error(f"No model dataset or class variable found for: {variable.parent_dataset_name}.{variable.name}")
             if parent_dataset:
                 variable.set_parent_dataset(parent_dataset)
                 parent_dataset.add_variable(variable)
@@ -224,11 +229,25 @@ class SDTM(BaseProduct):
         """
         variables_qualified_names = set(list(map(lambda x: x.strip(), variable.variables_qualified.split(";"))))
         is_general_observation_class = variable.parent_class_name in ["Findings", "Events", "Interventions"]
-        variables_qualified = [v for v in variables if v.name in variables_qualified_names and \
-            (
-                (v.parent_class_name == variable.parent_class_name and is_general_observation_class) or \
-                (v.parent_dataset_name == variable.parent_dataset_name and not is_general_observation_class)
-            )]
+        variables_qualified = [
+            v
+            for v in variables
+            if v.name in variables_qualified_names
+            and (
+                (
+                    v.parent_class_name == variable.parent_class_name
+                    and is_general_observation_class
+                )
+                or (
+                    v.parent_dataset_name == variable.parent_dataset_name
+                    and not is_general_observation_class
+                )
+                or (
+                    variable.parent_dataset_name == ""
+                    and v.parent_class_name == "General Observations"
+                )
+            )
+        ]
         if variables_qualified:
             variable.add_link("qualifiesVariables", [v.links["self"] for v in variables_qualified])
 

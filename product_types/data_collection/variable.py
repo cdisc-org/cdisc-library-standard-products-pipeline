@@ -1,4 +1,3 @@
-
 from typing import List
 from utilities import logger
 from product_types.base_variable import BaseVariable
@@ -115,7 +114,7 @@ class Variable(BaseVariable):
                 "title": self.label,
                 "type": "Class Variable" if variable_type == "classes" else "Data Collection Field"
             }
-    
+
     def _build_root_link(self):
         variable_type = self._get_type()
         parent_name = self._get_parent_obj_name()
@@ -125,10 +124,10 @@ class Variable(BaseVariable):
                 "title": self.label,
                 "type": "Root Data Element"
         }
-    
+
     def add_link(self, key, link):
         self.links[key] = link
-    
+
     def set_parent_class(self, parent_class):
         self.parent_class = parent_class
         self.add_link("parentClass", parent_class.links.get("self"))
@@ -156,7 +155,7 @@ class Variable(BaseVariable):
         targets = [] if not self.mapping_targets else self.mapping_targets.split(";")
         for target in targets:
             self._set_target(target.strip())
-    
+
     def _get_type(self):
         if not self.parent_product.is_ig and self.name.startswith("--"):
             return "classes"
@@ -218,7 +217,7 @@ class Variable(BaseVariable):
             return "sdtmig"
         else:
             return "sdtm"
-    
+
     def _get_mapping_target_variable_type(self, target: str = None):
         """
         Determines whether the mapping target should be a dataset or class variable.
@@ -241,49 +240,52 @@ class Variable(BaseVariable):
         else:
             return "Class"
 
-    def try_get_api_json(self, link):
-        try:
-            return self.parent_product.library_client.get_api_json(link)
-        except Exception as e:
-            None
+    def potential_links(
+        self, class_name: str, domain_name: str, variable_name: str
+    ) -> list[BaseVariable.PotentialLink]:
+        return [
+            {
+                "condition": True,
+                "href": f"/domains/{domain_name}/fields/{variable_name}",
+            },
+            {
+                "condition": True,
+                "href": f"/classes/{class_name}/fields/{variable_name}",
+            },
+            {
+                "condition": class_name == "FindingsAboutEventsorInterventions",
+                "href": f"/classes/Findings/fields/{variable_name}",
+            },
+            {
+                "condition": class_name == "FindingsAboutEventsorInterventions",
+                "href": f"/classes/FindingsAbout/fields/{variable_name}",
+            },
+            {"condition": True, "href": f"/classes/Identifiers/fields/{variable_name}"},
+            {"condition": True, "href": f"/classes/Timing/fields/{variable_name}"},
+        ]
 
     def build_implements_link(self):
-        names = [self.name]
-        if self.parent_domain_name and len(self.name) > 1 and self.name[:2] == self.parent_domain_name:
-            #needed for cases in which names like SU.SUBJID are processed while containing the parent class name
-            names.append(self.transformer.replace_str(self.name, self.parent_domain_name, "--", 1))
-                
+        names = self.get_variable_variations(self.parent_domain_name)
         class_name = self.transformer.format_name_for_link(self.parent_class_name)
-            
         data = None
-        
         for name in names:
-            
-            parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/{class_name}/fields/{name}"
-            # try class link
-            data = self.try_get_api_json(parent_href)
-
-            # try Findings class if class_name == "FindingsAboutEventsorInterventions"
-            if not data and class_name == "FindingsAboutEventsorInterventions":
-                parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Findings/fields/{name}"
-                data = self.try_get_api_json(parent_href)
-
-            # try Identifiers
-            if not data:
-                parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Identifiers/fields/{name}"
-                data = self.try_get_api_json(parent_href)
-
-            # try timing
-            if not data:
-                parent_href = self.parent_product.summary["_links"]["model"]["href"] + f"/classes/Timing/fields/{name}"
-                data = self.try_get_api_json(parent_href)
-                
+            for link in self.potential_links(
+                class_name, f"{self.parent_domain_name}", name
+            ):
+                condition, href = link.values()
+                if condition:
+                    parent_href = (
+                        self.parent_product.summary["_links"]["model"]["href"] + href
+                    )
+                    data = self.try_get_api_json(parent_href)
+                if data:
+                    break
             if data:
                 break
-
-
         if data:
             self.links["implements"] = data["_links"]["self"]
+        else:
+            logger.error(f"No model dataset or class variable found for: {self.parent_domain_name}.{self.name}")
 
     def _set_target(self, variable: str) -> dict:
         category = self._get_mapping_target_variable_type(variable)
@@ -313,7 +315,7 @@ class Variable(BaseVariable):
             except Exception as e:
                 logger.info(e)
                 logger.info(f'SET_MAPPING_TARGET: Failed to find mapping target for variable {self.name}, target {variable}, product_type: {mapping_product}, category: {category_name}, {href}')
-    
+
     def to_json(self):
         json_data = {
             "_links": self.links,
@@ -344,11 +346,11 @@ class Variable(BaseVariable):
             json_data["valueList"] = self.value_list
 
         return json_data
-    
+
     def validate(self):
         if not self.label:
             logger.info(f"Variable with name: {self.name} is missing a label. This will cause the title in links to this variable to be empty.")
-    
+
     def to_string(self):
         string = f"Name: {self.name}, Parent Class: {self.parent_class_name}, Parent Domain: {self.parent_domain_name}"
         if self.scenario:
