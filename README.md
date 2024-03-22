@@ -74,3 +74,19 @@ ex: `python .\parse_document.py -c config -l 'info' -i -o log.txt`
 Tests can be run by running the following command from the root directory of this repository:
 
 `pytest`
+
+#### Informative Content
+
+To load informative content into the database, for example, for TIG v 1-0:
+
+- Set the env variables (or use the defined command line arguments):
+
+   `CONFLUENCE_USERNAME`
+   `CONFLUENCE_PASSWORD`
+   `COSMOSDB_ENDPOINT`
+   `COSMOSDB_KEY`
+   `COSMOSDB_DATABASE_NAME`
+
+- run the command:
+
+   `python load_ig.py -t https://wiki.cdisc.org/display/TATOBA/Tobacco+Implementation+Guide+Home -s tig -v 1-0`

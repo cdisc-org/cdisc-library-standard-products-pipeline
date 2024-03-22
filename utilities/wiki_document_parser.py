@@ -10,6 +10,7 @@ from utilities.blob_service import BlobService
 from utilities import document_tags
 from typing import List
 import os
+from sys import maxsize
 
 class Parser:
     
@@ -23,7 +24,7 @@ class Parser:
         html = self.client.get_html(url)
         return self._get_markdown_from_html(html)
     
-    def get_ig_document_tree(self, url, standard, standard_version):
+    def get_ig_document_tree(self, url, standard, standard_version, max_pages=maxsize):
         page_id = self._get_page_id(url)
         children = self._get_page_children(page_id)
         pages = [
@@ -34,7 +35,7 @@ class Parser:
             } for child in children if self._has_children(child["id"])
         ]
         documents = {}
-        while pages:
+        while pages and len(documents) < max_pages:
             page = pages.pop()
             title = page.get("title")
             if "specifications" in title.lower() or "content control" in title.lower():

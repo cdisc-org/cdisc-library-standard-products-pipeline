@@ -5,9 +5,10 @@ from utilities.wiki_document_parser import Parser
 from db_models.ig_document import IGDocument
 import argparse
 from dotenv import load_dotenv
-import json
 import os
 import utilities.constants as constants
+from functools import reduce
+from collections import defaultdict
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -30,6 +31,10 @@ def create_logger(args):
     logger.addHandler(console_handler)
     return logger
 
+def accumulate_pageids(cumulative, document):
+    cumulative[(document.standard, document.standard_version)].add(document.page_id)
+    return cumulative
+
 if __name__ == "__main__":
     args = parse_arguments()
     logger = create_logger(args)
@@ -48,3 +53,15 @@ if __name__ == "__main__":
     logger.info(f"{len(documents)} documents found.")
     for document in documents.values():
         document._save_to_db()
+    standard_version_to_pageids = reduce(accumulate_pageids, documents.values(), defaultdict(set))
+    docs_params = [
+        {
+            "standard": standard,
+            "version": version,
+            "page_ids": page_ids
+        }
+        for (standard, version), page_ids
+        in standard_version_to_pageids.items()
+    ]
+    for doc_params in docs_params:
+        IGDocument.delete_except(doc_params)
