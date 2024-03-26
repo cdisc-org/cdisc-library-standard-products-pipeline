@@ -41,6 +41,15 @@ class BaseDBModel:
         )
         return [cls(db_record) for db_record in db_records]
 
+    @classmethod
+    def delete(
+        cls, id, partition_key: str = None, db_service=None
+    ):
+        db_service = db_service or CosmosDBService.get_instance(
+            cls._table_name()
+        )
+        db_service.delete_item(id, partition_key=partition_key)
+
     def _ensure_valid_record_structure():
         raise NotImplementedError()
 
