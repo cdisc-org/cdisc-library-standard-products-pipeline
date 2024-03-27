@@ -136,6 +136,9 @@ class Parser:
         for div in parser.find_all("div", {'class':'expand-control'}):
             # Remove table dropdowns
             div.decompose()
+        for a in parser.find_all("a"):
+            # Replace links with plaintext
+            a.unwrap()
         for img in parser.find_all("img"):
             img_link = img.attrs["src"]
             try:
