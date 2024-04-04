@@ -19,6 +19,7 @@ def parse_arguments():
     parser.add_argument("-l", "--log_level")
     parser.add_argument("-v", "--version")
     parser.add_argument("-o", "--output", help="Name of the file to write data to. Defaults to assumptions.json", default="data.json")
+    parser.add_argument("-r", "--report_file", help="File containing document generation report", default="report.txt")
     args = parser.parse_args()
     return args
 
@@ -26,6 +27,9 @@ def create_logger(args):
     logger = logging.getLogger("load-ig-pipeline")
     logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
     logger.setLevel(args.log_level or logging.DEBUG)
+    file_handler = logging.FileHandler(args.report_file, "w")
+    file_handler.setFormatter(logFormatter)
+    logger.addHandler(file_handler)
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logFormatter)
     logger.addHandler(console_handler)

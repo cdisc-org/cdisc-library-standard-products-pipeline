@@ -39,7 +39,12 @@ class WikiClient:
         if raw_data.status_code == 200:
             if not raw_data.encoding:
                 raw_data.encoding = 'UTF-8'
-            return json.loads(raw_data.text)
+            json_data = json.loads(raw_data.text)
+            next = json_data["_links"].get("next")
+            if next:
+                base = json_data["_links"].get("base")
+                json_data["results"].extend(self.get_json(f"{base}{next}")["results"])
+            return json_data
         else:
             raise Exception(f"Get request to {url} returned unsuccessful response {raw_data.status_code}")
     
@@ -49,7 +54,7 @@ class WikiClient:
             raise Exception(f"Put request to {url} returned unsuccessful response {raw_data.status_code}")
         
     def get_wiki_table(self, document_id, table_name):
-        base_url = f"https://wiki.cdisc.org/ajax/confiforms/rest/filter.action?pageId={document_id}&f={table_name}&q="
+        base_url = f"{self.wiki_base_url}/ajax/confiforms/rest/filter.action?pageId={document_id}&f={table_name}&q="
         response = requests.get(base_url, auth=(self.username, self.password))
         if response.status_code != 200:
             raise Exception(f"Invalid url for wiki document {document_id} and table {table_name}")
