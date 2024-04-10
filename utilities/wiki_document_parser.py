@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from markdownify import markdownify
-from markdown import markdown
 from db_models.ig_document import IGDocument
 from uuid import uuid4
 from utilities.transformer import Transformer
@@ -11,6 +10,7 @@ from utilities import document_tags
 from typing import List
 import os
 from sys import maxsize
+from urllib.parse import unquote
 
 class Parser:
     
@@ -145,7 +145,7 @@ class Parser:
                 data = self.client.download_file(img_link)
                 image_path = img_link.split("?")[0]
                 image_file_name = f"{page_id}-{image_path.split('/')[-1]}"
-                self.image_blob_service.upload_file(data, image_file_name)
+                self.image_blob_service.upload_file(data, unquote(image_file_name))
                 base_url = f"https://cdisclibrary{os.environ.get('ENVIRONMENT', '').lower()}.blob.core.windows.net/images"
                 image_link_path = f"{base_url}/{image_file_name}"
                 attrs = {
@@ -156,8 +156,9 @@ class Parser:
                     attrs["height"] = img.attrs["height"]
                 img.attrs = attrs
                 self.logger.info(f"Successfully duplicated {img_link}")
-            except:
+            except Exception as e:
                 self.logger.error(f"Failed to duplicate {img_link}")
+                self.logger.error(e)
         return self.transformer.get_raw_text(str(parser))
         
 

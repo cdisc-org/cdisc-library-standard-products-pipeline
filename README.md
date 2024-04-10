@@ -81,11 +81,13 @@ To load informative content into the database, for example, for TIG v 1-0:
 
 - Set the env variables (or use the defined command line arguments):
 
-   `CONFLUENCE_USERNAME`
-   `CONFLUENCE_PASSWORD`
-   `COSMOSDB_ENDPOINT`
-   `COSMOSDB_KEY`
-   `COSMOSDB_DATABASE_NAME`
+   - `CONFLUENCE_USERNAME`
+   - `CONFLUENCE_PASSWORD`
+   - `COSMOSDB_ENDPOINT`
+   - `COSMOSDB_KEY`
+   - `COSMOSDB_DATABASE_NAME`
+   - `AZURE_CONNECTION_STRING` - blob storage connection string
+   - `ENVIRONMENT` - `cdisclibrary` blob storage environment (`dev`, `qa`, `stage`, or <empty> for prod)
 
 - run the command:
 
