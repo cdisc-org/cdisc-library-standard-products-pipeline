@@ -1,0 +1,57 @@
+name: Promote Cosmos DB documents
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: Environment Source -> Target
+        required: true
+        type: choice
+        options:
+          - DEV -> QA
+          - QA -> STAGE
+          - STAGE -> PROD
+
+jobs:
+  promote_documents:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get source and target environment
+        uses: winterjung/split@v2
+        id: split
+        with:
+          msg: ${{ github.event.inputs.env }}
+          separator: " -> "
+
+      - name: Set the source and target table secret names
+        run: |
+          echo "COSMOSDB_CONNECTION_STRING_SOURCE_NAME=COSMOSDB_KEY_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_SOURCE_NAME=COSMOSDB_KEY_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME=COSMOSDB_KEY_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_KEY_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_CONNECTION_STRING_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
+
+      - name: Set the source and target table argument values
+        run: |
+          echo "COSMOSDB_CONNECTION_STRING_SOURCE=${{ secrets[env.COSMOSDB_CONNECTION_STRING_SOURCE_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_SOURCE=${{ secrets[env.COSMOSDB_DATABASE_NAME_SOURCE_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE=${{ secrets[env.COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_KEY_TARGET=${{ secrets[env.COSMOSDB_KEY_TARGET_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_CONNECTION_STRING_TARGET=${{ secrets[env.COSMOSDB_CONNECTION_STRING_TARGET_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_TARGET=${{ secrets[env.COSMOSDB_DATABASE_NAME_TARGET_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET=${{ secrets[env.COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME]}}" >> $GITHUB_ENV
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run Promote Documents Script
+        run: python promote_documents.py -cs ${{ env.COSMOSDB_CONNECTION_STRING_SOURCE }} -ds ${{ env.COSMOSDB_DATABASE_NAME_SOURCE }} -ts ${{ env.COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE }} -ct ${{ env.COSMOSDB_CONNECTION_STRING_TARGET }} -dt ${{ env.COSMOSDB_DATABASE_NAME_TARGET }} -tt ${{ env.COSMOSDB_IG_DOCS_TABLE_NAME_TARGET }}

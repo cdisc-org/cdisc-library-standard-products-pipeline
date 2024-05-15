@@ -83,9 +83,9 @@ To load informative content into the database, for example, for TIG v 1-0:
 
    - `CONFLUENCE_USERNAME`
    - `CONFLUENCE_PASSWORD`
-   - `COSMOSDB_ENDPOINT`
-   - `COSMOSDB_KEY`
-   - `COSMOSDB_DATABASE_NAME`
+   - `COSMOSDB_CONNECTION_STRING_DEV`
+   - `COSMOSDB_DATABASE_NAME_DEV`
+   - `COSMOSDB_IG_DOCS_TABLE_NAME_DEV`
    - `AZURE_CONNECTION_STRING` - blob storage connection string
    - `ENVIRONMENT` - `cdisclibrary` blob storage environment (`dev`, `qa`, `stage`, or <empty> for prod)
 

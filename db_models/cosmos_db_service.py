@@ -1,47 +1,65 @@
-import json
 import logging
-from typing import Optional, List, Any
+from typing import Optional, List, Dict, Any
 
 from azure.core.paging import ItemPaged
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy
-from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosResourceNotFoundError
-import os
+from azure.cosmos.exceptions import (
+    CosmosResourceExistsError,
+    CosmosResourceNotFoundError,
+)
 from logging import getLogger, Logger
+
 
 class CosmosDBService:
     """
     This class is a high-level facade over CosmosDB.
     """
 
+    _cosmos_client_instance_map = {}
+    _database_instance_map = {}
     _table_name_instance_map = {}
 
     @classmethod
-    def get_instance(cls, table_name: str):
-        existing_instance = cls._table_name_instance_map.get(table_name)
-        if existing_instance is not None:
-            return existing_instance
+    def get_instance(cls, connection_string: str, database_name: str, table_name: str):
         instance = cls()
-        instance._db_endpoint = os.environ.get("COSMOSDB_ENDPOINT")
-        instance._resource_uri_template = os.environ.get("COSMOS_RESOURCE_URI")
-        instance._cosmos_client = CosmosClient(
-            url=instance._db_endpoint,
-            credential=os.environ.get("COSMOSDB_KEY"),
-        )
-        instance._database_name = os.environ.get("COSMOSDB_DATABASE_NAME")
-        instance._database = instance._cosmos_client.get_database_client(
-            database=instance._database_name
-        )
-        instance._container_name = table_name
-        instance._container = instance._database.get_container_client(
-            container=instance._container_name
-        )
         instance._logger = getLogger("cosmos-db-service")
-        cls._table_name_instance_map[table_name] = instance
-        return instance
+
+        instance._connection_string = connection_string
+        instance._cosmos_client = cls._cosmos_client_instance_map.get(connection_string)
+        if instance._cosmos_client is None:
+            instance._cosmos_client = CosmosClient.from_connection_string(
+                instance._connection_string
+            )
+            cls._cosmos_client_instance_map[connection_string] = instance._cosmos_client
+
+        instance._database_name = database_name
+        instance._database = cls._database_instance_map.get(
+            (connection_string, database_name)
+        )
+        if instance._database is None:
+            instance._database = instance._cosmos_client.get_database_client(
+                database=instance._database_name
+            )
+            cls._database_instance_map[(connection_string, database_name)] = (
+                instance._database
+            )
+
+        instance._container_name = table_name
+        existing_instance = cls._table_name_instance_map.get(
+            (connection_string, database_name, table_name)
+        )
+        if existing_instance is None:
+            instance._container = instance._database.get_container_client(
+                container=instance._container_name
+            )
+            cls._table_name_instance_map[(connection_string, database_name, table_name)] = (
+                instance
+            )
+            return instance
+        return existing_instance
 
     def __init__(self):
-        self._db_endpoint: str = None
-        self._resource_uri_template: str = None
+        self._connection_string: str = None
         self._cosmos_client: CosmosClient = None
         self._database_name: str = None
         self._database: DatabaseProxy = None
@@ -81,12 +99,42 @@ class CosmosDBService:
             )
             return None
 
-    def delete_item(self, item_id: str, partition_key: str = None):
+    def delete_item(self, item_id: Dict[str, Any] | str, partition_key: str = None):
         """
         Deletes an item from CosmosDB table.
         """
         partition_key = partition_key or item_id
         self._container.delete_item(item=item_id, partition_key=partition_key)
+
+    def delete_all(self, partition_key: str = None):
+        """
+        Deletes all items from CosmosDB table.
+        """
+        for item in self._container.read_all_items():
+            partition_key = item[partition_key or "id"]
+            self.delete_item(item, partition_key)
+
+    @staticmethod
+    def copy_all(
+        source_db_service: "CosmosDBService", target_db_service: "CosmosDBService"
+    ):
+        """
+        Copies all items from one CosmosDB table to another.
+        """
+        for item in source_db_service._container.read_all_items():
+            target_db_service._container.create_item(body=item)
+
+    @staticmethod
+    def replace_all(
+        source_db_service: "CosmosDBService",
+        target_db_service: "CosmosDBService",
+        partition_key: str = None,
+    ):
+        """
+        Deletes all items from target db and copies all items from source CosmosDB table to target.
+        """
+        target_db_service.delete_all(partition_key)
+        CosmosDBService.copy_all(source_db_service, target_db_service)
 
     def query_items(
         self, partition_key: str = None, query_params: dict = None
@@ -121,7 +169,7 @@ class CosmosDBService:
         """
         logging.info(f"updating item. update_body={item_to_update}")
         self._container.upsert_item(body=item_to_update)
-    
+
     def _create_where_statement(self, query_params: dict) -> str:
         conditions: List[str] = []
         for key, value in query_params.items():
