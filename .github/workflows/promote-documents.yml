@@ -27,7 +27,6 @@ jobs:
           echo "COSMOSDB_CONNECTION_STRING_SOURCE_NAME=COSMOSDB_KEY_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
           echo "COSMOSDB_DATABASE_NAME_SOURCE_NAME=COSMOSDB_KEY_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
           echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME=COSMOSDB_KEY_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_KEY_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
           echo "COSMOSDB_CONNECTION_STRING_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
           echo "COSMOSDB_DATABASE_NAME_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
           echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME=COSMOSDB_KEY_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
@@ -35,12 +34,11 @@ jobs:
       - name: Set the source and target table argument values
         run: |
           echo "COSMOSDB_CONNECTION_STRING_SOURCE=${{ secrets[env.COSMOSDB_CONNECTION_STRING_SOURCE_NAME]}}" >> $GITHUB_ENV
-          echo "COSMOSDB_DATABASE_NAME_SOURCE=${{ secrets[env.COSMOSDB_DATABASE_NAME_SOURCE_NAME]}}" >> $GITHUB_ENV
-          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE=${{ secrets[env.COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME]}}" >> $GITHUB_ENV
-          echo "COSMOSDB_KEY_TARGET=${{ secrets[env.COSMOSDB_KEY_TARGET_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_SOURCE=${{ vars[env.COSMOSDB_DATABASE_NAME_SOURCE_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE=${{ vars[env.COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME]}}" >> $GITHUB_ENV
           echo "COSMOSDB_CONNECTION_STRING_TARGET=${{ secrets[env.COSMOSDB_CONNECTION_STRING_TARGET_NAME]}}" >> $GITHUB_ENV
-          echo "COSMOSDB_DATABASE_NAME_TARGET=${{ secrets[env.COSMOSDB_DATABASE_NAME_TARGET_NAME]}}" >> $GITHUB_ENV
-          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET=${{ secrets[env.COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_TARGET=${{ vars[env.COSMOSDB_DATABASE_NAME_TARGET_NAME]}}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET=${{ vars[env.COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME]}}" >> $GITHUB_ENV
 
       - name: Checkout Repository
         uses: actions/checkout@v4
