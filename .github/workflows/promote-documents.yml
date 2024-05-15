@@ -52,4 +52,4 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Promote Documents Script
-        run: python promote_documents.py -cs ${{ env.COSMOSDB_CONNECTION_STRING_SOURCE }} -ds ${{ env.COSMOSDB_DATABASE_NAME_SOURCE }} -ts ${{ env.COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE }} -ct ${{ env.COSMOSDB_CONNECTION_STRING_TARGET }} -dt ${{ env.COSMOSDB_DATABASE_NAME_TARGET }} -tt ${{ env.COSMOSDB_IG_DOCS_TABLE_NAME_TARGET }}
+        run: python promote_documents.py -cs "${{ env.COSMOSDB_CONNECTION_STRING_SOURCE }}" -ds ${{ env.COSMOSDB_DATABASE_NAME_SOURCE }} -ts ${{ env.COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE }} -ct "${{ env.COSMOSDB_CONNECTION_STRING_TARGET }}" -dt ${{ env.COSMOSDB_DATABASE_NAME_TARGET }} -tt ${{ env.COSMOSDB_IG_DOCS_TABLE_NAME_TARGET }}
