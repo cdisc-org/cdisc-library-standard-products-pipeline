@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 
 from azure.core.paging import ItemPaged
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy
@@ -99,7 +99,7 @@ class CosmosDBService:
             )
             return None
 
-    def delete_item(self, item_id: Dict[str, Any] | str, partition_key: str = None):
+    def delete_item(self, item_id: Union[Dict[str, Any], str], partition_key: str = None):
         """
         Deletes an item from CosmosDB table.
         """

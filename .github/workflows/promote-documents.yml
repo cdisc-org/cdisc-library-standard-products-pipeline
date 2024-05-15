@@ -26,10 +26,10 @@ jobs:
         run: |
           echo "COSMOSDB_CONNECTION_STRING_SOURCE_NAME=COSMOSDB_CONNECTION_STRING_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
           echo "COSMOSDB_DATABASE_NAME_SOURCE_NAME=COSMOSDB_DATABASE_NAME_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME=COSMOSDB_TABLE_NAME_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME=COSMOSDB_IG_DOCS_TABLE_NAME_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
           echo "COSMOSDB_CONNECTION_STRING_TARGET_NAME=COSMOSDB_CONNECTION_STRING_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
           echo "COSMOSDB_DATABASE_NAME_TARGET_NAME=COSMOSDB_DATABASE_NAME_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME=COSMOSDB_TABLE_NAME_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME=COSMOSDB_IG_DOCS_TABLE_NAME_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
 
       - name: Set the source and target table argument values
         run: |
