@@ -1,5 +1,6 @@
 from db_models.base_db_model import BaseDBModel
 from datetime import datetime
+import os
 
 class IGDocument(BaseDBModel):
 
@@ -24,11 +25,25 @@ class IGDocument(BaseDBModel):
         self.children_titles.append(title)
 
     @classmethod
+    def _connection_string(cls) -> str:
+        """
+        Returns connection string for the model.
+        """
+        return os.environ.get("COSMOSDB_CONNECTION_STRING_DEV", "")
+    
+    @classmethod
+    def _database_name(cls) -> str:
+        """
+        Returns database name for the model.
+        """
+        return os.environ.get("COSMOSDB_DATABASE_NAME_DEV", "")
+    
+    @classmethod
     def _table_name(cls) -> str:
         """
         Returns table name for the model.
         """
-        return "ImplementationGuideDocuments"
+        return os.environ.get("COSMOSDB_IG_DOCS_TABLE_NAME_DEV", "")
 
     @classmethod
     def get_or_create(cls, record_params={}) -> "IGDocument":

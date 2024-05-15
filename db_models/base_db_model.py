@@ -1,18 +1,43 @@
 from uuid import uuid4
 from datetime import datetime
 from db_models.cosmos_db_service import CosmosDBService
+from abc import abstractmethod
+from typing import List
 
 class BaseDBModel:
 
     def __init__(self, params ={}, db_service=None):
         self.id = params.get("id", str(uuid4()))
         self._db_service = db_service or CosmosDBService.get_instance(
-            self._table_name()
+            self._connection_string(),
+            self._database_name(),
+            self._table_name(),
         )
         self.created_at = params.get("createdAt") or datetime.now().isoformat()
         self.updated_at = params.get("updatedAt") or datetime.now().isoformat()
 
     @classmethod
+    @abstractmethod
+    def _connection_string(cls) -> str:
+        """
+        Returns connection string for each model.
+        This method is needed to save a
+        model to the corresponding connection string.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def _database_name(cls) -> str:
+        """
+        Returns database name for each model.
+        This method is needed to save a
+        model to the corresponding database.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
     def _table_name(cls) -> str:
         """
         Returns table name for each model.
@@ -34,7 +59,9 @@ class BaseDBModel:
         """
         # avoiding dependency injection here
         db_service = db_service or CosmosDBService.get_instance(
-            cls._table_name()
+            cls._connection_string(),
+            cls._database_name(),
+            cls._table_name(),
         )
         db_records: List[dict] = db_service.query_items(
             partition_key=partition_key, query_params=query_params
@@ -46,7 +73,9 @@ class BaseDBModel:
         cls, id, partition_key: str = None, db_service=None
     ):
         db_service = db_service or CosmosDBService.get_instance(
-            cls._table_name()
+            cls._connection_string(),
+            cls._database_name(),
+            cls._table_name(),
         )
         db_service.delete_item(id, partition_key=partition_key)
 
