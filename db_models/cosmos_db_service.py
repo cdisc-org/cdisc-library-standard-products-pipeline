@@ -106,12 +106,12 @@ class CosmosDBService:
         partition_key = partition_key or item_id
         self._container.delete_item(item=item_id, partition_key=partition_key)
 
-    def delete_all(self, partition_key: str = None):
+    def delete_all(self, partition_key_name: str = "id"):
         """
         Deletes all items from CosmosDB table.
         """
         for item in self._container.read_all_items():
-            partition_key = item[partition_key or "id"]
+            partition_key = item[partition_key_name]
             self.delete_item(item, partition_key)
 
     @staticmethod
@@ -128,7 +128,7 @@ class CosmosDBService:
     def replace_all(
         source_db_service: "CosmosDBService",
         target_db_service: "CosmosDBService",
-        partition_key: str = None,
+        partition_key: str = "id",
     ):
         """
         Deletes all items from target db and copies all items from source CosmosDB table to target.
