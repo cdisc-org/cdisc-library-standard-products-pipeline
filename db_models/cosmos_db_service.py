@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, List, Dict, Any, Union
+from typing import Callable, Optional, List, Dict, Any, Union
 
 from azure.core.paging import ItemPaged
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy
@@ -115,26 +115,37 @@ class CosmosDBService:
             self.delete_item(item, partition_key)
 
     @staticmethod
+    def _identity_transformation(item: Dict[str, Any]) -> Dict[str, Any]:
+        return item
+
+    @staticmethod
     def copy_all(
-        source_db_service: "CosmosDBService", target_db_service: "CosmosDBService"
+        source_db_service: "CosmosDBService",
+        target_db_service: "CosmosDBService",
+        transformation: Callable[
+            [Dict[str, Any]], Dict[str, Any]
+        ] = _identity_transformation,
     ):
         """
         Copies all items from one CosmosDB table to another.
         """
         for item in source_db_service._container.read_all_items():
-            target_db_service._container.create_item(body=item)
+            target_db_service._container.create_item(body=transformation(item))
 
     @staticmethod
     def replace_all(
         source_db_service: "CosmosDBService",
         target_db_service: "CosmosDBService",
         partition_key: str = "id",
+        transformation: Callable[
+            [Dict[str, Any]], Dict[str, Any]
+        ] = _identity_transformation,
     ):
         """
         Deletes all items from target db and copies all items from source CosmosDB table to target.
         """
         target_db_service.delete_all(partition_key)
-        CosmosDBService.copy_all(source_db_service, target_db_service)
+        CosmosDBService.copy_all(source_db_service, target_db_service, transformation)
 
     def query_items(
         self, partition_key: str = None, query_params: dict = None
