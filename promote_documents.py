@@ -67,7 +67,8 @@ def parse_arguments():
 def _replace_blob(
     item: Dict[str, Any], blob_source: str, blob_target: str
 ) -> Dict[str, Any]:
-    item["html"] = item["html"].replace(blob_source, blob_target)
+    if "html" in item:
+        item["html"] = item["html"].replace(blob_source, blob_target)
     return item
 
 
