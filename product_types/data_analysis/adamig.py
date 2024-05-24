@@ -13,7 +13,7 @@ class ADAMIG(ADAM):
         self.product_category = "data-analysis"
         self.codelist_types = ["adamct", "sdtmct"]
         self.product_type = product_type
-        self.version_prefix = product_type + "-"
+        self.version_prefix = "" if version.startswith("tig-") else (product_type + "-")
     
     def generate_document(self) -> dict:
         if self.has_parent_model:
