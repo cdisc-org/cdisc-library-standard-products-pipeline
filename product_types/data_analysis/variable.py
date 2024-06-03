@@ -43,7 +43,7 @@ class Variable(BaseVariable):
         datastructure_name = self.transformer.format_name_for_link(self.parent_datastructure_name)
         product_name = self.parent_product.version_prefix + self.parent_product.version
         self_link = {
-                "href": f"/mdr/{self.parent_product.model_type}/{product_name}/datastructures/{datastructure_name}/variables/{variable_name}",
+                "href": f"/mdr/{self.parent_product.product_type if self.parent_product.product_type == 'tig' else self.parent_product.model_type}/{product_name}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/datastructures/{datastructure_name}/variables/{variable_name}",
                 "title": self.label,
                 "type": "Analysis Variable"
             }

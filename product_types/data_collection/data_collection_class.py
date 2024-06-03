@@ -24,7 +24,7 @@ class DataCollectionClass:
     def _build_self_link(self):
         link_name = self.transformer.format_name_for_link(self.name)
         self_link = {}
-        self_link["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/classes/{link_name}"
+        self_link["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/classes/{link_name}"
         self_link["title"] = self.label
         self_link["type"] = "Class"
         return self_link

@@ -31,7 +31,7 @@ class Scenario:
         parent_domain_name = self.transformer.format_name_for_link(self.parent_domain_name)
         link_name = f"{parent_domain_name}.{self.transformer.format_name_for_link(self.name)}"
         self_link = {}
-        self_link["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/scenarios/{link_name}"
+        self_link["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/scenarios/{link_name}"
         self_link["title"] = self.label
         self_link["type"] = "CDASH Scenario"
         return self_link

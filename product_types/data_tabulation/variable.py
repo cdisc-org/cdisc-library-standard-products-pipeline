@@ -41,7 +41,7 @@ class Variable(BaseVariable):
         type_label = "SDTM Class Variable" if variable_type == "classes" else "SDTM Dataset Variable"
         variable_name = self.transformer.format_name_for_link(self.name, [" ", ",","\n", "\\n", '"'])
         return  {
-            "href": f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/{variable_type}/{parent_name}/variables/{variable_name}",
+            "href": f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/{variable_type}/{parent_name}/variables/{variable_name}",
             "title": self.label,
             "type": type_label
         }
@@ -52,7 +52,7 @@ class Variable(BaseVariable):
         type_label = "SDTM Class Variable" if variable_type == "classes" else "SDTM Dataset Variable"
         variable_name = self.transformer.format_name_for_link(self.name, [" ", ",","\n", "\\n", '"'])
         return  {
-            "href": f"/mdr/root/{self.parent_product.product_type}/{variable_type}/{parent_name}/variables/{variable_name}",
+            "href": f"/mdr/root/{self.parent_product.product_type}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/{variable_type}/{parent_name}/variables/{variable_name}",
             "title": f"Version-agnostic anchor resource for {self.parent_product.product_type.upper()} variable {parent_name}.{variable_name}",
             "type": "Root Data Element"
         }

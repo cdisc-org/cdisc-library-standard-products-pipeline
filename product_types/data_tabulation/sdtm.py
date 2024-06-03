@@ -6,8 +6,8 @@ from copy import deepcopy
 from utilities import logger, constants
 
 class SDTM(BaseProduct):
-    def __init__(self, wiki_client, library_client, summary, product_type, version, config):
-        super().__init__(wiki_client, library_client, summary, product_type, version, config)
+    def __init__(self, wiki_client, library_client, summary, product_type, version, product_subtype, config):
+        super().__init__(wiki_client, library_client, summary, product_type, version, product_subtype, config)
         self.product_category = "data-tabulation"
         self.codelist_types = ["sdtmct"]
         self.is_ig = False

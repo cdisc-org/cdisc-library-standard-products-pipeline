@@ -110,7 +110,7 @@ class Variable(BaseVariable):
         parent_name = self._get_parent_obj_name()
         variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1], [" ", ",","\n", "\\n", '"', "/", "."])
         return {
-                "href": f"/mdr/{self.product_type}/{self.parent_product.version}/{variable_type}/{parent_name}/fields/{variable_name}",
+                "href": f"/mdr/{self.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/{variable_type}/{parent_name}/fields/{variable_name}",
                 "title": self.label,
                 "type": "Class Variable" if variable_type == "classes" else "Data Collection Field"
             }
@@ -120,7 +120,7 @@ class Variable(BaseVariable):
         parent_name = self._get_parent_obj_name()
         variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1], [" ", ",","\n", "\\n", '"', "/", "."])
         return {
-                "href": f"/mdr/root/{self.product_type}/{variable_type}/{parent_name}/fields/{variable_name}",
+                "href": f"/mdr/root/{self.product_type}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/{variable_type}/{parent_name}/fields/{variable_name}",
                 "title": self.label,
                 "type": "Root Data Element"
         }

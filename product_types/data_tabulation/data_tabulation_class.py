@@ -24,7 +24,7 @@ class DataTabulationClass:
     def _build_self_link(self) -> dict:
         name = self.transformer.format_name_for_link(self.name)
         self_link = {
-            "href": f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/classes/{name}",
+            "href": f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/classes/{name}",
             "title": self.label,
             "type": "Class"
         }

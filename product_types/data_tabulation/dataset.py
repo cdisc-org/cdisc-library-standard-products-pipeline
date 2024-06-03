@@ -26,7 +26,7 @@ class Dataset:
     def _build_self_link(self) -> dict:
         name = self.transformer.format_name_for_link(self.name)
         self_link = {
-            "href": f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/datasets/{name}",
+            "href": f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/datasets/{name}",
             "title": self.label,
             "type": "SDTM Dataset"
         }
@@ -78,4 +78,3 @@ class Dataset:
     def validate(self):
         if not self.label:
             logger.info(f"Dataset with name: {self.name} is missing a label. This will cause the title in links to this dataset to be empty.")
-

@@ -24,7 +24,7 @@ class Varset:
         datastructure_name = self.transformer.format_name_for_link(self.parent_datastructure_name)
         self_link["title"] = self.label
         version = self.parent_product.version_prefix + self.parent_product.version
-        self_link["href"] = f"/mdr/{self.parent_product.model_type}/{version}/datastructures/{datastructure_name}/varsets/{name}"
+        self_link["href"] = f"/mdr/{self.parent_product.product_type if self.parent_product.product_type == 'tig' else self.parent_product.model_type}/{version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/datastructures/{datastructure_name}/varsets/{name}"
         self_link["type"] = "Variable Set"
         return self_link
 

@@ -25,7 +25,7 @@ class Datastructure:
         self_link = {}
         self_link["title"] = self.label
         version = self.parent_product.version_prefix + self.parent_product.version
-        self_link["href"] = f"/mdr/{self.parent_product.model_type}/{version}/datastructures/{name}"
+        self_link["href"] = f"/mdr/{self.parent_product.product_type if self.parent_product.product_type == 'tig' else self.parent_product.model_type}/{version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/datastructures/{name}"
         self_link["type"] = "Data Structure"
         return self_link
 
