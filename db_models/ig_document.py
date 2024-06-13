@@ -8,6 +8,7 @@ class IGDocument(BaseDBModel):
         super(IGDocument, self).__init__(params)
         self.standard = params["standard"]
         self.standard_version = params["version"]
+        self.standard_subtype = params.get("standardSubtype")
         self.title = params["title"]
         self.page_id = params["pageId"]
         self.html = params["html"]
@@ -56,6 +57,7 @@ class IGDocument(BaseDBModel):
         )), None)
 
         if document:
+            document.standard_subtype = record_params.get("standardSubtype")
             document.title = record_params.get("title")
             document.html = record_params.get("html")
             document.text = record_params.get("text")
@@ -86,6 +88,8 @@ class IGDocument(BaseDBModel):
         assert self.page_id and isinstance(self.page_id, str)
         assert self.standard and isinstance(self.standard, str)
         assert self.standard_version and isinstance(self.standard_version, str)
+        if self.standard_subtype:
+            isinstance(self.standard_subtype, str)
         if self.parent_document:
             assert isinstance(self.parent_document, str)
             assert self.parent_document_title is not None
@@ -109,7 +113,8 @@ class IGDocument(BaseDBModel):
             "children": self.children,
             "childrenTitles": self.children_titles
         }
-
+        if self.standard_subtype:
+            data["standardSubtype"] = self.standard_subtype
         if self.parent_document:
             data["parent"] = self.parent_document
             data["parentDocumentTitle"] = self.parent_document_title
