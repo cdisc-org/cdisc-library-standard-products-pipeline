@@ -72,7 +72,7 @@ class SDTM(BaseProduct):
         # set up parent class links
         for c in classes:
             if(c.parent_class_name == None):
-                logger.warning(f"Expected to find a parent class, found None in: {c.to_json()}")
+                logger.warning(f"Expected to find a parent class, found None for: {c.name}")
             else:
                 parent_class = self._find_class(c.parent_class_name, classes) or self._find_class_by_name(c.parent_class_name, classes)
                 if parent_class:
