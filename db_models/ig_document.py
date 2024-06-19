@@ -82,6 +82,14 @@ class IGDocument(BaseDBModel):
             if document.page_id not in record_params.get("page_ids"):
                 cls.delete(id=document.id)
 
+    @classmethod
+    def delete_where(cls, query_params={}):
+        documents = cls.query_by_params(
+            query_params=query_params
+        )
+        for document in documents:
+            cls.delete(id=document.id)
+
     def _ensure_valid_record_structure(self):
         assert self.title and isinstance(self.title, str)
         assert self.id and isinstance(self.id, str)
