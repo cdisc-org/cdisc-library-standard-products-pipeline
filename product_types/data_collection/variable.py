@@ -213,6 +213,8 @@ class Variable(BaseVariable):
         """
         if self.parent_class_name == "Domain Specific":
             return "sdtmig"
+        elif self.parent_product.product_type == "tig":
+            return "tig"
         elif self.parent_product.is_ig:
             return "sdtmig"
         else:
@@ -293,11 +295,17 @@ class Variable(BaseVariable):
         parent = self.transformer.format_name_for_link(self._get_mapping_parent(variable))
         if parent == "AssociatedPersonsIdentifiers":
             parent = "AssociatedPersons"
-        version = self.parent_product.sdtm_version if mapping_product == 'sdtm' else self.parent_product.sdtmig_version
+        if mapping_product == 'sdtm':
+            version = self.parent_product.sdtm_version
+        elif mapping_product == 'sdtmig':
+            version = self.parent_product.sdtmig_version
+        elif mapping_product == 'tig':
+            version = self.parent_product.sdtmig_version.split("-", 1)[1]
+            product_subtype = "sdtm"
         mapping_target_key = f"{mapping_product}{category}MappingTargets"
         category_name = "classes" if category == "Class" else "datasets"
         variable_name = variable.split(".")[-1].strip()
-        href = f"/mdr/{mapping_product}/{version}/{category_name}/{parent}/variables/{variable_name}"
+        href = f"/mdr/{mapping_product}/{version}{f'/{product_subtype}' if product_subtype else ''}/{category_name}/{parent}/variables/{variable_name}"
         if not parent:
             return
         try:
