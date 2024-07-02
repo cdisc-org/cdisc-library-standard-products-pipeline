@@ -213,8 +213,8 @@ class Variable(BaseVariable):
         """
         if self.parent_class_name == "Domain Specific":
             return "sdtmig"
-        elif self.parent_product.product_type == "tig":
-            return "tig"
+        elif self.parent_product.product_type.startswith("integrated/"):
+            return self.parent_product.product_type
         elif self.parent_product.is_ig:
             return "sdtmig"
         else:
@@ -299,7 +299,7 @@ class Variable(BaseVariable):
             version = self.parent_product.sdtm_version
         elif mapping_product == 'sdtmig':
             version = self.parent_product.sdtmig_version
-        elif mapping_product == 'tig':
+        elif mapping_product == 'integrated/tig':
             version = self.parent_product.sdtmig_version.split("-", 1)[1]
             product_subtype = "sdtm"
         mapping_target_key = f"{mapping_product}{category}MappingTargets"

@@ -53,7 +53,7 @@ class Variable(BaseVariable):
         variable_name = self.transformer.format_name_for_link(self.name, [" ", ",","\n", "\\n", '"'])
         return  {
             "href": f"/mdr/root/{self.parent_product.product_type}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/{variable_type}/{parent_name}/variables/{variable_name}",
-            "title": f"Version-agnostic anchor resource for {self.parent_product.product_type.upper()} variable {parent_name}.{variable_name}",
+            "title": f"Version-agnostic anchor resource for {self.parent_product.product_type.upper().replace('INTEGRATED/', '')}{f' {self.parent_product.product_subtype.upper()}' if  self.parent_product.product_subtype else ''} variable {parent_name}.{variable_name}",
             "type": "Root Data Element"
         }
     

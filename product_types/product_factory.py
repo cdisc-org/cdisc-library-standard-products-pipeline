@@ -55,10 +55,10 @@ class ProductFactory:
             product = version.split("-")[0]
             v = version.split("-", 1)[1]
             product_subtype = product_type[:-len("ig")]
-            self_href = f"/mdr/{product}/{v}/{product_subtype}"
+            self_href = f"/mdr/integrated/{product}/{v}/{product_subtype}"
             if summary.get("priorVersion"):
                 prior_version = self.transformer.replace_str(str(summary['priorVersion']),'.', '-')
-                prior_version_href = f"/mdr/{product}/{prior_version}/{product_subtype}"        
+                prior_version_href = f"/mdr/integrated/{product}/{prior_version}/{product_subtype}"
         elif (product_type.startswith("adam")):
             self_href = f"/mdr/adam/{product_type}-{version}"
             if summary.get("priorVersion"):
@@ -91,7 +91,7 @@ class ProductFactory:
         product_subtype = None
         if version.startswith("tig-"):
             product_subtype = product_type[:-len("ig")] if product_type.endswith("ig") else product_type
-            product_type = version.split("-")[0]
+            product_type = f"integrated/{version.split('-')[0]}"
             version = f"{version.split('-', 1)[1]}"
         if product_type == "sdtm":
             return SDTM(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, product_subtype, config)
