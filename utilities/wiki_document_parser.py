@@ -66,8 +66,7 @@ class Parser:
             }
 
             if tags.get("integrated_standards"):
-                doc_params["standard"] = f'{tags["integrated_standards"][0]}ig'
-                doc_params["version"] = f"{standard}-{standard_version}"
+                doc_params["standardSubtype"] = tags["integrated_standards"][0]
             document = IGDocument.get_or_create(doc_params)
             new_child_documents = [
                 {

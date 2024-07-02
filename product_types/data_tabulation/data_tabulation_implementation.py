@@ -6,8 +6,8 @@ from utilities import logger
 import re
 
 class DataTabulationImplementation(SDTM):
-    def __init__(self, wiki_client, library_client, summary, product_type, version, config = None):
-        super().__init__(wiki_client, library_client, summary, product_type, version, config)
+    def __init__(self, wiki_client, library_client, summary, product_type, version, product_subtype, config = None):
+        super().__init__(wiki_client, library_client, summary, product_type, version, product_subtype, config)
         self.model_type = "sdtm"
         self.parent_model = None # defined when parsing the document`
         self.is_ig = True

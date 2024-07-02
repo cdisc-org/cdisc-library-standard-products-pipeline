@@ -5,8 +5,8 @@ from product_types.data_tabulation.sdtmig import SDTMIG
 from product_types.data_tabulation.sendig import SENDIG
 
 class Integrated(BaseProduct):
-    def __init__(self, wiki_client, library_client, summary, product_type, version, config):
-        super().__init__(wiki_client, library_client, summary, product_type, version, config)
+    def __init__(self, wiki_client, library_client, summary, product_type, version, product_subtype, config):
+        super().__init__(wiki_client, library_client, summary, product_type, version, product_subtype, config)
         self.product_category = "integrated"
         self.name = self.summary["name"].split(" ")[0]
         self.label = self.summary["label"]

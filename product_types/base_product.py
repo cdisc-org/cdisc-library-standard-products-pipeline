@@ -10,13 +10,14 @@ from utilities import logger
 import utilities.constants as constants
 
 class BaseProduct:
-    def __init__(self, wiki_client, library_client, summary, product_type, version, config = None):
+    def __init__(self, wiki_client, library_client, summary, product_type, version, product_subtype, config = None):
         self.wiki_client = wiki_client
         self.config = config
         self.library_client = library_client
         self.transformer = Transformer(config)
         self.summary = summary
         self.product_type = product_type
+        self.product_subtype = product_subtype
         self.product_category = "base"
         self.codelist_types = []
         self.version = version

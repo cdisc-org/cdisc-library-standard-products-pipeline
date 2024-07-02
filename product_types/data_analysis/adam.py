@@ -4,8 +4,8 @@ import sys
 from copy import deepcopy
 
 class ADAM(BaseProduct):
-    def __init__(self, wiki_client, library_client, summary, product_type, version, config):
-        super().__init__(wiki_client, library_client, summary, product_type, version, config)
+    def __init__(self, wiki_client, library_client, summary, product_type, version, product_subtype, config):
+        super().__init__(wiki_client, library_client, summary, product_type, version, product_subtype, config)
         self.product_category = "data-analysis"
         self.codelist_type = "sdtm"
         self.tabulation_mapping = "sdtm"
