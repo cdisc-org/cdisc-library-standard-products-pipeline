@@ -302,7 +302,7 @@ class Variable(BaseVariable):
         elif mapping_product == 'integrated/tig':
             version = self.parent_product.sdtmig_version.split("-", 1)[1]
             product_subtype = "sdtm"
-        mapping_target_key = f"{mapping_product}{category}MappingTargets"
+        mapping_target_key = "mappingTargets" if mapping_product.startswith("integrated") else f"{mapping_product}{category}MappingTargets"
         category_name = "classes" if category == "Class" else "datasets"
         variable_name = variable.split(".")[-1].strip()
         href = f"/mdr/{mapping_product}/{version}{f'/{product_subtype}' if product_subtype else ''}/{category_name}/{parent}/variables/{variable_name}"

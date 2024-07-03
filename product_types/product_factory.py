@@ -93,6 +93,7 @@ class ProductFactory:
             product_subtype = product_type[:-len("ig")] if product_type.endswith("ig") else product_type
             product_type = f"integrated/{version.split('-')[0]}"
             version = f"{version.split('-', 1)[1]}"
+            summary["version"] = version
         if product_type == "sdtm":
             return SDTM(self.wiki_client, LibraryClient(self.api_key), summary, product_type, version, product_subtype, config)
         elif product_type == "sendig" or product_subtype == "send":
