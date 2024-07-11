@@ -110,7 +110,7 @@ class Variable(BaseVariable):
         parent_name = self._get_parent_obj_name()
         variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1], [" ", ",","\n", "\\n", '"', "/", "."])
         return {
-                "href": f"/mdr/{self.product_type}/{self.parent_product.version}/{variable_type}/{parent_name}/fields/{variable_name}",
+                "href": f"/mdr/{self.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/{variable_type}/{parent_name}/fields/{variable_name}",
                 "title": self.label,
                 "type": "Class Variable" if variable_type == "classes" else "Data Collection Field"
             }
@@ -120,7 +120,7 @@ class Variable(BaseVariable):
         parent_name = self._get_parent_obj_name()
         variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1], [" ", ",","\n", "\\n", '"', "/", "."])
         return {
-                "href": f"/mdr/root/{self.product_type}/{variable_type}/{parent_name}/fields/{variable_name}",
+                "href": f"/mdr/root/{self.product_type}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/{variable_type}/{parent_name}/fields/{variable_name}",
                 "title": self.label,
                 "type": "Root Data Element"
         }
@@ -213,6 +213,8 @@ class Variable(BaseVariable):
         """
         if self.parent_class_name == "Domain Specific":
             return "sdtmig"
+        elif self.parent_product.product_type.startswith("integrated/"):
+            return self.parent_product.product_type
         elif self.parent_product.is_ig:
             return "sdtmig"
         else:
@@ -293,11 +295,17 @@ class Variable(BaseVariable):
         parent = self.transformer.format_name_for_link(self._get_mapping_parent(variable))
         if parent == "AssociatedPersonsIdentifiers":
             parent = "AssociatedPersons"
-        version = self.parent_product.sdtm_version if mapping_product == 'sdtm' else self.parent_product.sdtmig_version
-        mapping_target_key = f"{mapping_product}{category}MappingTargets"
+        if mapping_product == 'sdtm':
+            version = self.parent_product.sdtm_version
+        elif mapping_product == 'sdtmig':
+            version = self.parent_product.sdtmig_version
+        elif mapping_product == 'integrated/tig':
+            version = self.parent_product.sdtmig_version.split("-", 1)[1]
+            product_subtype = "sdtm"
+        mapping_target_key = "mappingTargets" if mapping_product.startswith("integrated") else f"{mapping_product}{category}MappingTargets"
         category_name = "classes" if category == "Class" else "datasets"
         variable_name = variable.split(".")[-1].strip()
-        href = f"/mdr/{mapping_product}/{version}/{category_name}/{parent}/variables/{variable_name}"
+        href = f"/mdr/{mapping_product}/{version}{f'/{product_subtype}' if product_subtype else ''}/{category_name}/{parent}/variables/{variable_name}"
         if not parent:
             return
         try:

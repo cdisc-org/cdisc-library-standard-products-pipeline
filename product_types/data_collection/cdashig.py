@@ -8,8 +8,8 @@ from copy import deepcopy
 from utilities import logger, constants
 
 class CDASHIG(CDASH):
-    def __init__(self, wiki_client, library_client, summary, product_type, version, config):
-        super().__init__(wiki_client, library_client, summary, product_type, version, config)
+    def __init__(self, wiki_client, library_client, summary, product_type, version, product_subtype, config):
+        super().__init__(wiki_client, library_client, summary, product_type, version, product_subtype, config)
         self.model_type = "cdash"
         self.tabulation_mapping = "sdtmig"
         self.is_ig = True
@@ -108,5 +108,3 @@ class CDASHIG(CDASH):
     def _cleanup_fields(self, fields: [dict]):
         for field in fields:
             self._cleanup_json(field, ["class", "domain", "scenario", "codelist",  "mappingTargets"])
-
-

@@ -24,7 +24,7 @@ class Domain:
     def _build_self_link(self):
         link_name = self.transformer.remove_str(self.name, " ")
         self_link = {}
-        self_link["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/domains/{link_name}"
+        self_link["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/domains/{link_name}"
         self_link["title"] = self.label
         self_link["type"] = "CDASH Domain"
         return self_link
@@ -60,4 +60,3 @@ class Domain:
         if not self.label:
             logger.info(f"Domain with name: {self.name} is missing a label. This will cause the title in links to this domain to be empty.")
     
-
