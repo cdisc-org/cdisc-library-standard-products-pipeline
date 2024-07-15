@@ -141,9 +141,9 @@ class Variable(BaseVariable):
         parent_name = self._get_parent_obj_name()
         variable_name = self.transformer.format_name_for_link(self.name.split("_")[-1], [" ", ",","\n", "\\n", '"', "/", "."])
         self.add_link("parentScenario", parent_scenario.links.get("self"))
-        self.links["self"]["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}/scenarios/{parent_name}/fields/{variable_name}"
+        self.links["self"]["href"] = f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/scenarios/{parent_name}/fields/{variable_name}"
         self.links["self"]["type"] = "Data Collection Field"
-        self.links["rootItem"]["href"] =  f"/mdr/root/{self.parent_product.product_type}/scenarios/{parent_name}/fields/{variable_name}"
+        self.links["rootItem"]["href"] =  f"/mdr/root/{self.parent_product.product_type}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/scenarios/{parent_name}/fields/{variable_name}"
         self.links["rootItem"]["title"] = f"Version-agnostic anchor element for scenario field {parent_scenario.name}.{variable_name}"
         if "priorVersion" in self.links:
             del self.links["priorVersion"]

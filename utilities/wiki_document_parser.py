@@ -11,6 +11,7 @@ from typing import List
 import os
 from sys import maxsize
 from urllib.parse import unquote
+from re import compile
 
 class Parser:
     
@@ -30,7 +31,7 @@ class Parser:
         pages = [
             {
                 "id": str(uuid4()),
-                "title": child["title"],
+                "title": self._clean_title(child["title"]),
                 "page_data": child
             } for child in children if self._has_children(child["id"])
         ]
@@ -71,7 +72,7 @@ class Parser:
             new_child_documents = [
                 {
                     "id": str(uuid4()),
-                    "title": child["title"],
+                    "title": self._clean_title(child["title"]),
                     "page_data": child,
                     "parent": document.id,
                     "parentDocumentTitle": document.title
@@ -192,3 +193,7 @@ class Parser:
             return self.client.get_wiki_json(page_id, path="/child/page")
         except:
             return {}
+        
+    def _clean_title(self, title):
+        example_regex = compile(r'.*Example\.\s*')
+        return example_regex.sub('', title, 1)
