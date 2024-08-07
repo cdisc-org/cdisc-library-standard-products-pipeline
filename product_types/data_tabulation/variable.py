@@ -1,14 +1,70 @@
-
+from dataclasses import dataclass
 from utilities import logger
 from product_types.base_variable import BaseVariable
 
+@dataclass
 class Variable(BaseVariable):
 
-    def __init__(self, variable_data, parent_product, parent_dataset = None, parent_class = None):
+    product_type: str
+    parent_class: object
+    parent_dataset: object
+    name_no_prefix: str
+    label: str
+    data_type: str
+    id: str
+    ordinal: str
+    role: str
+    description: str
+    core: str
+    parent_dataset_name: str
+    parent_class_name: str
+    codelist: str
+    usage_restrictions: str
+    variable_ccode: str
+    definition: str
+    examples: str
+    notes: str
+    variables_qualified: str
+    
+    def __init__(self, variable_data = None, parent_product = None, parent_dataset = None, parent_class = None, json_data = None):
         super().__init__(parent_product)
+        if json_data:
+            self._init_from_json(json_data, parent_dataset, parent_class)
+        else:
+            self._init_from_wiki(variable_data, parent_product, parent_dataset, parent_class)
+        if parent_dataset:
+            self.set_parent_dataset(parent_dataset)
+            parent_dataset.add_variable(self)
+        elif not self.parent_product.is_ig and parent_class:
+            self.set_parent_class(parent_class)
+            parent_class.add_variable(self)
+
+    def _init_from_json(self, json_data, parent_dataset, parent_class):
+        self.name = json_data.get("name")
+        self.label = json_data.get("label")
+        self.data_type = json_data.get("simpleDatatype")
+        self.ordinal = json_data.get("ordinal")
+        self.codelist = ""
+        self.codelist_submission_values = json_data.get("codelistSubmissionValues")
+        self.core = json_data.get("core")
+        self.role = json_data.get("role")
+        self.description = json_data.get("description")
+        self.notes = json_data.get("notes")
+        self.definition = json_data.get("definition")
+        self.examples = json_data.get("examples")
+        self.usage_restrictions = json_data.get("usageRestrictions")
+        self.variable_ccode = json_data.get("variableCcode")
+        self.described_value_domain = json_data.get("describedValueDomain", "")
+        self.value_list = json_data.get("valueList")
+        self.id = json_data.get("name")
+        self.parent_class_name = parent_class.name
+        self.parent_dataset_name = parent_dataset.name
+        self._build_links()
+        if json_data["_links"].get("codelist"):
+            self.add_link("codelist", json_data["_links"].get("codelist"))
+
+    def _init_from_wiki(self, variable_data, parent_product, parent_dataset = None, parent_class = None):
         self.product_type = parent_product.product_type
-        self.parent_class = parent_class
-        self.parent_dataset = parent_dataset
         self.name = variable_data.get("Variable Name", "").strip()
         self.name_no_prefix = variable_data.get("Variable Name (no prefix)")
         self.label = self.transformer.get_raw_text(variable_data.get("Variable Label"))
@@ -18,8 +74,8 @@ class Variable(BaseVariable):
         self.role = variable_data.get("Role")
         self.description = self.transformer.cleanup_html_encoding(variable_data.get("Description", variable_data.get("CDISC Notes", "")))
         self.core = variable_data.get("Core")
-        self.parent_dataset_name = self.parent_product.get_dataset_name(variable_data.get("Dataset Name", ""))
-        self.parent_class_name = self.parent_product.class_name_mappings.get(variable_data["Observation Class"], variable_data["Observation Class"])
+        self.parent_dataset_name = parent_dataset.name
+        self.parent_class_name = parent_class.name
         self.codelist = variable_data.get("Controlled Terms, Codelist, or Format", variable_data.get("Controlled Terms, Codelist or Format", ""))
         self.described_value_domain = variable_data.get("Format")
         self.usage_restrictions = variable_data.get("Usage Restrictions")
@@ -29,11 +85,43 @@ class Variable(BaseVariable):
         self.notes = variable_data.get("Notes")
         self.variables_qualified = variable_data.get("Variable(s) Qualified")
         self.value_list = None
-        self.links = {
+        self.parent_dataset_name = (
+            ""
+            if self.parent_dataset_name is None
+            else self.parent_dataset_name.replace("SDTM ", "").replace(
+                "SEND ", ""
+            )
+        )
+        self.parent_class_name = self.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
+        self._build_links()
+
+    def _build_links(self):
+        self.links ={
             "parentProduct": self.parent_product.summary["_links"]["self"],
             "self": self._build_self_link(),
             "rootItem": self._build_root_link()
         }
+        self.set_prior_version()
+        if self.parent_product.is_ig:
+            try:
+                self.build_model_dataset_variable_link()
+            except:
+                try:
+                    self.build_model_class_variable_link()
+                except:
+                    logger.error(f"No model dataset or class variable found for: {self.parent_dataset_name}.{self.name}")
+        self._build_codelist_links()
+
+    def _build_codelist_links(self):
+        if self.parent_product._iscodelist(self.codelist) and self.codelist != "N/A":
+            codelist_submission_values = self.parent_product.parse_codelist_submission_values(self.codelist)
+            self.add_codelist_links(codelist_submission_values)
+            self.add_codelist_submission_values(codelist_submission_values)
+        elif self.parent_product._isdescribedvaluedomain(self.codelist) and self.codelist != "N/A":
+            self.set_described_value_domain(self.codelist)
+        elif self.codelist and self.codelist != "N/A":
+            # The provided codelist is a value list
+            self.set_value_list(self.codelist)
 
     def _build_self_link(self):
         variable_type = self._get_type()
@@ -56,55 +144,73 @@ class Variable(BaseVariable):
             "title": f"Version-agnostic anchor resource for {self.parent_product.product_type.upper().replace('INTEGRATED/', '')}{f' {self.parent_product.product_subtype.upper()}' if  self.parent_product.product_subtype else ''} variable {parent_name}.{variable_name}",
             "type": "Root Data Element"
         }
-    
+ 
+    def get_class_variable(self, class_name: str, variable_name: str) -> dict:
+        model_href = self.parent_product.summary["_links"]["model"]["href"]
+        query = lambda doc: {
+            (clazz["name"], variable["name"]): variable
+            for clazz in doc["classes"]
+            for variable in clazz.get("classVariables", [])
+        }
+        model_variable = self.parent_product.library_client.query_api_json(
+            model_href,
+            query,
+            (class_name, variable_name),
+        )
+        if model_variable:
+            return model_variable["_links"]["self"]
+
     def potential_links(
-        self, class_name: str,  variable_name: str
+        self, class_name: str
     ) -> list[BaseVariable.PotentialLink]:
         return [
             {
                 "condition": True,
-                "href": f"/classes/{class_name}/variables/{variable_name}",
+                "class_name": class_name
             },
             {
-                "condition": class_name == "FindingsAbout",
-                "href": f"/classes/Findings/variables/{variable_name}",
+                "condition": class_name == "Findings About",
+                "class_name": "Findings"
             },
             {
                 "condition": True,
-                "href": f"/classes/GeneralObservations/variables/{variable_name}",
+                "class_name": "General Observations"
             },
         ]
-
+    
     def build_model_class_variable_link(self):
-        parent_model_name = self.transformer.replace_str(str(self.parent_product.parent_model), '.', '-')
-        class_name = self.transformer.format_name_for_link(self.parent_class_name)
         names = self.get_variable_variations(self.parent_dataset_name)
         data = None
         for name in names:
             for link in self.potential_links(
-                class_name, name
+                self.parent_class_name
             ):
-                condition, href = link.values()
+                condition, class_name = link.values()
                 if condition:
-                    parent_href = (
-                        f"/mdr/{self.parent_product.model_type}/{parent_model_name}{href}"
-                    )
-                    data = self.try_get_api_json(parent_href)
+                    data = self.get_class_variable(class_name, name)
                 if data:
                     break
             if data:
                 break
         if data:
-            self.links["modelClassVariable"] = data["_links"]["self"]
+            self.links["modelClassVariable"] = data
         else:
             raise Exception
 
     def build_model_dataset_variable_link(self):
-        model_variable_parent = self.parent_dataset_name
-        parent_model_name = self.transformer.replace_str(str(self.parent_product.parent_model), '.', '-')
-        model_link_href = f"/mdr/{self.parent_product.model_type}/{parent_model_name}/datasets/{model_variable_parent}/variables/{self.name}"
-        data = self.parent_product.library_client.get_api_json(model_link_href)
-        self.links["modelDatasetVariable"] = data["_links"]["self"]
+        model_href = self.parent_product.summary["_links"]["model"]["href"]
+        query = lambda doc: {
+            (dataset["name"], variable["name"]): variable
+            for dataset in doc["datasets"]
+            for variable in dataset.get("datasetVariables", [])
+        }
+        model_variable = self.parent_product.library_client.query_api_json(
+            model_href, query, (self.parent_dataset_name, self.name)
+        )
+        if model_variable:
+            self.links["modelDatasetVariable"] = model_variable["_links"]["self"]
+        else:
+            raise Exception
     
     def add_link(self, key, link):
         self.links[key] = link
