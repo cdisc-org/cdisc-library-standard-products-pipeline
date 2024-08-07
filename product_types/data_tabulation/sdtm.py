@@ -44,7 +44,6 @@ class SDTM(BaseProduct):
 
         # link variables to appropriate parent structure
         for variable in variables:
-            # TODO: this needs to be done for attached vars as well
             if variable.variables_qualified:
                 self._add_qualified_variables_link(variable, variables)
 
