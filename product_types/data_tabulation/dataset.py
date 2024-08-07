@@ -80,8 +80,9 @@ class Dataset:
         return self_link
     
     def merge_from(self, other: 'Dataset'):
-        self.variables = other.variables
- 
+        if not self.variables:
+            self.variables = other.variables
+
     def set_model_link(self):
         model_href = self.parent_product.summary["_links"]["model"]["href"]
         query = lambda doc: {(dataset["name"]): dataset for dataset in doc["datasets"]}
