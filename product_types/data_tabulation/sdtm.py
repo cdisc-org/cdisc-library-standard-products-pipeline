@@ -66,7 +66,6 @@ class SDTM(BaseProduct):
                     dataset.merge_from(override_dataset)
                     parent_class.datasets[override_dataset_index] = dataset
                 else:
-                    dataset.set_ordinal(str(len(parent_class.datasets) + 1))
                     parent_class.add_dataset(dataset)
         return classes, datasets, variables
 
@@ -132,7 +131,7 @@ class SDTM(BaseProduct):
         dataset_count = 0
         for record in datasets_data["list"]["entry"]:
             dataset_count = dataset_count + 1
-            dataset = Dataset(record["fields"], record.get("id"), self, str(len(datasets) + 1))
+            dataset = Dataset(record["fields"], record.get("id"), self)
             datasets.append(dataset)
         logger.info(f"Finished loading datasets: {dataset_count}/{len(datasets_data['list']['entry'])}")
         return datasets

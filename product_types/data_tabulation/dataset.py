@@ -22,11 +22,11 @@ class Dataset:
     parent_class: object
     variables: list
 
-    def __init__(self, dataset_data = None, id = None, parent_product = None, ordinal = None, json_data = None, parent_class = None):
+    def __init__(self, dataset_data = None, id = None, parent_product = None, json_data = None, parent_class = None):
         if json_data:
             self._init_from_json(json_data, parent_product, parent_class)
         else:
-            self._init_from_wiki(dataset_data, id, parent_product, ordinal)
+            self._init_from_wiki(dataset_data, id, parent_product)
         self.validate()
 
     def _init_from_json(self, json_data, parent_product, parent_class):
@@ -44,7 +44,7 @@ class Dataset:
         self._build_links(parent_product)
         [Variable(json_data=variable, parent_product=parent_product, parent_class=parent_class, parent_dataset=self) for variable in json_data.get("datasetVariables", [])]
  
-    def _init_from_wiki(self, dataset_data, id, parent_product, ordinal):
+    def _init_from_wiki(self, dataset_data, id, parent_product):
         self.variables = []
         self.parent_class = None
         self.transformer = Transformer(None)
@@ -103,9 +103,6 @@ class Dataset:
     def set_parent_class(self, parent_class):
         self.parent_class = parent_class
         self.add_link("parentClass", parent_class.links.get("self"))
-    
-    def set_ordinal(self, ordinal):
-        self.ordinal = ordinal
 
     def to_json(self):
         json_data = {
