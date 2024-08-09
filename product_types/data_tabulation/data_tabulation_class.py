@@ -91,10 +91,10 @@ class DataTabulationClass:
         self.links[key] = link
 
     def add_variable(self, variable):
-        self.variables.append(variable)
+        BaseProduct.insert_by_ordinal(self.variables, variable)
     
     def add_dataset(self, dataset):
-        self.datasets.append(dataset)
+        BaseProduct.insert_by_ordinal(self.datasets, dataset)
 
     def to_json(self):
         json_data = {

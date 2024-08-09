@@ -62,9 +62,9 @@ class SDTM(BaseProduct):
                 dataset.set_parent_class(parent_class)
                 override_dataset = next((d for d in parent_class.datasets if d.name == dataset.name), None)
                 if override_dataset:
-                    override_dataset_index = parent_class.datasets.index(override_dataset)
+                    parent_class.datasets.remove(override_dataset)
                     dataset.merge_from(override_dataset)
-                    parent_class.datasets[override_dataset_index] = dataset
+                    parent_class.add_dataset(dataset)
                 else:
                     parent_class.add_dataset(dataset)
         return classes, datasets, variables
@@ -103,17 +103,17 @@ class SDTM(BaseProduct):
         if self._has_override():
             for override_class in self.library_client.get_api_json(self.overrides)["classes"]:
                 class_obj = DataTabulationClass(parent_product=self, json_data=override_class)
-                classes.append(class_obj)                
+                BaseProduct.insert_by_ordinal(classes, class_obj)
         for record in classes_data["list"]["entry"]:
             class_count = class_count+1
             class_obj = DataTabulationClass(record["fields"], record.get("id"), self)
             override_class = next((clazz for clazz in classes if clazz.name == class_obj.name), None)
             if override_class:
-                override_class_index = classes.index(override_class)
+                classes.remove(override_class)
                 class_obj.merge_from(override_class)
-                classes[override_class_index] = class_obj
+                BaseProduct.insert_by_ordinal(classes, class_obj)
             else:
-                classes.append(class_obj)
+                BaseProduct.insert_by_ordinal(classes, class_obj)
         logger.info(f"Finished loading classes: {class_count}/{len(classes_data['list']['entry'])}")
         return classes
 
@@ -132,7 +132,7 @@ class SDTM(BaseProduct):
         for record in datasets_data["list"]["entry"]:
             dataset_count = dataset_count + 1
             dataset = Dataset(record["fields"], record.get("id"), self)
-            datasets.append(dataset)
+            BaseProduct.insert_by_ordinal(datasets, dataset)
         logger.info(f"Finished loading datasets: {dataset_count}/{len(datasets_data['list']['entry'])}")
         return datasets
     
@@ -158,7 +158,7 @@ class SDTM(BaseProduct):
                 parent_dataset = self._find_dataset(parent_dataset_name, datasets)
                 parent_class = self._find_class_by_name(parent_class_name, classes)
                 variable = variable = Variable(variable_data=row, parent_product=self, parent_class=parent_class, parent_dataset=parent_dataset)
-                variables.append(variable)
+                BaseProduct.insert_by_ordinal(variables, variable)
             logger.info("Finished loading variables")
         return variables
 

@@ -98,7 +98,7 @@ class Dataset:
         self.links[key] = link
 
     def add_variable(self, variable):
-        self.variables.append(variable)
+        BaseProduct.insert_by_ordinal(self.variables, variable)
     
     def set_parent_class(self, parent_class):
         self.parent_class = parent_class
