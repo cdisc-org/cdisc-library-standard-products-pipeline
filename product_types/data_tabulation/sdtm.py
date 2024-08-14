@@ -36,38 +36,16 @@ class SDTM(BaseProduct):
         arrays of classes, datasets and variables
         """
         self.codelist_mapping = self._get_codelist_mapping()
+        if self._has_override():
+            self.overrides = f"/mdr/{self.config.get(constants.OVERRIDESSTANDARD)}/{self.config.get(constants.OVERRIDESVERSION)}"
         classes = self.get_classes()
         datasets = self.get_datasets()
-        variables = self.get_variables()
+        variables = self.get_variables(classes, datasets)
 
         # link variables to appropriate parent structure
         for variable in variables:
-            variable.parent_dataset_name = (
-                ""
-                if variable.parent_dataset_name is None
-                else variable.parent_dataset_name.replace("SDTM ", "").replace(
-                    "SEND ", ""
-                )
-            )
-            variable.parent_class_name = variable.parent_class_name.replace("SDTM ", "").replace("SEND ", "")
-            parent_dataset = self._find_dataset(variable.parent_dataset_name, datasets)
-            parent_class = self._find_class_by_name(variable.parent_class_name, classes)
             if variable.variables_qualified:
                 self._add_qualified_variables_link(variable, variables)
-            if self.is_ig:
-                try:
-                    variable.build_model_dataset_variable_link()
-                except:
-                    try:
-                        variable.build_model_class_variable_link()
-                    except:
-                        logger.error(f"No model dataset or class variable found for: {variable.parent_dataset_name}.{variable.name}")
-            if parent_dataset:
-                variable.set_parent_dataset(parent_dataset)
-                parent_dataset.add_variable(variable)
-            elif not self.is_ig and parent_class:
-                variable.set_parent_class(parent_class)
-                parent_class.add_variable(variable)
 
         # set up parent class links
         for c in classes:
@@ -82,7 +60,13 @@ class SDTM(BaseProduct):
             parent_class = self._find_class(dataset.parent_class_name, classes) or self._find_class_by_name(dataset.parent_class_name, classes)
             if parent_class:
                 dataset.set_parent_class(parent_class)
-                parent_class.add_dataset(dataset)
+                override_dataset = next((d for d in parent_class.datasets if d.name == dataset.name), None)
+                if override_dataset:
+                    parent_class.datasets.remove(override_dataset)
+                    dataset.merge_from(override_dataset)
+                    parent_class.add_dataset(dataset)
+                else:
+                    parent_class.add_dataset(dataset)
         return classes, datasets, variables
 
     def validate_document(self, document: dict):
@@ -116,16 +100,20 @@ class SDTM(BaseProduct):
         classes = []
         classes_data = self.wiki_client.get_wiki_table(document_id, constants.CLASSES)
         class_count = 0
+        if self._has_override():
+            for override_class in self.library_client.get_api_json(self.overrides)["classes"]:
+                class_obj = DataTabulationClass(parent_product=self, json_data=override_class)
+                BaseProduct.insert_by_ordinal(classes, class_obj)
         for record in classes_data["list"]["entry"]:
             class_count = class_count+1
             class_obj = DataTabulationClass(record["fields"], record.get("id"), self)
-            if self.is_ig:
-                class_obj.set_model_link(self.summary["_links"]["model"]["href"])
-            prior_version = self._get_prior_version(class_obj.links["self"])
-            if prior_version:
-                class_obj.add_link("priorVersion", prior_version)
-            class_obj.set_ordinal(str(len(classes) + 1))
-            classes.append(class_obj)
+            override_class = next((clazz for clazz in classes if clazz.name == class_obj.name), None)
+            if override_class:
+                classes.remove(override_class)
+                class_obj.merge_from(override_class)
+                BaseProduct.insert_by_ordinal(classes, class_obj)
+            else:
+                BaseProduct.insert_by_ordinal(classes, class_obj)
         logger.info(f"Finished loading classes: {class_count}/{len(classes_data['list']['entry'])}")
         return classes
 
@@ -142,19 +130,13 @@ class SDTM(BaseProduct):
         datasets_data = self.wiki_client.get_wiki_table(document_id, constants.DATASETS)
         dataset_count = 0
         for record in datasets_data["list"]["entry"]:
-            dataset_count = dataset_count+1
+            dataset_count = dataset_count + 1
             dataset = Dataset(record["fields"], record.get("id"), self)
-            if self.is_ig:
-                dataset.set_model_link(self.summary["_links"]["model"]["href"])
-            prior_version = self._get_prior_version(dataset.links["self"])
-            if prior_version:
-                dataset.add_link("priorVersion", prior_version)
-            dataset.set_ordinal(str(len(datasets) + 1))
-            datasets.append(dataset)
+            BaseProduct.insert_by_ordinal(datasets, dataset)
         logger.info(f"Finished loading datasets: {dataset_count}/{len(datasets_data['list']['entry'])}")
         return datasets
     
-    def get_variables(self) -> [dict]:
+    def get_variables(self, classes, datasets) -> [dict]:
         """
         Load variables from wiki
 
@@ -171,28 +153,15 @@ class SDTM(BaseProduct):
         if variables_data:
             reader = self._parse_spec_grabber_output(variables_data)
             for row in reader:
-                variable = self._build_variable(row)
-                variables.append(variable)
+                parent_dataset_name = self.get_dataset_name(row.get("Dataset Name", ""))
+                parent_class_name = self.class_name_mappings.get(row["Observation Class"], row["Observation Class"])
+                parent_dataset = self._find_dataset(parent_dataset_name, datasets)
+                parent_class = self._find_class_by_name(parent_class_name, classes)
+                variable = variable = Variable(variable_data=row, parent_product=self, parent_class=parent_class, parent_dataset=parent_dataset)
+                BaseProduct.insert_by_ordinal(variables, variable)
             logger.info("Finished loading variables")
         return variables
 
-    def _build_variable(self, variable_data: dict) -> dict:
-        """
-        Format variable data from wiki into variable object for the json document
-
-        Arguments:
-
-        variable_data: spec grabber data for a single variable represented as a dictionary
-
-        Returns:
-
-        An SDTM variable
-        """
-        variable = Variable(variable_data, self)
-
-        variable.set_prior_version()
-        return variable
-    
     def _find_class(self, class_id: str, classes: DataTabulationClass) -> DataTabulationClass:
         if not class_id:
             return None
@@ -270,3 +239,12 @@ class SDTM(BaseProduct):
                 self._cleanup_json(var, ["class", "dataset", "name_no_prefix", "codelist", "qualifiesVariables", "id"])
         logger.info("Finished cleaning document")
         return document
+
+    def _has_override(self) -> bool:
+        try: 
+            self.config.get(constants.OVERRIDESSTANDARD)
+            self.config.get(constants.OVERRIDESVERSION)
+            return True
+        except KeyError:
+            logger.info("No override found")
+            return False

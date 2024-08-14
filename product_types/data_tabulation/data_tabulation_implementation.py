@@ -31,19 +31,6 @@ class DataTabulationImplementation(SDTM):
                 self._validate_links(dataset)
         logger.info("Finished validating document")
 
-    def _build_variable(self, variable_data: dict) -> dict:
-        variable: Variable = super()._build_variable(variable_data)
-        if self._iscodelist(variable.codelist) and variable.codelist != "N/A":
-            codelist_submission_values = self.parse_codelist_submission_values(variable.codelist)
-            variable.add_codelist_links(codelist_submission_values)
-            variable.add_codelist_submission_values(codelist_submission_values)
-        elif self._isdescribedvaluedomain(variable.codelist) and variable.codelist != "N/A":
-            variable.set_described_value_domain(variable.codelist)
-        elif variable.codelist and variable.codelist != "N/A":
-            # The provided codelist is a value list
-            variable.set_value_list(variable.codelist)
-        return variable
-
     def _cleanup_document(self, document: dict) -> dict:
         """
         Remove unnecessary keys from a json document

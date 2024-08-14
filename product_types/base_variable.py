@@ -5,7 +5,7 @@ from typing import TypedDict
 
 class BaseVariable:
 
-    PotentialLink = TypedDict("PotentialLink", {"condition": bool, "href": str})
+    PotentialLink = TypedDict("PotentialLink", {"condition": bool, "class_name": str})
 
     def __init__(self, parent_product):
         self.transformer = Transformer(None)

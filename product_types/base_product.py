@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from utilities.transformer import Transformer
 from utilities import logger
 import utilities.constants as constants
+from bisect import bisect_left
 
 class BaseProduct:
     def __init__(self, wiki_client, library_client, summary, product_type, version, product_subtype, config = None):
@@ -314,3 +315,9 @@ class BaseProduct:
         self.parent_model = self.summary.get("parentModel")
         del self.summary["parentModel"]
         return model_data
+
+    @staticmethod
+    def insert_by_ordinal(items: list, item):
+        keys = [int(i.ordinal) for i in items]
+        index = bisect_left(keys, int(item.ordinal))
+        items.insert(index, item)

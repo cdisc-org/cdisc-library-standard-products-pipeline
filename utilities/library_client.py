@@ -41,3 +41,15 @@ class LibraryClient:
             "User-Agent": "pipeline"
         }
         return http.get(self.base_api_url+href, headers=headers)
+    
+    @cache
+    def _create_lookup(self, href, query):
+        json_data = self.get_api_json(href)
+        keyed = query(json_data)
+        return keyed
+
+    @cache
+    def query_api_json(self, href, query, key):
+        lookup = self._create_lookup(href, query)
+        match = lookup.get(key)
+        return match
