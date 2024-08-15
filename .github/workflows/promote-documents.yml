@@ -1,4 +1,4 @@
-name: Promote Cosmos DB documents
+name: Promote Cosmos DB documents reusable workflow
 on:
   workflow_call:
     inputs:

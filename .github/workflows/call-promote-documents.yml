@@ -1,3 +1,4 @@
+name: Promote Cosmos DB documents
 on:
     workflow_dispatch:
 jobs:
