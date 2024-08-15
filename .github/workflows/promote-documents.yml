@@ -1,37 +1,30 @@
 name: Promote Cosmos DB documents
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      env:
-        description: Environment Source -> Target
+      source:
         required: true
-        type: choice
-        options:
-          - DEV -> QA
-          - QA -> STAGE
-          - STAGE -> PROD
+        type: string
+      target:
+        required: true
+        type: string
 
 jobs:
   promote_documents:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
     steps:
-      - name: Get source and target environment
-        uses: winterjung/split@v2
-        id: split
-        with:
-          msg: ${{ github.event.inputs.env }}
-          separator: " -> "
 
       - name: Set the source and target table secret names
         run: |
-          echo "COSMOSDB_CONNECTION_STRING_SOURCE_NAME=COSMOSDB_CONNECTION_STRING_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_DATABASE_NAME_SOURCE_NAME=COSMOSDB_DATABASE_NAME_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME=COSMOSDB_IG_DOCS_TABLE_NAME_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
-          echo "BLOB_URL_SOURCE_NAME=BLOB_URL_${{ steps.split.outputs._0 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_CONNECTION_STRING_TARGET_NAME=COSMOSDB_CONNECTION_STRING_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_DATABASE_NAME_TARGET_NAME=COSMOSDB_DATABASE_NAME_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
-          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME=COSMOSDB_IG_DOCS_TABLE_NAME_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
-          echo "BLOB_URL_TARGET_NAME=BLOB_URL_${{ steps.split.outputs._1 }}" >> $GITHUB_ENV
+          echo "COSMOSDB_CONNECTION_STRING_SOURCE_NAME=COSMOSDB_CONNECTION_STRING_${{ inputs.source }}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_SOURCE_NAME=COSMOSDB_DATABASE_NAME_${{ inputs.source }}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_SOURCE_NAME=COSMOSDB_IG_DOCS_TABLE_NAME_${{ inputs.source }}" >> $GITHUB_ENV
+          echo "BLOB_URL_SOURCE_NAME=BLOB_URL_${{ inputs.source }}" >> $GITHUB_ENV
+          echo "COSMOSDB_CONNECTION_STRING_TARGET_NAME=COSMOSDB_CONNECTION_STRING_${{ inputs.target }}" >> $GITHUB_ENV
+          echo "COSMOSDB_DATABASE_NAME_TARGET_NAME=COSMOSDB_DATABASE_NAME_${{ inputs.target }}" >> $GITHUB_ENV
+          echo "COSMOSDB_IG_DOCS_TABLE_NAME_TARGET_NAME=COSMOSDB_IG_DOCS_TABLE_NAME_${{ inputs.target }}" >> $GITHUB_ENV
+          echo "BLOB_URL_TARGET_NAME=BLOB_URL_${{ inputs.target }}" >> $GITHUB_ENV
 
       - name: Set the source and target table argument values
         run: |
