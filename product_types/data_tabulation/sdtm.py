@@ -154,7 +154,8 @@ class SDTM(BaseProduct):
             reader = self._parse_spec_grabber_output(variables_data)
             for row in reader:
                 parent_dataset_name = self.get_dataset_name(row.get("Dataset Name", ""))
-                parent_class_name = self.class_name_mappings.get(row["Observation Class"], row["Observation Class"])
+                parent_class_name = row["Observation Class"].removeprefix("SDTM ").removeprefix("SEND ")
+                parent_class_name = self.class_name_mappings.get(parent_class_name, parent_class_name)
                 parent_dataset = self._find_dataset(parent_dataset_name, datasets)
                 parent_class = self._find_class_by_name(parent_class_name, classes)
                 variable = variable = Variable(variable_data=row, parent_product=self, parent_class=parent_class, parent_dataset=parent_dataset)
