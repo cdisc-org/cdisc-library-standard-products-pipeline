@@ -4,7 +4,7 @@ on:
 jobs:
   call-promote-documents-qa:
     name: Promote Documents from DEV to QA
-    uses: cdisc-org/cdisc-library-standard-products-pipeline/.github/workflows/promote-documents.yml@main
+    uses: ./.github/workflows/promote-documents.yml
     with:
       source: DEV
       target: QA
@@ -12,7 +12,7 @@ jobs:
   call-promote-documents-stage:
     name: Promote Documents from QA to STAGE
     needs: call-promote-documents-qa
-    uses: cdisc-org/cdisc-library-standard-products-pipeline/.github/workflows/promote-documents.yml@main
+    uses: ./.github/workflows/promote-documents.yml
     with:
       source: QA
       target: STAGE
@@ -20,7 +20,7 @@ jobs:
   call-promote-documents-prod:
     name: Promote Documents from STAGE to PROD
     needs: call-promote-documents-stage
-    uses: cdisc-org/cdisc-library-standard-products-pipeline/.github/workflows/promote-documents.yml@main
+    uses: ./.github/workflows/promote-documents.yml
     with:
       source: STAGE
       target: PROD
