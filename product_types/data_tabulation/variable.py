@@ -25,6 +25,9 @@ class Variable(BaseVariable):
     examples: str
     notes: str
     variables_qualified: str
+    variable_group: str
+    root_variable_ccode: str
+    root_variable_definition: str
     
     def __init__(self, variable_data = None, parent_product = None, parent_dataset = None, parent_class = None, json_data = None):
         super().__init__(parent_product)
@@ -54,6 +57,9 @@ class Variable(BaseVariable):
         self.examples = json_data.get("examples")
         self.usage_restrictions = json_data.get("usageRestrictions")
         self.variable_ccode = json_data.get("variableCcode")
+        self.variable_group = json_data.get("variableGroup")
+        self.root_variable_ccode = json_data.get("rootVariableCcode")
+        self.root_variable_definition = json_data.get("rootVariableDefinition")
         self.described_value_domain = json_data.get("describedValueDomain", "")
         self.value_list = json_data.get("valueList")
         self.id = json_data.get("name")
@@ -83,7 +89,11 @@ class Variable(BaseVariable):
         self.definition = variable_data.get("Definition")
         self.examples = variable_data.get("Examples")
         self.notes = variable_data.get("Notes")
-        self.variables_qualified = variable_data.get("Variable(s) Qualified")
+        self.variables_qualified = variable_data.get("Variable(s) Qualified")  # removed in SDTM 3.0
+        # SDTM 3.0+: "Variable Group" is new; "Variable C-code" and "Definition" were renamed
+        self.variable_group = variable_data.get("Variable Group")
+        self.root_variable_ccode = variable_data.get("Root Variable C-code")
+        self.root_variable_definition = variable_data.get("Root Variable Definition")
         self.value_list = None
         self.parent_dataset_name = (
             ""
@@ -265,6 +275,12 @@ class Variable(BaseVariable):
             json_data["usageRestrictions"] = self.usage_restrictions
         if self.variable_ccode:
             json_data["variableCcode"] = self.variable_ccode
+        if self.root_variable_ccode:
+            json_data["rootVariableCcode"] = self.root_variable_ccode
+        if self.root_variable_definition:
+            json_data["rootVariableDefinition"] = self.root_variable_definition
+        if self.variable_group:
+            json_data["variableGroup"] = self.variable_group
         if self.described_value_domain:
             json_data["describedValueDomain"] = self.described_value_domain
         if self.value_list:
