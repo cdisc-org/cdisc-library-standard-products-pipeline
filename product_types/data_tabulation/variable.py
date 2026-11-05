@@ -80,8 +80,8 @@ class Variable(BaseVariable):
         self.role = variable_data.get("Role")
         self.description = self.transformer.cleanup_html_encoding(variable_data.get("Description", variable_data.get("CDISC Notes", "")))
         self.core = variable_data.get("Core")
-        self.parent_dataset_name = parent_dataset.name
-        self.parent_class_name = parent_class.name
+        self.parent_dataset_name = parent_dataset.name if parent_dataset else None
+        self.parent_class_name = parent_class.name if parent_class else ""
         self.codelist = variable_data.get("Controlled Terms, Codelist, or Format", variable_data.get("Controlled Terms, Codelist or Format", ""))
         self.described_value_domain = variable_data.get("Format")
         self.usage_restrictions = variable_data.get("Usage Restrictions")

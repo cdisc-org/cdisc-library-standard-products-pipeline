@@ -1,0 +1,206 @@
+2026-11-05 14:17:00,633 [INFO ]  Loading product of type: sdtm
+2026-11-05 14:17:05,266 [INFO ]  No override found
+2026-11-05 14:17:05,698 [INFO ]  No override found
+2026-11-05 14:17:07,217 [INFO ]  Finished loading classes: 10/10
+2026-11-05 14:17:15,224 [INFO ]  Finished loading datasets: 30/30
+2026-11-05 14:17:17,173 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Interventions/variables/--TRTCD returned unsuccessful 404 response
+2026-11-05 14:17:17,174 [ERROR]  No prior version found for variable: Name: --TRTCD, Parent Class: Interventions, Parent Dataset: 
+2026-11-05 14:17:23,596 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Events/variables/--CLASI returned unsuccessful 404 response
+2026-11-05 14:17:23,597 [ERROR]  No prior version found for variable: Name: --CLASI, Parent Class: Events, Parent Dataset: 
+2026-11-05 14:17:33,399 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--CALCN returned unsuccessful 404 response
+2026-11-05 14:17:33,399 [ERROR]  No prior version found for variable: Name: --CALCN, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:34,604 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--RSCNT returned unsuccessful 404 response
+2026-11-05 14:17:34,605 [ERROR]  No prior version found for variable: Name: --RSCNT, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:36,193 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--RESMOD returned unsuccessful 404 response
+2026-11-05 14:17:36,193 [ERROR]  No prior version found for variable: Name: --RESMOD, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:36,652 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--CBRFL returned unsuccessful 404 response
+2026-11-05 14:17:36,652 [ERROR]  No prior version found for variable: Name: --CBRFL, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:37,584 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--PTFL returned unsuccessful 404 response
+2026-11-05 14:17:37,585 [ERROR]  No prior version found for variable: Name: --PTFL, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:39,072 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--ROEBE returned unsuccessful 404 response
+2026-11-05 14:17:39,072 [ERROR]  No prior version found for variable: Name: --ROEBE, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:39,191 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--ROELNM returned unsuccessful 404 response
+2026-11-05 14:17:39,191 [ERROR]  No prior version found for variable: Name: --ROELNM, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:39,308 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/Findings/variables/--ROETYP returned unsuccessful 404 response
+2026-11-05 14:17:39,309 [ERROR]  No prior version found for variable: Name: --ROETYP, Parent Class: Findings, Parent Dataset: 
+2026-11-05 14:17:43,464 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/GeneralObservations/variables/SUBJID returned unsuccessful 404 response
+2026-11-05 14:17:43,464 [ERROR]  No prior version found for variable: Name: SUBJID, Parent Class: General Observations, Parent Dataset: 
+2026-11-05 14:17:44,870 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/GeneralObservations/variables/MASSID returned unsuccessful 404 response
+2026-11-05 14:17:44,872 [ERROR]  No prior version found for variable: Name: MASSID, Parent Class: General Observations, Parent Dataset: 
+2026-11-05 14:17:46,285 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/AssociatedPersons/variables/RSUBJIDP returned unsuccessful 404 response
+2026-11-05 14:17:46,285 [ERROR]  No prior version found for variable: Name: RSUBJIDP, Parent Class: Associated Persons, Parent Dataset: 
+2026-11-05 14:17:47,138 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/GeneralObservations/variables/ETCD returned unsuccessful 404 response
+2026-11-05 14:17:47,138 [ERROR]  No prior version found for variable: Name: ETCD, Parent Class: General Observations, Parent Dataset: 
+2026-11-05 14:17:47,253 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/classes/GeneralObservations/variables/ELEMENT returned unsuccessful 404 response
+2026-11-05 14:17:47,254 [ERROR]  No prior version found for variable: Name: ELEMENT, Parent Class: General Observations, Parent Dataset: 
+2026-11-05 14:17:53,433 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/CO/variables/SUBJID returned unsuccessful 404 response
+2026-11-05 14:17:53,433 [ERROR]  No prior version found for variable: Name: SUBJID, Parent Class: Special-Purpose, Parent Dataset: CO
+2026-11-05 14:17:57,544 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DM/variables/AGERLO returned unsuccessful 404 response
+2026-11-05 14:17:57,544 [ERROR]  No prior version found for variable: Name: AGERLO, Parent Class: Special-Purpose, Parent Dataset: DM
+2026-11-05 14:17:57,657 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DM/variables/AGERHI returned unsuccessful 404 response
+2026-11-05 14:17:57,657 [ERROR]  No prior version found for variable: Name: AGERHI, Parent Class: Special-Purpose, Parent Dataset: DM
+2026-11-05 14:17:58,205 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DM/variables/CRACE returned unsuccessful 404 response
+2026-11-05 14:17:58,205 [ERROR]  No prior version found for variable: Name: CRACE, Parent Class: Special-Purpose, Parent Dataset: DM
+2026-11-05 14:17:58,432 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DM/variables/CETHNIC returned unsuccessful 404 response
+2026-11-05 14:17:58,433 [ERROR]  No prior version found for variable: Name: CETHNIC, Parent Class: Special-Purpose, Parent Dataset: DM
+2026-11-05 14:18:00,175 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/STUDYID returned unsuccessful 404 response
+2026-11-05 14:18:00,175 [ERROR]  No prior version found for variable: Name: STUDYID, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:00,289 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/DOMAIN returned unsuccessful 404 response
+2026-11-05 14:18:00,289 [ERROR]  No prior version found for variable: Name: DOMAIN, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:00,405 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/USUBJID returned unsuccessful 404 response
+2026-11-05 14:18:00,406 [ERROR]  No prior version found for variable: Name: USUBJID, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:00,521 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/SUBJID returned unsuccessful 404 response
+2026-11-05 14:18:00,522 [ERROR]  No prior version found for variable: Name: SUBJID, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:00,632 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/FOCID returned unsuccessful 404 response
+2026-11-05 14:18:00,632 [ERROR]  No prior version found for variable: Name: FOCID, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:00,745 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/DCSEQ returned unsuccessful 404 response
+2026-11-05 14:18:00,745 [ERROR]  No prior version found for variable: Name: DCSEQ, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:00,860 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFSTDTC returned unsuccessful 404 response
+2026-11-05 14:18:00,861 [ERROR]  No prior version found for variable: Name: RFSTDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:00,978 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFENDTC returned unsuccessful 404 response
+2026-11-05 14:18:00,978 [ERROR]  No prior version found for variable: Name: RFENDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,093 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFXSTDTC returned unsuccessful 404 response
+2026-11-05 14:18:01,094 [ERROR]  No prior version found for variable: Name: RFXSTDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,208 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFXENDTC returned unsuccessful 404 response
+2026-11-05 14:18:01,208 [ERROR]  No prior version found for variable: Name: RFXENDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,322 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFCSTDTC returned unsuccessful 404 response
+2026-11-05 14:18:01,322 [ERROR]  No prior version found for variable: Name: RFCSTDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,438 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFCENDTC returned unsuccessful 404 response
+2026-11-05 14:18:01,439 [ERROR]  No prior version found for variable: Name: RFCENDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,557 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFICDTC returned unsuccessful 404 response
+2026-11-05 14:18:01,557 [ERROR]  No prior version found for variable: Name: RFICDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,681 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RFPENDTC returned unsuccessful 404 response
+2026-11-05 14:18:01,683 [ERROR]  No prior version found for variable: Name: RFPENDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,797 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/DTHDTC returned unsuccessful 404 response
+2026-11-05 14:18:01,798 [ERROR]  No prior version found for variable: Name: DTHDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:01,923 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/DTHFL returned unsuccessful 404 response
+2026-11-05 14:18:01,923 [ERROR]  No prior version found for variable: Name: DTHFL, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,035 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/SITEID returned unsuccessful 404 response
+2026-11-05 14:18:02,035 [ERROR]  No prior version found for variable: Name: SITEID, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,152 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/INVID returned unsuccessful 404 response
+2026-11-05 14:18:02,153 [ERROR]  No prior version found for variable: Name: INVID, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,269 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/INVNAM returned unsuccessful 404 response
+2026-11-05 14:18:02,270 [ERROR]  No prior version found for variable: Name: INVNAM, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,425 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/BRTHDTC returned unsuccessful 404 response
+2026-11-05 14:18:02,426 [ERROR]  No prior version found for variable: Name: BRTHDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,539 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/AGE returned unsuccessful 404 response
+2026-11-05 14:18:02,540 [ERROR]  No prior version found for variable: Name: AGE, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,653 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/AGERLO returned unsuccessful 404 response
+2026-11-05 14:18:02,653 [ERROR]  No prior version found for variable: Name: AGERLO, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,788 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/AGERHI returned unsuccessful 404 response
+2026-11-05 14:18:02,789 [ERROR]  No prior version found for variable: Name: AGERHI, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:02,899 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/AGEU returned unsuccessful 404 response
+2026-11-05 14:18:02,900 [ERROR]  No prior version found for variable: Name: AGEU, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,016 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/SEX returned unsuccessful 404 response
+2026-11-05 14:18:03,016 [ERROR]  No prior version found for variable: Name: SEX, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,128 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/RACE returned unsuccessful 404 response
+2026-11-05 14:18:03,129 [ERROR]  No prior version found for variable: Name: RACE, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,242 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/CRACE returned unsuccessful 404 response
+2026-11-05 14:18:03,243 [ERROR]  No prior version found for variable: Name: CRACE, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,357 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/ETHNIC returned unsuccessful 404 response
+2026-11-05 14:18:03,358 [ERROR]  No prior version found for variable: Name: ETHNIC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,474 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/CETHNIC returned unsuccessful 404 response
+2026-11-05 14:18:03,474 [ERROR]  No prior version found for variable: Name: CETHNIC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,596 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/ARMCD returned unsuccessful 404 response
+2026-11-05 14:18:03,596 [ERROR]  No prior version found for variable: Name: ARMCD, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,716 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/ARM returned unsuccessful 404 response
+2026-11-05 14:18:03,716 [ERROR]  No prior version found for variable: Name: ARM, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,828 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/ACTARMCD returned unsuccessful 404 response
+2026-11-05 14:18:03,828 [ERROR]  No prior version found for variable: Name: ACTARMCD, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:03,951 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/ACTARM returned unsuccessful 404 response
+2026-11-05 14:18:03,951 [ERROR]  No prior version found for variable: Name: ACTARM, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:04,073 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/ARMNRS returned unsuccessful 404 response
+2026-11-05 14:18:04,073 [ERROR]  No prior version found for variable: Name: ARMNRS, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:04,187 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/ACTARMUD returned unsuccessful 404 response
+2026-11-05 14:18:04,187 [ERROR]  No prior version found for variable: Name: ACTARMUD, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:04,313 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/SETCD returned unsuccessful 404 response
+2026-11-05 14:18:04,314 [ERROR]  No prior version found for variable: Name: SETCD, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:04,430 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/COUNTRY returned unsuccessful 404 response
+2026-11-05 14:18:04,432 [ERROR]  No prior version found for variable: Name: COUNTRY, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:04,554 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/DC/variables/DCDTC returned unsuccessful 404 response
+2026-11-05 14:18:04,555 [ERROR]  No prior version found for variable: Name: DCDTC, Parent Class: Special-Purpose, Parent Dataset: DC
+2026-11-05 14:18:05,051 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SE/variables/SUBJID returned unsuccessful 404 response
+2026-11-05 14:18:05,051 [ERROR]  No prior version found for variable: Name: SUBJID, Parent Class: Special-Purpose, Parent Dataset: SE
+2026-11-05 14:18:07,440 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SV/variables/SUBJID returned unsuccessful 404 response
+2026-11-05 14:18:07,441 [ERROR]  No prior version found for variable: Name: SUBJID, Parent Class: Special-Purpose, Parent Dataset: SV
+2026-11-05 14:18:07,559 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SV/variables/SVSEQ returned unsuccessful 404 response
+2026-11-05 14:18:07,559 [ERROR]  No prior version found for variable: Name: SVSEQ, Parent Class: Special-Purpose, Parent Dataset: SV
+2026-11-05 14:18:10,343 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SM/variables/SUBJID returned unsuccessful 404 response
+2026-11-05 14:18:10,343 [ERROR]  No prior version found for variable: Name: SUBJID, Parent Class: Special-Purpose, Parent Dataset: SM
+2026-11-05 14:18:20,537 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/TX/variables/TXGRPID returned unsuccessful 404 response
+2026-11-05 14:18:20,538 [ERROR]  No prior version found for variable: Name: TXGRPID, Parent Class: Trial Design, Parent Dataset: TX
+2026-11-05 14:18:28,214 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/APRELSUB/variables/RSUBJIDP returned unsuccessful 404 response
+2026-11-05 14:18:28,215 [ERROR]  No prior version found for variable: Name: RSUBJIDP, Parent Class: Associated Persons, Parent Dataset: APRELSUB
+2026-11-05 14:18:28,574 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/STUDYID returned unsuccessful 404 response
+2026-11-05 14:18:28,575 [ERROR]  No prior version found for variable: Name: STUDYID, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:28,704 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/RDOMAIN returned unsuccessful 404 response
+2026-11-05 14:18:28,705 [ERROR]  No prior version found for variable: Name: RDOMAIN, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:28,818 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/USUBJID returned unsuccessful 404 response
+2026-11-05 14:18:28,818 [ERROR]  No prior version found for variable: Name: USUBJID, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:28,932 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/APID returned unsuccessful 404 response
+2026-11-05 14:18:28,932 [ERROR]  No prior version found for variable: Name: APID, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:29,045 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/POOLID returned unsuccessful 404 response
+2026-11-05 14:18:29,045 [ERROR]  No prior version found for variable: Name: POOLID, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:29,157 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/SPDEVID returned unsuccessful 404 response
+2026-11-05 14:18:29,157 [ERROR]  No prior version found for variable: Name: SPDEVID, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:29,269 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/IDVAR returned unsuccessful 404 response
+2026-11-05 14:18:29,269 [ERROR]  No prior version found for variable: Name: IDVAR, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:29,380 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/NS--/variables/IDVARVLN returned unsuccessful 404 response
+2026-11-05 14:18:29,381 [ERROR]  No prior version found for variable: Name: IDVARVLN, Parent Class: Relationship, Parent Dataset: NS--
+2026-11-05 14:18:30,060 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/RELSPEC/variables/APID returned unsuccessful 404 response
+2026-11-05 14:18:30,061 [ERROR]  No prior version found for variable: Name: APID, Parent Class: Relationship, Parent Dataset: RELSPEC
+2026-11-05 14:18:30,626 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/RELDEV/variables/STUDYID returned unsuccessful 404 response
+2026-11-05 14:18:30,627 [ERROR]  No prior version found for variable: Name: STUDYID, Parent Class: Relationship, Parent Dataset: RELDEV
+2026-11-05 14:18:30,742 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/RELDEV/variables/SPDEVID returned unsuccessful 404 response
+2026-11-05 14:18:30,743 [ERROR]  No prior version found for variable: Name: SPDEVID, Parent Class: Relationship, Parent Dataset: RELDEV
+2026-11-05 14:18:30,857 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/RELDEV/variables/PARENT returned unsuccessful 404 response
+2026-11-05 14:18:30,857 [ERROR]  No prior version found for variable: Name: PARENT, Parent Class: Relationship, Parent Dataset: RELDEV
+2026-11-05 14:18:30,974 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/RELDEV/variables/LEVEL returned unsuccessful 404 response
+2026-11-05 14:18:30,974 [ERROR]  No prior version found for variable: Name: LEVEL, Parent Class: Relationship, Parent Dataset: RELDEV
+2026-11-05 14:18:32,749 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/STUDYID returned unsuccessful 404 response
+2026-11-05 14:18:32,750 [ERROR]  No prior version found for variable: Name: STUDYID, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:32,866 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/DOMAIN returned unsuccessful 404 response
+2026-11-05 14:18:32,866 [ERROR]  No prior version found for variable: Name: DOMAIN, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:32,980 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/RDOMAIN returned unsuccessful 404 response
+2026-11-05 14:18:32,981 [ERROR]  No prior version found for variable: Name: RDOMAIN, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,093 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/RTESTCD returned unsuccessful 404 response
+2026-11-05 14:18:33,093 [ERROR]  No prior version found for variable: Name: RTESTCD, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,210 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/RCAT returned unsuccessful 404 response
+2026-11-05 14:18:33,212 [ERROR]  No prior version found for variable: Name: RCAT, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,325 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/RELSCAT returned unsuccessful 404 response
+2026-11-05 14:18:33,326 [ERROR]  No prior version found for variable: Name: RELSCAT, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,438 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/RMETHOD returned unsuccessful 404 response
+2026-11-05 14:18:33,438 [ERROR]  No prior version found for variable: Name: RMETHOD, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,556 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/SCALENAM returned unsuccessful 404 response
+2026-11-05 14:18:33,557 [ERROR]  No prior version found for variable: Name: SCALENAM, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,676 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/RVAR returned unsuccessful 404 response
+2026-11-05 14:18:33,676 [ERROR]  No prior version found for variable: Name: RVAR, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,792 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/SCORE returned unsuccessful 404 response
+2026-11-05 14:18:33,792 [ERROR]  No prior version found for variable: Name: SCORE, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:33,935 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/SCRDSC returned unsuccessful 404 response
+2026-11-05 14:18:33,936 [ERROR]  No prior version found for variable: Name: SCRDSC, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:34,104 [ERROR]  Request to https://dev.cdisclibrary.org/api/mdr/root/sdtm/datasets/SX/variables/DISPORD returned unsuccessful 404 response
+2026-11-05 14:18:34,104 [ERROR]  No prior version found for variable: Name: DISPORD, Parent Class: Study Reference, Parent Dataset: SX
+2026-11-05 14:18:34,104 [INFO ]  Finished loading variables
+2026-11-05 14:18:34,105 [WARNI]  Expected to find a parent class, found None for: General Observations
+2026-11-05 14:18:34,105 [WARNI]  Expected to find a parent class, found None for: Special-Purpose
+2026-11-05 14:18:34,105 [WARNI]  Expected to find a parent class, found None for: Associated Persons
+2026-11-05 14:18:34,105 [WARNI]  Expected to find a parent class, found None for: Trial Design
+2026-11-05 14:18:34,105 [WARNI]  Expected to find a parent class, found None for: Study Reference
+2026-11-05 14:18:34,105 [WARNI]  Expected to find a parent class, found None for: Relationship
+2026-11-05 14:18:34,105 [ERROR]  No parent class found with id: Special Purpose
+2026-11-05 14:18:34,106 [ERROR]  Unable to find class with name: Special Purpose
+2026-11-05 14:18:34,106 [ERROR]  No parent class found with id: Special Purpose
+2026-11-05 14:18:34,107 [ERROR]  Unable to find class with name: Special Purpose
+2026-11-05 14:18:34,107 [ERROR]  No parent class found with id: Special Purpose
+2026-11-05 14:18:34,107 [ERROR]  Unable to find class with name: Special Purpose
+2026-11-05 14:18:34,107 [ERROR]  No parent class found with id: Special Purpose
+2026-11-05 14:18:34,107 [ERROR]  Unable to find class with name: Special Purpose
+2026-11-05 14:18:34,109 [ERROR]  No parent class found with id: Special Purpose
+2026-11-05 14:18:34,109 [ERROR]  Unable to find class with name: Special Purpose
+2026-11-05 14:18:34,109 [ERROR]  No parent class found with id: Special Purpose
+2026-11-05 14:18:34,109 [ERROR]  Unable to find class with name: Special Purpose
+2026-11-05 14:18:34,111 [INFO ]  Cleaning generated document
+2026-11-05 14:18:34,113 [INFO ]  Finished cleaning document
+2026-11-05 14:18:34,114 [INFO ]  Begin validating
+2026-11-05 14:18:34,114 [INFO ]  Finished validating
