@@ -71,13 +71,24 @@ class Dataset:
             self.add_link("priorVersion", prior_version)
     
     def _build_self_link(self) -> dict:
-        name = self.transformer.format_name_for_link(self.name)
+        if self._keeps_dashes_in_link():
+            name = self.transformer.format_name_for_link(self.name, [" ", ",", "\n", "\\n", '"', "/", "."])
+        else:
+            name = self.transformer.format_name_for_link(self.name)
         self_link = {
             "href": f"/mdr/{self.parent_product.product_type}/{self.parent_product.version}{f'/{self.parent_product.product_subtype}' if  self.parent_product.product_subtype else ''}/datasets/{name}",
             "title": self.label,
             "type": "SDTM Dataset"
         }
         return self_link
+
+    def _keeps_dashes_in_link(self) -> bool:
+        first_major_version = {"sdtm": 3, "sdtmig": 4, "sendig": 4}
+        product_type = str(self.parent_product.product_type).lower()
+        if product_type not in first_major_version:
+            return False
+        major = int(str(self.parent_product.version).split("-")[0])
+        return major >= first_major_version[product_type]
     
     def merge_from(self, other: 'Dataset'):
         if not self.variables:
